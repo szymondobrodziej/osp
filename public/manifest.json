@@ -1,0 +1,41 @@
+{
+  "name": "OSP Commander - System wsparcia dla KDR",
+  "short_name": "OSP Commander",
+  "description": "Profesjonalny system wsparcia dla Kierujących Działaniem Ratowniczym OSP",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#DC2626",
+  "theme_color": "#DC2626",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["utilities", "productivity"],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Nowe zdarzenie",
+      "short_name": "Nowe",
+      "description": "Rozpocznij nową akcję ratowniczą",
+      "url": "/",
+      "icons": [
+        {
+          "src": "/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ]
+}
+

@@ -1,0 +1,906 @@
+import { IncidentType } from '@/types/incident';
+
+// Uproszczona struktura dla wbudowanych szablonów (bez pełnej ChecklistTemplate)
+interface BuiltInTemplate {
+  name: string;
+  description?: string;
+  categories: {
+    id: string;
+    name: string;
+    icon?: string;
+    order: number;
+    items: {
+      id: string;
+      title: string;
+      description?: string;
+      priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+      estimatedDuration?: number;
+      assignedTo?: string;
+      requiredFor?: string[];
+    }[];
+  }[];
+}
+
+// Szablon dla pożaru budynku (wg materiałów KPP PSP Sochaczew)
+export const FIRE_BUILDING_TEMPLATE: BuiltInTemplate = {
+  name: 'Pożar budynku',
+  description: 'Procedura działań ratowniczo-gaśniczych przy pożarze budynku mieszkalnego lub użyteczności publicznej',
+  categories: [
+    {
+      id: 'arrival',
+      name: '1. Przyjazd i rozpoznanie',
+      order: 1,
+      items: [
+        {
+          id: 'arrival-1',
+          title: 'Zabezpieczenie miejsca zdarzenia',
+          description: 'Ustawienie pojazdów w bezpiecznej odległości, oznakowanie terenu, zabezpieczenie przed osobami postronnymi, wyznaczenie stref zagrożenia',
+          priority: 'CRITICAL',
+          estimatedDuration: 2,
+        },
+        {
+          id: 'arrival-2',
+          title: 'Rozpoznanie wstępne - budynek',
+          description: 'Rodzaj budynku (mieszkalny/użyteczności publicznej), liczba kondygnacji, konstrukcja (murowana/drewniana), stan techniczny',
+          priority: 'CRITICAL',
+          estimatedDuration: 3,
+        },
+        {
+          id: 'arrival-3',
+          title: 'Rozpoznanie wstępne - pożar',
+          description: 'Lokalizacja źródła pożaru, faza rozwoju (początkowa/rozwinięta/pełna), kierunek rozprzestrzeniania, intensywność',
+          priority: 'CRITICAL',
+          estimatedDuration: 3,
+        },
+        {
+          id: 'arrival-4',
+          title: 'Sprawdzenie obecności ludzi i zwierząt',
+          description: 'Ustalenie liczby osób w budynku, lokalizacja poszkodowanych, drogi ewakuacji, obecność zwierząt',
+          priority: 'CRITICAL',
+          estimatedDuration: 2,
+        },
+        {
+          id: 'arrival-5',
+          title: 'Ocena zagrożeń',
+          description: 'Ryzyko zawalenia konstrukcji, zagrożenie wybuchem, materiały niebezpieczne, instalacje (gaz, prąd), zagrożenie dla sąsiednich budynków',
+          priority: 'CRITICAL',
+          estimatedDuration: 3,
+        },
+        {
+          id: 'arrival-6',
+          title: 'Wyłączenie mediów',
+          description: 'Odcięcie prądu, gazu, innych mediów - współpraca z właścicielem/zarządcą',
+          priority: 'HIGH',
+          estimatedDuration: 5,
+        },
+        {
+          id: 'arrival-7',
+          title: 'Meldunek do dyspozytora',
+          description: 'Przekazanie informacji: lokalizacja, rodzaj pożaru, zagrożenia, liczba poszkodowanych, zapotrzebowanie na dodatkowe siły i środki',
+          priority: 'HIGH',
+          estimatedDuration: 2,
+        },
+        {
+          id: 'arrival-8',
+          title: 'Ustalenie źródła wody',
+          description: 'Lokalizacja hydrantów, zbiorników wodnych, możliwość dowozu wody, wydajność źródła',
+          priority: 'CRITICAL',
+          estimatedDuration: 3,
+        },
+      ],
+    },
+    {
+      id: 'rescue',
+      name: '2. Ratownictwo i ewakuacja',
+      order: 2,
+      items: [
+        {
+          id: 'rescue-1',
+          title: 'Wyznaczenie dróg ewakuacji',
+          description: 'Określenie bezpiecznych dróg ewakuacji, klatek schodowych, wyjść ewakuacyjnych, okien',
+          priority: 'CRITICAL',
+          estimatedDuration: 2,
+        },
+        {
+          id: 'rescue-2',
+          title: 'Ewakuacja osób - strefa bezpośredniego zagrożenia',
+          description: 'Wyprowadzenie/wyniesienie osób z pomieszczeń objętych pożarem i zadymionych',
+          priority: 'CRITICAL',
+          estimatedDuration: 10,
+        },
+        {
+          id: 'rescue-3',
+          title: 'Ewakuacja osób - budynek',
+          description: 'Ewakuacja pozostałych osób z całego budynku, sprawdzenie wszystkich pomieszczeń',
+          priority: 'CRITICAL',
+          estimatedDuration: 15,
+        },
+        {
+          id: 'rescue-4',
+          title: 'Poszukiwanie poszkodowanych',
+          description: 'Systematyczne przeszukanie pomieszczeń, w tym miejsc trudnodostępnych (łazienki, balkony, piwnice)',
+          priority: 'CRITICAL',
+          estimatedDuration: 15,
+        },
+        {
+          id: 'rescue-5',
+          title: 'Ewakuacja zwierząt',
+          description: 'Wyprowadzenie zwierząt domowych i gospodarskich z zagrożonej strefy',
+          priority: 'MEDIUM',
+          estimatedDuration: 10,
+        },
+        {
+          id: 'rescue-6',
+          title: 'Zabezpieczenie ewakuowanych',
+          description: 'Zapewnienie bezpiecznego miejsca, ochrona przed zimnem/upałem, sprawdzenie stanu zdrowia',
+          priority: 'HIGH',
+          estimatedDuration: 5,
+        },
+        {
+          id: 'rescue-7',
+          title: 'Ocena stanu poszkodowanych',
+          description: 'Segregacja medyczna, określenie priorytetów udzielania pomocy',
+          priority: 'CRITICAL',
+          estimatedDuration: 3,
+        },
+        {
+          id: 'rescue-8',
+          title: 'Udzielenie kwalifikowanej pierwszej pomocy',
+          description: 'KPP dla poszkodowanych wg procedur ratownictwa medycznego, wezwanie ZRM',
+          priority: 'CRITICAL',
+          estimatedDuration: 10,
+        },
+        {
+          id: 'rescue-9',
+          title: 'Przekazanie poszkodowanych ZRM',
+          description: 'Współpraca z zespołem ratownictwa medycznego, przekazanie informacji o udzielonej pomocy',
+          priority: 'HIGH',
+          estimatedDuration: 5,
+        },
+        {
+          id: 'rescue-10',
+          title: 'Ewakuacja mienia',
+          description: 'Wyniesienie wartościowych przedmiotów, dokumentów, zabezpieczenie przed kradzieżą',
+          priority: 'LOW',
+          estimatedDuration: 20,
+        },
+      ],
+    },
+    {
+      id: 'firefighting',
+      name: '3. Działania gaśnicze',
+      order: 3,
+      items: [
+        {
+          id: 'fire-1',
+          title: 'Wybór środka gaśniczego',
+          description: 'Woda, piana, proszek, CO2 - w zależności od rodzaju pożaru (klasa A, B, C, D, F)',
+          priority: 'CRITICAL',
+          estimatedDuration: 2,
+        },
+        {
+          id: 'fire-2',
+          title: 'Rozwinięcie linii gaśniczych - natarcie',
+          description: 'Linie natarcia do ogniska pożaru, zabezpieczenie dróg ewakuacyjnych, prądownice mgłowe/strumieniowe',
+          priority: 'CRITICAL',
+          estimatedDuration: 5,
+        },
+        {
+          id: 'fire-3',
+          title: 'Rozwinięcie linii gaśniczych - ochrona',
+          description: 'Linie ochronne dla sąsiednich pomieszczeń/budynków, zabezpieczenie przed rozprzestrzenianiem',
+          priority: 'HIGH',
+          estimatedDuration: 5,
+        },
+        {
+          id: 'fire-4',
+          title: 'Natarcie gaśnicze - atak bezpośredni',
+          description: 'Atak na ognisko pożaru od strony wejścia, gaszenie od dołu do góry',
+          priority: 'CRITICAL',
+          estimatedDuration: 20,
+        },
+        {
+          id: 'fire-5',
+          title: 'Natarcie gaśnicze - atak pośredni',
+          description: 'Gaszenie przez otwory okienne/drzwiowe, z zewnątrz budynku (jeśli zagrożenie zawalenia)',
+          priority: 'HIGH',
+          estimatedDuration: 15,
+        },
+        {
+          id: 'fire-6',
+          title: 'Wentylacja pożarowa',
+          description: 'Odprowadzenie dymu i gazów pożarowych, otwarcie okien/drzwi, wentylatory nadciśnieniowe',
+          priority: 'HIGH',
+          estimatedDuration: 10,
+        },
+        {
+          id: 'fire-7',
+          title: 'Kontrola rozprzestrzeniania',
+          description: 'Monitoring sąsiednich pomieszczeń, stropów, poddasza, instalacji',
+          priority: 'HIGH',
+          estimatedDuration: 15,
+        },
+        {
+          id: 'fire-8',
+          title: 'Dogaszanie',
+          description: 'Likwidacja ognisk wtórnych, kontrola temperatury, przewracanie materiałów',
+          priority: 'MEDIUM',
+          estimatedDuration: 30,
+        },
+        {
+          id: 'fire-9',
+          title: 'Rozbiórka konstrukcji',
+          description: 'Rozbiórka elementów zagrażających zawaleniem, usunięcie materiałów palnych',
+          priority: 'MEDIUM',
+          estimatedDuration: 20,
+        },
+        {
+          id: 'fire-10',
+          title: 'Zabezpieczenie przed ponownym zapłonem',
+          description: 'Kontrola temperatury kamerą termowizyjną, zwilżenie materiałów, posterunek obserwacyjny',
+          priority: 'MEDIUM',
+          estimatedDuration: 15,
+        },
+      ],
+    },
+    {
+      id: 'safety',
+      name: '4. Bezpieczeństwo i współdziałanie',
+      order: 4,
+      items: [
+        {
+          id: 'safety-1',
+          title: 'Kontrola SODO (Sprzęt Ochrony Dróg Oddechowych)',
+          description: 'Sprawdzenie ciśnienia w butlach, szczelności masek, rotacja ratowników w SODO',
+          priority: 'CRITICAL',
+          estimatedDuration: 5,
+        },
+        {
+          id: 'safety-2',
+          title: 'Kontrola statyki budynku',
+          description: 'Ocena zagrożenia zawaleniem przez specjalistę, wyznaczenie stref niebezpiecznych, ewakuacja ratowników',
+          priority: 'HIGH',
+          estimatedDuration: 10,
+        },
+        {
+          id: 'safety-3',
+          title: 'Posterunek bezpieczeństwa',
+          description: 'Wyznaczenie posterunku obserwacyjnego, kontrola stanu ratowników, łączność',
+          priority: 'HIGH',
+          estimatedDuration: 5,
+        },
+        {
+          id: 'safety-4',
+          title: 'Współdziałanie z Policją',
+          description: 'Zabezpieczenie miejsca zdarzenia, regulacja ruchu, ustalenie przyczyn pożaru',
+          priority: 'MEDIUM',
+          estimatedDuration: 10,
+        },
+        {
+          id: 'safety-5',
+          title: 'Współdziałanie z ZRM/Pogotowiem',
+          description: 'Koordynacja działań ratowniczych, przekazywanie poszkodowanych',
+          priority: 'HIGH',
+          estimatedDuration: 5,
+        },
+        {
+          id: 'safety-6',
+          title: 'Współdziałanie z dostawcami mediów',
+          description: 'Koordynacja z gazownią, energetyką, wodociągami',
+          priority: 'MEDIUM',
+          estimatedDuration: 10,
+        },
+        {
+          id: 'safety-7',
+          title: 'Zabezpieczenie mienia',
+          description: 'Ochrona przed kradzieżą, zabezpieczenie wartościowych przedmiotów, przekazanie właścicielowi/Policji',
+          priority: 'MEDIUM',
+          estimatedDuration: 10,
+        },
+      ],
+    },
+    {
+      id: 'completion',
+      name: '5. Zakończenie działań i dokumentacja',
+      order: 5,
+      items: [
+        {
+          id: 'completion-1',
+          title: 'Kontrola dogaszenia',
+          description: 'Sprawdzenie kamerą termowizyjną, kontrola wszystkich pomieszczeń, brak ognisk wtórnych',
+          priority: 'HIGH',
+          estimatedDuration: 15,
+        },
+        {
+          id: 'completion-2',
+          title: 'Przekazanie terenu',
+          description: 'Protokół przekazania właścicielowi/zarządcy/Policji, pouczenie o zagrożeniach',
+          priority: 'HIGH',
+          estimatedDuration: 10,
+        },
+        {
+          id: 'completion-3',
+          title: 'Sporządzenie dokumentacji - Karta zdarzenia',
+          description: 'Wypełnienie karty zdarzenia: dane podstawowe, siły i środki, przebieg działań',
+          priority: 'HIGH',
+          estimatedDuration: 15,
+        },
+        {
+          id: 'completion-4',
+          title: 'Sporządzenie dokumentacji - Informacja ze zdarzenia',
+          description: 'Szczegółowy opis przebiegu akcji, zastosowanych metod, wyników',
+          priority: 'MEDIUM',
+          estimatedDuration: 10,
+        },
+        {
+          id: 'completion-5',
+          title: 'Dokumentacja fotograficzna',
+          description: 'Zdjęcia miejsca zdarzenia przed, w trakcie i po akcji',
+          priority: 'MEDIUM',
+          estimatedDuration: 5,
+        },
+        {
+          id: 'completion-6',
+          title: 'Uzupełnienie sprzętu i paliwa',
+          description: 'Sprawdzenie i uzupełnienie wyposażenia, tankowanie, napełnienie butli SODO',
+          priority: 'MEDIUM',
+          estimatedDuration: 20,
+        },
+        {
+          id: 'completion-7',
+          title: 'Mycie i konserwacja sprzętu',
+          description: 'Oczyszczenie sprzętu, węży, umundurowania, konserwacja narzędzi',
+          priority: 'LOW',
+          estimatedDuration: 30,
+        },
+        {
+          id: 'completion-8',
+          title: 'Meldunek o zakończeniu',
+          description: 'Powiadomienie dyspozytora o zakończeniu działań i powrocie do jednostki',
+          priority: 'HIGH',
+          estimatedDuration: 2,
+        },
+      ],
+    },
+  ],
+};
+
+// Szablon dla wypadku drogowego (wg materiałów ratownictwa technicznego)
+export const ACCIDENT_ROAD_TEMPLATE: BuiltInTemplate = {
+  name: 'Wypadek drogowy',
+  description: 'Procedura działań ratowniczych przy wypadku drogowym z uwięzionymi osobami',
+  categories: [
+    {
+      id: 'arrival',
+      name: '1. Przyjazd i zabezpieczenie miejsca wypadku',
+      order: 1,
+      items: [
+        {
+          id: 'arrival-1',
+          title: 'Zabezpieczenie miejsca wypadku - oznakowanie',
+          description: 'Ustawienie pojazdów ratowniczych, pachołków, trójkątów ostrzegawczych, świateł ostrzegawczych - min. 100m przed miejscem wypadku',
+          priority: 'CRITICAL',
+          estimatedDuration: 2,
+        },
+        {
+          id: 'arrival-2',
+          title: 'Zabezpieczenie miejsca wypadku - ruch drogowy',
+          description: 'Koordynacja z Policją, kierowanie ruchu, ewentualne zamknięcie drogi',
+          priority: 'CRITICAL',
+          estimatedDuration: 3,
+        },
+        {
+          id: 'arrival-3',
+          title: 'Rozpoznanie wstępne - pojazdy',
+          description: 'Liczba i rodzaj pojazdów (osobowe, ciężarowe, autobusy), pozycja (na kołach, na boku, dach), deformacje',
+          priority: 'CRITICAL',
+          estimatedDuration: 2,
+        },
+        {
+          id: 'arrival-4',
+          title: 'Rozpoznanie wstępne - poszkodowani',
+          description: 'Liczba poszkodowanych, lokalizacja (w pojeździe, poza pojazdem), stan (przytomni/nieprzytomni)',
+          priority: 'CRITICAL',
+          estimatedDuration: 2,
+        },
+        {
+          id: 'arrival-5',
+          title: 'Ocena zagrożeń - pożar',
+          description: 'Wycieki paliwa, uszkodzenia instalacji elektrycznej, temperatura silnika, ryzyko pożaru',
+          priority: 'CRITICAL',
+          estimatedDuration: 2,
+        },
+        {
+          id: 'arrival-6',
+          title: 'Ocena zagrożeń - substancje niebezpieczne',
+          description: 'Sprawdzenie tabliczek ADR, wycieków chemikaliów, gazów - jeśli pojazd ciężarowy',
+          priority: 'HIGH',
+          estimatedDuration: 3,
+        },
+        {
+          id: 'arrival-7',
+          title: 'Zabezpieczenie przed pożarem',
+          description: 'Wyłączenie zapłonu we wszystkich pojazdach, zabezpieczenie wycieków paliwa sorbentem, gotowość gaśnicza',
+          priority: 'CRITICAL',
+          estimatedDuration: 3,
+        },
+        {
+          id: 'arrival-8',
+          title: 'Meldunek do dyspozytora',
+          description: 'Informacja: lokalizacja, liczba pojazdów i poszkodowanych, zagrożenia, zapotrzebowanie na ZRM/LPR/dodatkowe siły',
+          priority: 'HIGH',
+          estimatedDuration: 2,
+        },
+      ],
+    },
+    {
+      id: 'technical',
+      name: '2. Działania techniczne - stabilizacja',
+      order: 2,
+      items: [
+        {
+          id: 'tech-1',
+          title: 'Stabilizacja pojazdów - ocena',
+          description: 'Ocena stabilności pojazdu, punktów podparcia, ryzyka przemieszczenia',
+          priority: 'CRITICAL',
+          estimatedDuration: 2,
+        },
+        {
+          id: 'tech-2',
+          title: 'Stabilizacja pojazdów - wykonanie',
+          description: 'Podparcie klinami, poduszkami stabilizacyjnymi, blokami drewnianymi - pojazd na kołach/boku/dachu',
+          priority: 'CRITICAL',
+          estimatedDuration: 5,
+        },
+        {
+          id: 'tech-3',
+          title: 'Odłączenie akumulatora',
+          description: 'Odłączenie bieguna ujemnego (-), zabezpieczenie instalacji elektrycznej, unikanie airbagów',
+          priority: 'HIGH',
+          estimatedDuration: 3,
+        },
+        {
+          id: 'tech-4',
+          title: 'Neutralizacja poduszek powietrznych',
+          description: 'Zabezpieczenie niewypełnionych airbagów (kierownica, deski rozdzielcze, boczne, kurtyny)',
+          priority: 'HIGH',
+          estimatedDuration: 5,
+        },
+        {
+          id: 'tech-5',
+          title: 'Zabezpieczenie pojazdów hybrydowych/elektrycznych',
+          description: 'Identyfikacja pojazdu (logo, kolor przewodów), odłączenie baterii wysokiego napięcia, bezpieczne strefy cięcia',
+          priority: 'CRITICAL',
+          estimatedDuration: 5,
+        },
+      ],
+    },
+    {
+      id: 'rescue',
+      name: '3. Ratownictwo medyczne',
+      order: 3,
+      items: [
+        {
+          id: 'rescue-1',
+          title: 'Nawiązanie kontaktu z poszkodowanymi',
+          description: 'Komunikacja werbalna, ocena przytomności, uspokojenie, informowanie o działaniach',
+          priority: 'CRITICAL',
+          estimatedDuration: 2,
+        },
+        {
+          id: 'rescue-2',
+          title: 'Triage poszkodowanych (segregacja)',
+          description: 'Segregacja medyczna wg kolorów: CZERWONY (stan krytyczny), ŻÓŁTY (poważny), ZIELONY (lekki), CZARNY (zgon)',
+          priority: 'CRITICAL',
+          estimatedDuration: 5,
+        },
+        {
+          id: 'rescue-3',
+          title: 'Zabezpieczenie kręgosłupa szyjnego',
+          description: 'Założenie kołnierza ortopedycznego, stabilizacja głowy ręczna do czasu unieruchomienia',
+          priority: 'CRITICAL',
+          estimatedDuration: 3,
+        },
+        {
+          id: 'rescue-4',
+          title: 'Tamowanie krwotoków',
+          description: 'Opatrunki uciskowe, stazy, tamowanie ran - wg procedur ratownictwa medycznego',
+          priority: 'CRITICAL',
+          estimatedDuration: 5,
+        },
+        {
+          id: 'rescue-5',
+          title: 'Zabezpieczenie dróg oddechowych',
+          description: 'Udrożnienie dróg oddechowych, pozycja boczna bezpieczna (jeśli możliwa), tlen',
+          priority: 'CRITICAL',
+          estimatedDuration: 3,
+        },
+        {
+          id: 'rescue-6',
+          title: 'Ocena stanu poszkodowanych - ABC',
+          description: 'Airway (drogi oddechowe), Breathing (oddech), Circulation (krążenie) - ciągły monitoring',
+          priority: 'CRITICAL',
+          estimatedDuration: 5,
+        },
+        {
+          id: 'rescue-7',
+          title: 'Koordynacja z ZRM',
+          description: 'Przekazanie informacji o stanie poszkodowanych, przygotowanie do przekazania, współdziałanie',
+          priority: 'HIGH',
+          estimatedDuration: 3,
+        },
+      ],
+    },
+    {
+      id: 'extrication',
+      name: '4. Uwolnienie poszkodowanych',
+      order: 4,
+      items: [
+        {
+          id: 'extri-1',
+          title: 'Wybór metody uwolnienia',
+          description: 'Ocena: szybkie uwolnienie (stan krytyczny) vs. kontrolowane uwolnienie (stabilny), drogi dostępu',
+          priority: 'CRITICAL',
+          estimatedDuration: 2,
+        },
+        {
+          id: 'extri-2',
+          title: 'Zabezpieczenie poszkodowanych podczas cięcia',
+          description: 'Osłona przed odpryskami szkła/metalu, ochrona głowy, informowanie o działaniach',
+          priority: 'CRITICAL',
+          estimatedDuration: 3,
+        },
+        {
+          id: 'extri-3',
+          title: 'Usunięcie szyb',
+          description: 'Wybicie/wycięcie szyb bocznych, tylnej, przedniej - zapewnienie dostępu i wentylacji',
+          priority: 'HIGH',
+          estimatedDuration: 5,
+        },
+        {
+          id: 'extri-4',
+          title: 'Otwarcie drzwi - narzędzia ręczne',
+          description: 'Próba otwarcia drzwi kluczem, ręcznie, narzędziami ręcznymi (łom, rozpieracz)',
+          priority: 'HIGH',
+          estimatedDuration: 5,
+        },
+        {
+          id: 'extri-5',
+          title: 'Otwarcie drzwi - narzędzia hydrauliczne',
+          description: 'Użycie rozpieracza hydraulicznego do otwarcia/zerwania drzwi',
+          priority: 'HIGH',
+          estimatedDuration: 10,
+        },
+        {
+          id: 'extri-6',
+          title: 'Cięcie słupków - słupek A',
+          description: 'Cięcie słupka A (między maską a drzwiami) nożycami hydraulicznymi - uwaga na airbagi',
+          priority: 'MEDIUM',
+          estimatedDuration: 5,
+        },
+        {
+          id: 'extri-7',
+          title: 'Cięcie słupków - słupek B',
+          description: 'Cięcie słupka B (środkowy) - główne wzmocnienie, może wymagać wielu cięć',
+          priority: 'MEDIUM',
+          estimatedDuration: 10,
+        },
+        {
+          id: 'extri-8',
+          title: 'Zdejmowanie dachu (roof removal)',
+          description: 'Cięcie słupków A, B, C i zdejmowanie dachu - pełny dostęp do poszkodowanych',
+          priority: 'MEDIUM',
+          estimatedDuration: 15,
+        },
+        {
+          id: 'extri-9',
+          title: 'Odsunięcie deski rozdzielczej (dashboard roll)',
+          description: 'Użycie rozpieracza do odsunięcia deski rozdzielczej od nóg poszkodowanego',
+          priority: 'HIGH',
+          estimatedDuration: 10,
+        },
+        {
+          id: 'extri-10',
+          title: 'Podniesienie/opuszczenie deski rozdzielczej',
+          description: 'Technika podniesienia lub opuszczenia deski rozdzielczej w zależności od sytuacji',
+          priority: 'HIGH',
+          estimatedDuration: 10,
+        },
+        {
+          id: 'extri-11',
+          title: 'Unieruchomienie całkowite - deska ortopedyczna',
+          description: 'Założenie deski ortopedycznej/noszy typu KED przed wydobyciem',
+          priority: 'CRITICAL',
+          estimatedDuration: 10,
+        },
+        {
+          id: 'extri-12',
+          title: 'Wydobycie poszkodowanego',
+          description: 'Kontrolowane, płynne wydobycie z zachowaniem osi kręgosłupa, przeniesienie na nosze',
+          priority: 'CRITICAL',
+          estimatedDuration: 10,
+        },
+        {
+          id: 'extri-13',
+          title: 'Przekazanie poszkodowanego ZRM',
+          description: 'Przekazanie z pełną informacją o mechanizmie urazu, udzielonej pomocy, stanie',
+          priority: 'HIGH',
+          estimatedDuration: 5,
+        },
+      ],
+    },
+    {
+      id: 'environmental',
+      name: '5. Ochrona środowiska i porządkowanie',
+      order: 5,
+      items: [
+        {
+          id: 'env-1',
+          title: 'Zabezpieczenie wycieków paliwa',
+          description: 'Sorbet, maty absorbcyjne, pojemniki na paliwo, zabezpieczenie studzienek kanalizacyjnych',
+          priority: 'HIGH',
+          estimatedDuration: 10,
+        },
+        {
+          id: 'env-2',
+          title: 'Zabezpieczenie wycieków płynów eksploatacyjnych',
+          description: 'Olej silnikowy, płyn chłodniczy, płyn hamulcowy, płyn wspomagania - sorbet, pojemniki',
+          priority: 'MEDIUM',
+          estimatedDuration: 10,
+        },
+        {
+          id: 'env-3',
+          title: 'Neutralizacja plam',
+          description: 'Posypanie sorbentem, zebranie zanieczyszczeń',
+          priority: 'MEDIUM',
+          estimatedDuration: 15,
+        },
+        {
+          id: 'env-4',
+          title: 'Utylizacja odpadów',
+          description: 'Przekazanie zanieczyszczonego sorbentu do utylizacji',
+          priority: 'MEDIUM',
+          estimatedDuration: 10,
+        },
+      ],
+    },
+    {
+      id: 'completion',
+      name: 'Zakończenie',
+      order: 5,
+      items: [
+        {
+          id: 'completion-1',
+          title: 'Przekazanie miejsca Policji',
+          description: 'Protokół, dokumentacja fotograficzna',
+          priority: 'HIGH',
+          estimatedDuration: 10,
+        },
+        {
+          id: 'completion-2',
+          title: 'Dokumentacja zdarzenia',
+          description: 'Karta zdarzenia, raport',
+          priority: 'HIGH',
+          estimatedDuration: 15,
+        },
+        {
+          id: 'completion-3',
+          title: 'Meldunek o zakończeniu',
+          description: 'Powiadomienie dyspozytora',
+          priority: 'HIGH',
+          estimatedDuration: 2,
+        },
+      ],
+    },
+  ],
+};
+
+// Szablon dla zagrożenia chemicznego
+export const HAZMAT_CHEMICAL_TEMPLATE: BuiltInTemplate = {
+  name: 'Zagrożenie chemiczne',
+  description: 'Procedura działań przy zagrożeniu substancjami niebezpiecznymi',
+  categories: [
+    {
+      id: 'arrival',
+      name: 'Przyjazd i rozpoznanie',
+      order: 1,
+      items: [
+        {
+          id: 'arrival-1',
+          title: 'Zatrzymanie z wiatru',
+          description: 'Ustawienie pojazdów z wiatru, bezpieczna odległość min. 50m',
+          priority: 'CRITICAL',
+          estimatedDuration: 2,
+        },
+        {
+          id: 'arrival-2',
+          title: 'Identyfikacja substancji',
+          description: 'Numer UN, karty charakterystyki, oznakowanie, konsultacja z SKKM',
+          priority: 'CRITICAL',
+          estimatedDuration: 5,
+        },
+        {
+          id: 'arrival-3',
+          title: 'Ocena zagrożenia',
+          description: 'Rodzaj substancji, ilość, stan skupienia, warunki atmosferyczne',
+          priority: 'CRITICAL',
+          estimatedDuration: 5,
+        },
+        {
+          id: 'arrival-4',
+          title: 'Wyznaczenie stref zagrożenia',
+          description: 'Strefa czerwona (gorąca), żółta (ciepła), zielona (zimna)',
+          priority: 'CRITICAL',
+          estimatedDuration: 5,
+        },
+        {
+          id: 'arrival-5',
+          title: 'Meldunek i wezwanie wsparcia',
+          description: 'Powiadomienie dyspozytora, SKKM, specjalistycznych grup ratownictwa chemicznego',
+          priority: 'CRITICAL',
+          estimatedDuration: 3,
+        },
+      ],
+    },
+    {
+      id: 'isolation',
+      name: 'Izolacja i ewakuacja',
+      order: 2,
+      items: [
+        {
+          id: 'isolation-1',
+          title: 'Wyznaczenie i oznakowanie stref',
+          description: 'Fizyczne oznaczenie granic stref taśmą, pachołkami',
+          priority: 'CRITICAL',
+          estimatedDuration: 10,
+        },
+        {
+          id: 'isolation-2',
+          title: 'Ewakuacja ludności',
+          description: 'Wyprowadzenie osób ze strefy czerwonej i żółtej',
+          priority: 'CRITICAL',
+          estimatedDuration: 20,
+        },
+        {
+          id: 'isolation-3',
+          title: 'Zabezpieczenie dostępu',
+          description: 'Zamknięcie dróg, posterunki kontrolne',
+          priority: 'HIGH',
+          estimatedDuration: 10,
+        },
+        {
+          id: 'isolation-4',
+          title: 'Punkt zbiórki ewakuowanych',
+          description: 'Wyznaczenie i obsługa punktu zbiórki',
+          priority: 'HIGH',
+          estimatedDuration: 5,
+        },
+      ],
+    },
+    {
+      id: 'intervention',
+      name: 'Działania interwencyjne',
+      order: 3,
+      items: [
+        {
+          id: 'intervention-1',
+          title: 'Przygotowanie ekip interwencyjnych',
+          description: 'Ubrania chemoodporne, SCBA, dekontaminacja',
+          priority: 'CRITICAL',
+          estimatedDuration: 15,
+        },
+        {
+          id: 'intervention-2',
+          title: 'Ograniczenie rozprzestrzeniania',
+          description: 'Przegrodzenie, obwałowanie, kurtyny wodne',
+          priority: 'HIGH',
+          estimatedDuration: 20,
+        },
+        {
+          id: 'intervention-3',
+          title: 'Neutralizacja substancji',
+          description: 'Użycie neutralizatorów, rozcieńczanie, zbieranie',
+          priority: 'HIGH',
+          estimatedDuration: 30,
+        },
+        {
+          id: 'intervention-4',
+          title: 'Monitoring atmosfery',
+          description: 'Ciągły pomiar stężeń, detektory gazów',
+          priority: 'CRITICAL',
+          estimatedDuration: 60,
+        },
+      ],
+    },
+    {
+      id: 'decontamination',
+      name: 'Dekontaminacja',
+      order: 4,
+      items: [
+        {
+          id: 'decon-1',
+          title: 'Utworzenie strefy dekontaminacji',
+          description: 'Wyznaczenie miejsca, przygotowanie sprzętu',
+          priority: 'CRITICAL',
+          estimatedDuration: 15,
+        },
+        {
+          id: 'decon-2',
+          title: 'Dekontaminacja ratowników',
+          description: 'Trójstopniowa dekontaminacja po każdym wejściu',
+          priority: 'CRITICAL',
+          estimatedDuration: 10,
+        },
+        {
+          id: 'decon-3',
+          title: 'Dekontaminacja sprzętu',
+          description: 'Oczyszczenie narzędzi, pojazdów',
+          priority: 'HIGH',
+          estimatedDuration: 30,
+        },
+        {
+          id: 'decon-4',
+          title: 'Utylizacja odpadów',
+          description: 'Segregacja i przekazanie odpadów niebezpiecznych',
+          priority: 'HIGH',
+          estimatedDuration: 20,
+        },
+      ],
+    },
+    {
+      id: 'completion',
+      name: 'Zakończenie',
+      order: 5,
+      items: [
+        {
+          id: 'completion-1',
+          title: 'Pomiary kontrolne',
+          description: 'Sprawdzenie braku skażenia w strefach',
+          priority: 'CRITICAL',
+          estimatedDuration: 20,
+        },
+        {
+          id: 'completion-2',
+          title: 'Przekazanie terenu',
+          description: 'Protokół, dokumentacja, przekazanie właściwym służbom',
+          priority: 'HIGH',
+          estimatedDuration: 15,
+        },
+        {
+          id: 'completion-3',
+          title: 'Badania lekarskie ratowników',
+          description: 'Kontrola stanu zdrowia po ekspozycji',
+          priority: 'HIGH',
+          estimatedDuration: 30,
+        },
+        {
+          id: 'completion-4',
+          title: 'Dokumentacja zdarzenia',
+          description: 'Szczegółowy raport, karta zdarzenia, zdjęcia',
+          priority: 'HIGH',
+          estimatedDuration: 30,
+        },
+      ],
+    },
+  ],
+};
+
+// Eksport wszystkich szablonów
+export const CHECKLIST_TEMPLATES: Record<IncidentType, BuiltInTemplate> = {
+  FIRE_BUILDING: FIRE_BUILDING_TEMPLATE,
+  ACCIDENT_ROAD: ACCIDENT_ROAD_TEMPLATE,
+  HAZMAT_CHEMICAL: HAZMAT_CHEMICAL_TEMPLATE,
+  // Pozostałe szablony będą dodane później
+  FIRE_FOREST: FIRE_BUILDING_TEMPLATE, // Tymczasowo
+  FIRE_VEHICLE: FIRE_BUILDING_TEMPLATE,
+  FIRE_OUTDOOR: FIRE_BUILDING_TEMPLATE,
+  ACCIDENT_INDUSTRIAL: ACCIDENT_ROAD_TEMPLATE,
+  HAZMAT_ECOLOGICAL: FIRE_BUILDING_TEMPLATE,
+  RESCUE_WATER: FIRE_BUILDING_TEMPLATE,
+  RESCUE_HEIGHT: FIRE_BUILDING_TEMPLATE,
+  RESCUE_TECHNICAL: ACCIDENT_ROAD_TEMPLATE,
+  FLOOD: FIRE_BUILDING_TEMPLATE,
+  STORM: FIRE_BUILDING_TEMPLATE,
+  OTHER: FIRE_BUILDING_TEMPLATE,
+};
+

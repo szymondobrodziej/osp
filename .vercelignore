@@ -1,0 +1,15 @@
+# SSL certificates (tylko dla lokalnego developmentu)
+.cert/
+*.pem
+
+# Custom HTTPS server (nie potrzebny na Vercel)
+server.js
+
+# Development files
+.env.local
+.env.development
+
+# Documentation
+DEPLOYMENT.md
+VERCEL-QUICKSTART.md
+
