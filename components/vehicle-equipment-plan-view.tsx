@@ -85,8 +85,14 @@ export function VehicleEquipmentPlanView({ vehicle }: VehicleEquipmentPlanViewPr
   };
 
   const handleMouseDown = (compartmentId: string, e: React.MouseEvent) => {
-    if (!editMode) return; // Przeciąganie działa na mobile gdy editMode włączony
+    if (!editMode) return;
     e.preventDefault();
+    e.stopPropagation();
+    setDraggingCompartment(compartmentId);
+  };
+
+  const handleTouchStart = (compartmentId: string, e: React.TouchEvent) => {
+    if (!editMode) return;
     e.stopPropagation();
     setDraggingCompartment(compartmentId);
   };
@@ -106,7 +112,29 @@ export function VehicleEquipmentPlanView({ vehicle }: VehicleEquipmentPlanViewPr
     });
   };
 
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!draggingCompartment || !containerRef.current || !editMode) return;
+
+    const touch = e.touches[0];
+    if (!touch) return;
+
+    const rect = containerRef.current.getBoundingClientRect();
+    const x = ((touch.clientX - rect.left) / rect.width) * 100;
+    const y = ((touch.clientY - rect.top) / rect.height) * 100;
+
+    const clampedX = Math.max(0, Math.min(100, x));
+    const clampedY = Math.max(0, Math.min(100, y));
+
+    updateCompartment(vehicle.id, draggingCompartment, {
+      position: { x: clampedX, y: clampedY },
+    });
+  };
+
   const handleMouseUp = () => {
+    setDraggingCompartment(null);
+  };
+
+  const handleTouchEnd = () => {
     setDraggingCompartment(null);
   };
 
@@ -205,6 +233,9 @@ export function VehicleEquipmentPlanView({ vehicle }: VehicleEquipmentPlanViewPr
             onMouseMove={handleMouseMove}
             onMouseUp={handleMouseUp}
             onMouseLeave={handleMouseUp}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+            onTouchCancel={handleTouchEnd}
           >
           {/* Siatka */}
           {showGrid && (
@@ -253,6 +284,7 @@ export function VehicleEquipmentPlanView({ vehicle }: VehicleEquipmentPlanViewPr
                   transform: 'translate(-50%, -50%)',
                 }}
                 onMouseDown={(e) => handleMouseDown(compartment.id, e)}
+                onTouchStart={(e) => handleTouchStart(compartment.id, e)}
               >
                 <div
                   className="rounded overflow-hidden"
