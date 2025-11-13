@@ -32,6 +32,20 @@ export function VehicleEquipmentPlanView({ vehicle }: VehicleEquipmentPlanViewPr
   const [editMode, setEditMode] = useState(false);
   const [draggingCompartment, setDraggingCompartment] = useState<string | null>(null);
 
+  // Wykryj czy mobile
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
   // Automatyczne dopasowanie zoomu do szerokości ekranu
   useEffect(() => {
     const updateAutoZoom = () => {
@@ -39,14 +53,13 @@ export function VehicleEquipmentPlanView({ vehicle }: VehicleEquipmentPlanViewPr
 
       const wrapperWidth = wrapperRef.current.clientWidth;
       const canvasWidth = 2400;
-      const padding = 32; // 2 * 16px (p-4)
+      const padding = isMobile ? 16 : 32; // Mniejszy padding na mobile
 
       // Oblicz zoom tak, żeby canvas zmieścił się w szerokości
       const calculatedZoom = (wrapperWidth - padding) / canvasWidth;
 
       // Na mobile (< 768px) użyj obliczonego zoomu
       // Na desktop (>= 768px) użyj 1.0 jako minimum
-      const isMobile = window.innerWidth < 768;
       const finalZoom = isMobile ? Math.max(0.15, calculatedZoom) : Math.max(0.5, calculatedZoom);
 
       setZoom(finalZoom);
@@ -56,7 +69,7 @@ export function VehicleEquipmentPlanView({ vehicle }: VehicleEquipmentPlanViewPr
     window.addEventListener('resize', updateAutoZoom);
 
     return () => window.removeEventListener('resize', updateAutoZoom);
-  }, [autoZoom]);
+  }, [autoZoom, isMobile]);
 
   const handleZoomChange = (newZoom: number) => {
     setAutoZoom(false);
@@ -68,14 +81,14 @@ export function VehicleEquipmentPlanView({ vehicle }: VehicleEquipmentPlanViewPr
   };
 
   const handleMouseDown = (compartmentId: string, e: React.MouseEvent) => {
-    if (!editMode) return;
+    if (!editMode || isMobile) return; // Wyłącz przeciąganie na mobile
     e.preventDefault();
     e.stopPropagation();
     setDraggingCompartment(compartmentId);
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
-    if (!draggingCompartment || !containerRef.current || !editMode) return;
+    if (!draggingCompartment || !containerRef.current || !editMode || isMobile) return;
 
     const rect = containerRef.current.getBoundingClientRect();
     const x = ((e.clientX - rect.left) / rect.width) * 100;
@@ -112,24 +125,27 @@ export function VehicleEquipmentPlanView({ vehicle }: VehicleEquipmentPlanViewPr
               )}
             </div>
             <div className="flex flex-wrap gap-1 md:gap-2">
-              <Button
-                variant={editMode ? "default" : "outline"}
-                size="sm"
-                onClick={() => setEditMode(!editMode)}
-              >
-                {editMode ? <Unlock className="h-3 w-3 md:h-4 md:w-4 md:mr-2" /> : <Lock className="h-3 w-3 md:h-4 md:w-4 md:mr-2" />}
-                <span className="hidden md:inline">{editMode ? 'Zablokuj' : 'Edytuj pozycje'}</span>
-                <span className="md:hidden">{editMode ? 'Zablokuj' : 'Edytuj'}</span>
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setShowGrid(!showGrid)}
-                className="hidden sm:flex"
-              >
-                <Grid3x3 className="h-4 w-4 mr-2" />
-                {showGrid ? 'Ukryj' : 'Pokaż'} siatkę
-              </Button>
+              {/* Przyciski edycji - tylko na desktop */}
+              {!isMobile && (
+                <>
+                  <Button
+                    variant={editMode ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setEditMode(!editMode)}
+                  >
+                    {editMode ? <Unlock className="h-4 w-4 mr-2" /> : <Lock className="h-4 w-4 mr-2" />}
+                    {editMode ? 'Zablokuj' : 'Edytuj pozycje'}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowGrid(!showGrid)}
+                  >
+                    <Grid3x3 className="h-4 w-4 mr-2" />
+                    {showGrid ? 'Ukryj' : 'Pokaż'} siatkę
+                  </Button>
+                </>
+              )}
               <Button
                 variant="outline"
                 size="sm"
@@ -242,61 +258,69 @@ export function VehicleEquipmentPlanView({ vehicle }: VehicleEquipmentPlanViewPr
                   className="rounded-lg overflow-hidden"
                   style={{
                     width: `${compartment.size.width * 12}px`,
-                    minWidth: zoom < 0.5 ? '180px' : '250px',
+                    minWidth: isMobile ? '120px' : (zoom < 0.5 ? '180px' : '250px'),
                     backgroundColor: compartment.color || '#94a3b8',
-                    border: `${Math.max(2, 3 * zoom)}px solid rgba(0,0,0,0.2)`,
+                    border: `${Math.max(1, 3 * zoom)}px solid rgba(0,0,0,0.2)`,
                   }}
                 >
                   {/* Nagłówek schowka */}
                   <div
-                    className="px-3 py-2 border-b-2 border-black/20"
+                    className={isMobile ? "px-1.5 py-1 border-b border-black/20" : "px-3 py-2 border-b-2 border-black/20"}
                     style={{ backgroundColor: 'rgba(0,0,0,0.15)' }}
                   >
-                    <div className="flex items-center justify-between">
-                      <h3 className="font-bold text-white text-sm drop-shadow-md">
+                    <div className="flex items-center justify-between gap-1">
+                      <h3 className={`font-bold text-white drop-shadow-md ${isMobile ? 'text-[10px]' : 'text-sm'}`}>
                         {compartment.name}
                       </h3>
                       <Badge
                         variant="secondary"
-                        className="bg-white/90 text-xs font-bold"
+                        className={`bg-white/90 font-bold ${isMobile ? 'text-[8px] px-1 py-0' : 'text-xs'}`}
                       >
-                        {totalItems} szt.
+                        {totalItems}
                       </Badge>
                     </div>
                   </div>
 
                   {/* Lista wyposażenia - ROZWINIĘTA (bez scrollowania) */}
-                  <div className="p-2">
+                  <div className={isMobile ? "p-1" : "p-2"}>
                     {showCategories ? (
                       // Widok z kategoriami
-                      <div className="space-y-2">
+                      <div className={isMobile ? "space-y-0.5" : "space-y-2"}>
                         {Object.entries(itemsByCategory).map(([category, items]) => (
-                          <div key={category} className="space-y-1">
-                            <div className="text-[10px] font-bold text-white/80 uppercase tracking-wide px-1">
-                              {EQUIPMENT_CATEGORY_LABELS[category as keyof typeof EQUIPMENT_CATEGORY_LABELS]}
-                            </div>
+                          <div key={category} className={isMobile ? "space-y-0.5" : "space-y-1"}>
+                            {!isMobile && (
+                              <div className="text-[10px] font-bold text-white/80 uppercase tracking-wide px-1">
+                                {EQUIPMENT_CATEGORY_LABELS[category as keyof typeof EQUIPMENT_CATEGORY_LABELS]}
+                              </div>
+                            )}
                             {items.map((item) => (
                               <div
                                 key={item.id}
-                                className="bg-white/95 rounded px-2 py-1.5 text-xs shadow-sm hover:shadow-md transition-shadow"
+                                className={`bg-white/95 rounded shadow-sm ${
+                                  isMobile
+                                    ? 'px-1 py-0.5 text-[8px]'
+                                    : 'px-2 py-1.5 text-xs hover:shadow-md transition-shadow'
+                                }`}
                               >
-                                <div className="flex items-center justify-between gap-2">
-                                  <span className="font-medium text-slate-800 flex-1 leading-tight">
+                                <div className={`flex items-center justify-between ${isMobile ? 'gap-0.5' : 'gap-2'}`}>
+                                  <span className={`font-medium text-slate-800 flex-1 leading-tight ${isMobile ? 'truncate' : ''}`}>
                                     {item.name}
                                   </span>
-                                  <Badge
-                                    variant="outline"
-                                    className="text-[10px] font-bold shrink-0"
-                                  >
-                                    {item.quantity} {item.unit || 'szt'}
-                                  </Badge>
+                                  {!isMobile && (
+                                    <Badge
+                                      variant="outline"
+                                      className="text-[10px] font-bold shrink-0"
+                                    >
+                                      {item.quantity} {item.unit || 'szt'}
+                                    </Badge>
+                                  )}
                                 </div>
-                                {item.description && (
+                                {!isMobile && item.description && (
                                   <div className="text-[10px] text-slate-500 mt-0.5 leading-tight">
                                     {item.description}
                                   </div>
                                 )}
-                                {item.expiryDate && (
+                                {!isMobile && item.expiryDate && (
                                   <div className="mt-1">
                                     <Badge
                                       variant={new Date(item.expiryDate) < new Date() ? "destructive" : "default"}
@@ -313,29 +337,35 @@ export function VehicleEquipmentPlanView({ vehicle }: VehicleEquipmentPlanViewPr
                       </div>
                     ) : (
                       // Widok bez kategorii (kompaktowy)
-                      <div className="space-y-1">
+                      <div className={isMobile ? "space-y-0.5" : "space-y-1"}>
                         {compartment.items.map((item) => (
                           <div
                             key={item.id}
-                            className="bg-white/95 rounded px-2 py-1.5 text-xs shadow-sm hover:shadow-md transition-shadow"
+                            className={`bg-white/95 rounded shadow-sm ${
+                              isMobile
+                                ? 'px-1 py-0.5 text-[8px]'
+                                : 'px-2 py-1.5 text-xs hover:shadow-md transition-shadow'
+                            }`}
                           >
-                            <div className="flex items-center justify-between gap-2">
-                              <span className="font-medium text-slate-800 flex-1 leading-tight">
+                            <div className={`flex items-center justify-between ${isMobile ? 'gap-0.5' : 'gap-2'}`}>
+                              <span className={`font-medium text-slate-800 flex-1 leading-tight ${isMobile ? 'truncate' : ''}`}>
                                 {item.name}
                               </span>
-                              <Badge
-                                variant="outline"
-                                className="text-[10px] font-bold shrink-0"
-                              >
-                                {item.quantity} {item.unit || 'szt'}
-                              </Badge>
+                              {!isMobile && (
+                                <Badge
+                                  variant="outline"
+                                  className="text-[10px] font-bold shrink-0"
+                                >
+                                  {item.quantity} {item.unit || 'szt'}
+                                </Badge>
+                              )}
                             </div>
-                            {item.description && (
+                            {!isMobile && item.description && (
                               <div className="text-[10px] text-slate-500 mt-0.5 leading-tight">
                                 {item.description}
                               </div>
                             )}
-                            {item.expiryDate && (
+                            {!isMobile && item.expiryDate && (
                               <div className="mt-1">
                                 <Badge
                                   variant={new Date(item.expiryDate) < new Date() ? "destructive" : "default"}
