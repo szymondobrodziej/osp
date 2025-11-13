@@ -117,20 +117,21 @@ export function VehicleEquipmentEditor({ vehicle }: VehicleEquipmentEditorProps)
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6">
       {/* Zarządzanie schowkami */}
       <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
+        <CardHeader className="pb-3">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div>
-              <CardTitle>Schowki pojazdu</CardTitle>
-              <CardDescription>Zarządzaj schowkami i ich zawartością</CardDescription>
+              <CardTitle className="text-base md:text-lg">Schowki pojazdu</CardTitle>
+              <CardDescription className="text-xs md:text-sm">Zarządzaj schowkami i ich zawartością</CardDescription>
             </div>
             <Dialog open={isAddingCompartment} onOpenChange={setIsAddingCompartment}>
               <DialogTrigger asChild>
-                <Button>
-                  <FolderPlus className="h-4 w-4 mr-2" />
-                  Dodaj schowek
+                <Button size="sm" className="md:size-default w-full sm:w-auto">
+                  <FolderPlus className="h-3 w-3 md:h-4 md:w-4 md:mr-2" />
+                  <span className="hidden sm:inline">Dodaj schowek</span>
+                  <span className="sm:hidden">Nowy schowek</span>
                 </Button>
               </DialogTrigger>
               <DialogContent>
@@ -226,11 +227,11 @@ export function VehicleEquipmentEditor({ vehicle }: VehicleEquipmentEditorProps)
 
       {/* Zarządzanie wyposażeniem */}
       <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle>Wyposażenie</CardTitle>
-              <CardDescription>
+        <CardHeader className="pb-3">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div className="flex-1 min-w-0">
+              <CardTitle className="text-base md:text-lg">Wyposażenie</CardTitle>
+              <CardDescription className="text-xs md:text-sm truncate">
                 {selectedCompartmentId
                   ? `Edytuj zawartość: ${vehicle.compartments.find(c => c.id === selectedCompartmentId)?.name}`
                   : 'Wybierz schowek aby edytować jego zawartość'}
@@ -238,9 +239,10 @@ export function VehicleEquipmentEditor({ vehicle }: VehicleEquipmentEditorProps)
             </div>
             <Dialog open={isAddingItem} onOpenChange={setIsAddingItem}>
               <DialogTrigger asChild>
-                <Button disabled={!selectedCompartmentId}>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Dodaj element
+                <Button disabled={!selectedCompartmentId} size="sm" className="md:size-default w-full sm:w-auto">
+                  <Plus className="h-3 w-3 md:h-4 md:w-4 md:mr-2" />
+                  <span className="hidden sm:inline">Dodaj element</span>
+                  <span className="sm:hidden">Nowy element</span>
                 </Button>
               </DialogTrigger>
               <DialogContent>
@@ -344,53 +346,53 @@ export function VehicleEquipmentEditor({ vehicle }: VehicleEquipmentEditorProps)
                 ?.items.map((item) => (
                   <div
                     key={item.id}
-                    className="flex items-center justify-between p-3 border rounded-lg hover:bg-slate-50"
+                    className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-3 border rounded-lg hover:bg-slate-50"
                   >
-                    <div className="flex-1">
-                      <div className="font-medium">{item.name}</div>
+                    <div className="flex-1 min-w-0">
+                      <div className="font-medium text-sm md:text-base truncate">{item.name}</div>
                       {item.description && (
-                        <div className="text-sm text-muted-foreground">{item.description}</div>
+                        <div className="text-xs md:text-sm text-muted-foreground truncate">{item.description}</div>
                       )}
-                      <div className="flex gap-2 mt-1 flex-wrap">
-                        <Badge variant="outline" className="text-xs">
+                      <div className="flex gap-1 md:gap-2 mt-1 flex-wrap">
+                        <Badge variant="outline" className="text-[10px] md:text-xs">
                           {EQUIPMENT_CATEGORY_LABELS[item.category]}
                         </Badge>
-                        <Badge variant="secondary" className="text-xs">
+                        <Badge variant="secondary" className="text-[10px] md:text-xs">
                           {item.quantity} {item.unit}
                         </Badge>
                         {item.expiryDate && (
                           <Badge
                             variant={new Date(item.expiryDate) < new Date() ? "destructive" : "default"}
-                            className="text-xs"
+                            className="text-[10px] md:text-xs"
                           >
                             📅 {new Date(item.expiryDate).toLocaleDateString('pl-PL')}
                           </Badge>
                         )}
                       </div>
                     </div>
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 self-end sm:self-auto">
                       <Button
                         variant="ghost"
                         size="sm"
                         onClick={() => setEditingItem({ compartmentId: selectedCompartmentId, item })}
                       >
-                        <Edit className="h-4 w-4" />
+                        <Edit className="h-3 w-3 md:h-4 md:w-4" />
                       </Button>
                       <Button
                         variant="ghost"
                         size="sm"
                         onClick={() => handleDeleteItem(selectedCompartmentId, item.id)}
                       >
-                        <Trash2 className="h-4 w-4 text-red-500" />
+                        <Trash2 className="h-3 w-3 md:h-4 md:w-4 text-red-500" />
                       </Button>
                     </div>
                   </div>
-                )) || <p className="text-muted-foreground text-center py-8">Brak elementów w tym schowku</p>}
+                )) || <p className="text-muted-foreground text-center py-8 text-sm">Brak elementów w tym schowku</p>}
             </div>
           ) : (
-            <div className="text-center py-12">
-              <Package className="w-16 h-16 mx-auto text-gray-300 mb-4" />
-              <p className="text-muted-foreground">Wybierz schowek aby zobaczyć jego zawartość</p>
+            <div className="text-center py-8 md:py-12">
+              <Package className="w-12 h-12 md:w-16 md:h-16 mx-auto text-gray-300 mb-4" />
+              <p className="text-muted-foreground text-sm md:text-base">Wybierz schowek aby zobaczyć jego zawartość</p>
             </div>
           )}
         </CardContent>

@@ -57,35 +57,38 @@ export function VehicleEquipmentPlanView({ vehicle }: VehicleEquipmentPlanViewPr
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3 md:space-y-4">
       {/* Toolbar */}
       <Card>
-        <CardContent className="p-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <h2 className="text-xl font-bold">{vehicle.name}</h2>
-              <Badge variant="secondary">
+        <CardContent className="p-3 md:p-4">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+            <div className="flex flex-wrap items-center gap-2 md:gap-4">
+              <h2 className="text-base md:text-xl font-bold">{vehicle.name}</h2>
+              <Badge variant="secondary" className="text-xs">
                 {vehicle.compartments.reduce((sum, c) => sum + c.items.length, 0)} elementów
               </Badge>
               {editMode && (
-                <Badge variant="default" className="animate-pulse">
-                  Tryb edycji - przeciągaj schowki
+                <Badge variant="default" className="animate-pulse text-xs">
+                  <span className="hidden md:inline">Tryb edycji - przeciągaj schowki</span>
+                  <span className="md:hidden">Edycja</span>
                 </Badge>
               )}
             </div>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-1 md:gap-2">
               <Button
                 variant={editMode ? "default" : "outline"}
                 size="sm"
                 onClick={() => setEditMode(!editMode)}
               >
-                {editMode ? <Unlock className="h-4 w-4 mr-2" /> : <Lock className="h-4 w-4 mr-2" />}
-                {editMode ? 'Zablokuj' : 'Edytuj pozycje'}
+                {editMode ? <Unlock className="h-3 w-3 md:h-4 md:w-4 md:mr-2" /> : <Lock className="h-3 w-3 md:h-4 md:w-4 md:mr-2" />}
+                <span className="hidden md:inline">{editMode ? 'Zablokuj' : 'Edytuj pozycje'}</span>
+                <span className="md:hidden">{editMode ? 'Zablokuj' : 'Edytuj'}</span>
               </Button>
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => setShowGrid(!showGrid)}
+                className="hidden sm:flex"
               >
                 <Grid3x3 className="h-4 w-4 mr-2" />
                 {showGrid ? 'Ukryj' : 'Pokaż'} siatkę
@@ -95,17 +98,17 @@ export function VehicleEquipmentPlanView({ vehicle }: VehicleEquipmentPlanViewPr
                 size="sm"
                 onClick={() => setShowCategories(!showCategories)}
               >
-                {showCategories ? <EyeOff className="h-4 w-4 mr-2" /> : <Eye className="h-4 w-4 mr-2" />}
-                Kategorie
+                {showCategories ? <EyeOff className="h-3 w-3 md:h-4 md:w-4 md:mr-2" /> : <Eye className="h-3 w-3 md:h-4 md:w-4 md:mr-2" />}
+                <span className="hidden md:inline">Kategorie</span>
               </Button>
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => setZoom(Math.max(0.5, zoom - 0.1))}
               >
-                <ZoomOut className="h-4 w-4" />
+                <ZoomOut className="h-3 w-3 md:h-4 md:w-4" />
               </Button>
-              <span className="text-sm font-medium px-3 py-2 bg-muted rounded-md min-w-[60px] text-center">
+              <span className="text-xs md:text-sm font-medium px-2 md:px-3 py-1 md:py-2 bg-muted rounded-md min-w-[50px] md:min-w-[60px] text-center">
                 {Math.round(zoom * 100)}%
               </span>
               <Button
@@ -113,12 +116,13 @@ export function VehicleEquipmentPlanView({ vehicle }: VehicleEquipmentPlanViewPr
                 size="sm"
                 onClick={() => setZoom(Math.min(2, zoom + 0.1))}
               >
-                <ZoomIn className="h-4 w-4" />
+                <ZoomIn className="h-3 w-3 md:h-4 md:w-4" />
               </Button>
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => setZoom(1)}
+                className="hidden sm:flex"
               >
                 <Maximize2 className="h-4 w-4" />
               </Button>
@@ -128,15 +132,15 @@ export function VehicleEquipmentPlanView({ vehicle }: VehicleEquipmentPlanViewPr
       </Card>
 
       {/* Plan pojazdu - DUŻY CANVAS Z SCROLLOWANIEM */}
-      <div className="bg-slate-50 rounded-lg overflow-auto" style={{ height: 'calc(100vh - 300px)' }}>
-        <div className="p-8">
+      <div className="bg-slate-50 rounded-lg overflow-auto" style={{ height: 'calc(100vh - 250px)' }}>
+        <div className="p-4 md:p-8">
           <div
             ref={containerRef}
             className={`relative bg-white rounded-lg shadow-lg ${editMode ? 'cursor-crosshair' : ''}`}
             style={{
               width: `${2400 * zoom}px`,
               height: `${1600 * zoom}px`,
-              minWidth: '2400px',
+              minWidth: '100%',
               minHeight: '1600px',
             }}
             onMouseMove={handleMouseMove}

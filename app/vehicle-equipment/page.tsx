@@ -74,26 +74,26 @@ export default function VehicleEquipmentPage() {
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
+    <div className="container mx-auto p-3 md:p-6 space-y-4 md:space-y-6">
       {/* Nagłówek strony */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h1 className="text-4xl font-bold flex items-center gap-3">
-            <Truck className="h-10 w-10 text-primary" />
+          <h1 className="text-2xl md:text-4xl font-bold flex items-center gap-2 md:gap-3">
+            <Truck className="h-6 w-6 md:h-10 md:w-10 text-primary" />
             Wyposażenie pojazdu
           </h1>
-          <p className="text-muted-foreground mt-2">
+          <p className="text-muted-foreground mt-1 md:mt-2 text-sm md:text-base">
             Przeglądaj i zarządzaj wyposażeniem pojazdów ratowniczych
           </p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline">
-            <Settings className="h-4 w-4 mr-2" />
-            Ustawienia
+          <Button variant="outline" size="sm" className="md:size-default">
+            <Settings className="h-4 w-4 md:mr-2" />
+            <span className="hidden md:inline">Ustawienia</span>
           </Button>
-          <Button>
-            <Plus className="h-4 w-4 mr-2" />
-            Dodaj pojazd
+          <Button size="sm" className="md:size-default">
+            <Plus className="h-4 w-4 md:mr-2" />
+            <span className="hidden md:inline">Dodaj pojazd</span>
           </Button>
         </div>
       </div>
@@ -147,15 +147,15 @@ export default function VehicleEquipmentPage() {
         if (expiringItems.length > 0) {
           return (
             <Card className="border-orange-200 bg-orange-50/50">
-              <CardHeader>
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <AlertCircle className="h-5 w-5 text-orange-500" />
-                  Elementy wygasające w ciągu 30 dni
-                  <Badge variant="destructive" className="ml-2">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base md:text-lg flex flex-wrap items-center gap-2">
+                  <AlertCircle className="h-4 w-4 md:h-5 md:w-5 text-orange-500" />
+                  <span className="flex-1">Elementy wygasające w ciągu 30 dni</span>
+                  <Badge variant="destructive" className="text-xs">
                     {expiringItems.length}
                   </Badge>
                 </CardTitle>
-                <CardDescription>
+                <CardDescription className="text-xs md:text-sm">
                   Sprawdź i wymień elementy, których termin ważności wkrótce upływa
                 </CardDescription>
               </CardHeader>
@@ -164,20 +164,20 @@ export default function VehicleEquipmentPage() {
                   {expiringItems.map((item) => (
                     <div
                       key={item.id}
-                      className="flex items-center justify-between p-3 bg-white rounded-lg border border-orange-200 hover:border-orange-300 transition-colors"
+                      className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 md:gap-3 p-3 bg-white rounded-lg border border-orange-200 hover:border-orange-300 transition-colors"
                     >
-                      <div className="flex-1">
-                        <div className="font-medium text-slate-900">{item.name}</div>
-                        <div className="text-sm text-slate-600 mt-0.5">
+                      <div className="flex-1 min-w-0">
+                        <div className="font-medium text-slate-900 text-sm md:text-base truncate">{item.name}</div>
+                        <div className="text-xs md:text-sm text-slate-600 mt-0.5 truncate">
                           {item.compartmentName} • {EQUIPMENT_CATEGORY_LABELS[item.category]}
                         </div>
                       </div>
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center justify-between md:justify-end gap-2 md:gap-3">
                         <Badge variant="outline" className="text-xs">
                           {item.quantity} {item.unit || 'szt'}
                         </Badge>
                         <div className="text-right">
-                          <div className="text-sm font-semibold text-orange-600">
+                          <div className="text-xs md:text-sm font-semibold text-orange-600">
                             {item.daysUntilExpiry} {item.daysUntilExpiry === 1 ? 'dzień' : 'dni'}
                           </div>
                           <div className="text-xs text-slate-500">
@@ -198,17 +198,19 @@ export default function VehicleEquipmentPage() {
       {/* Główna zawartość */}
       <Tabs defaultValue="plan" className="w-full">
         <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="plan">
-            <Map className="h-4 w-4 mr-2" />
-            Plan wyposażenia
+          <TabsTrigger value="plan" className="text-xs md:text-sm">
+            <Map className="h-3 w-3 md:h-4 md:w-4 md:mr-2" />
+            <span className="hidden sm:inline">Plan wyposażenia</span>
+            <span className="sm:hidden">Plan</span>
           </TabsTrigger>
-          <TabsTrigger value="settings">
-            <Settings className="h-4 w-4 mr-2" />
-            Zarządzanie
+          <TabsTrigger value="settings" className="text-xs md:text-sm">
+            <Settings className="h-3 w-3 md:h-4 md:w-4 md:mr-2" />
+            <span className="hidden sm:inline">Zarządzanie</span>
+            <span className="sm:hidden">Zarządz.</span>
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="plan" className="mt-6">
+        <TabsContent value="plan" className="mt-4 md:mt-6">
           {currentVehicle ? (
             <VehicleEquipmentPlanView vehicle={currentVehicle} />
           ) : (
