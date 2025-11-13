@@ -25,6 +25,7 @@ export function VehicleEquipmentPlanView({ vehicle }: VehicleEquipmentPlanViewPr
   const { updateCompartment } = useVehicleEquipmentStore();
   const containerRef = useRef<HTMLDivElement>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
+  const lastUpdateRef = useRef<number>(0);
   const [zoom, setZoom] = useState(1);
   const [autoZoom, setAutoZoom] = useState(true);
   const [showGrid, setShowGrid] = useState(false);
@@ -107,8 +108,10 @@ export function VehicleEquipmentPlanView({ vehicle }: VehicleEquipmentPlanViewPr
     const clampedX = Math.max(0, Math.min(100, x));
     const clampedY = Math.max(0, Math.min(100, y));
 
-    updateCompartment(vehicle.id, draggingCompartment, {
-      position: { x: clampedX, y: clampedY },
+    requestAnimationFrame(() => {
+      updateCompartment(vehicle.id, draggingCompartment, {
+        position: { x: clampedX, y: clampedY },
+      });
     });
   };
 
@@ -118,6 +121,11 @@ export function VehicleEquipmentPlanView({ vehicle }: VehicleEquipmentPlanViewPr
     const touch = e.touches[0];
     if (!touch) return;
 
+    // Throttle updates using requestAnimationFrame for smooth 60fps
+    const now = Date.now();
+    if (now - lastUpdateRef.current < 16) return; // ~60fps
+    lastUpdateRef.current = now;
+
     const rect = containerRef.current.getBoundingClientRect();
     const x = ((touch.clientX - rect.left) / rect.width) * 100;
     const y = ((touch.clientY - rect.top) / rect.height) * 100;
@@ -125,8 +133,10 @@ export function VehicleEquipmentPlanView({ vehicle }: VehicleEquipmentPlanViewPr
     const clampedX = Math.max(0, Math.min(100, x));
     const clampedY = Math.max(0, Math.min(100, y));
 
-    updateCompartment(vehicle.id, draggingCompartment, {
-      position: { x: clampedX, y: clampedY },
+    requestAnimationFrame(() => {
+      updateCompartment(vehicle.id, draggingCompartment, {
+        position: { x: clampedX, y: clampedY },
+      });
     });
   };
 
@@ -282,6 +292,9 @@ export function VehicleEquipmentPlanView({ vehicle }: VehicleEquipmentPlanViewPr
                   left: `${compartment.position.x}%`,
                   top: `${compartment.position.y}%`,
                   transform: 'translate(-50%, -50%)',
+                  transition: draggingCompartment === compartment.id ? 'none' : 'left 0.05s ease-out, top 0.05s ease-out',
+                  touchAction: editMode ? 'none' : 'auto',
+                  willChange: draggingCompartment === compartment.id ? 'left, top' : 'auto',
                 }}
                 onMouseDown={(e) => handleMouseDown(compartment.id, e)}
                 onTouchStart={(e) => handleTouchStart(compartment.id, e)}
