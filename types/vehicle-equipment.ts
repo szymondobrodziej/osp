@@ -120,8 +120,8 @@ export interface VehicleConfiguration {
     year?: number;
   };
   metadata?: {
-    createdAt: Date;
-    updatedAt: Date;
+    createdAt?: Date;
+    updatedAt?: Date;
     createdBy?: string;
   };
 }
