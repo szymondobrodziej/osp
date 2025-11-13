@@ -52,15 +52,19 @@ export function VehicleEquipmentPlanView({ vehicle }: VehicleEquipmentPlanViewPr
       if (!wrapperRef.current || !autoZoom) return;
 
       const wrapperWidth = wrapperRef.current.clientWidth;
+      const wrapperHeight = wrapperRef.current.clientHeight;
       const canvasWidth = 2400;
-      const padding = isMobile ? 16 : 32; // Mniejszy padding na mobile
+      const canvasHeight = 1600;
+      const padding = isMobile ? 8 : 32; // Minimalny padding na mobile
 
-      // Oblicz zoom tak, żeby canvas zmieścił się w szerokości
-      const calculatedZoom = (wrapperWidth - padding) / canvasWidth;
+      // Oblicz zoom tak, żeby canvas zmieścił się w szerokości I wysokości
+      const widthZoom = (wrapperWidth - padding) / canvasWidth;
+      const heightZoom = (wrapperHeight - padding) / canvasHeight;
+      const calculatedZoom = Math.min(widthZoom, heightZoom);
 
-      // Na mobile (< 768px) użyj obliczonego zoomu
-      // Na desktop (>= 768px) użyj 1.0 jako minimum
-      const finalZoom = isMobile ? Math.max(0.15, calculatedZoom) : Math.max(0.5, calculatedZoom);
+      // Na mobile użyj większego zoomu (wypełnij ekran maksymalnie)
+      // Na desktop użyj 0.5 jako minimum
+      const finalZoom = isMobile ? Math.max(0.3, calculatedZoom) : Math.max(0.5, calculatedZoom);
 
       setZoom(finalZoom);
     };
@@ -255,26 +259,27 @@ export function VehicleEquipmentPlanView({ vehicle }: VehicleEquipmentPlanViewPr
                 onMouseDown={(e) => handleMouseDown(compartment.id, e)}
               >
                 <div
-                  className="rounded-lg overflow-hidden"
+                  className="rounded overflow-hidden"
                   style={{
-                    width: `${compartment.size.width * 12}px`,
-                    minWidth: isMobile ? '120px' : (zoom < 0.5 ? '180px' : '250px'),
+                    width: isMobile ? '50px' : `${compartment.size.width * 12}px`,
+                    minWidth: isMobile ? '50px' : (zoom < 0.5 ? '180px' : '250px'),
+                    height: isMobile ? 'auto' : 'auto',
                     backgroundColor: compartment.color || '#94a3b8',
                     border: `${Math.max(1, 3 * zoom)}px solid rgba(0,0,0,0.2)`,
                   }}
                 >
                   {/* Nagłówek schowka */}
                   <div
-                    className={isMobile ? "px-1.5 py-1 border-b border-black/20" : "px-3 py-2 border-b-2 border-black/20"}
+                    className={isMobile ? "px-1 py-0.5 border-b border-black/20" : "px-3 py-2 border-b-2 border-black/20"}
                     style={{ backgroundColor: 'rgba(0,0,0,0.15)' }}
                   >
-                    <div className="flex items-center justify-between gap-1">
-                      <h3 className={`font-bold text-white drop-shadow-md ${isMobile ? 'text-[10px]' : 'text-sm'}`}>
+                    <div className="flex items-center justify-between gap-0.5">
+                      <h3 className={`font-bold text-white drop-shadow-md ${isMobile ? 'text-[9px] leading-tight' : 'text-sm'}`}>
                         {compartment.name}
                       </h3>
                       <Badge
                         variant="secondary"
-                        className={`bg-white/90 font-bold ${isMobile ? 'text-[8px] px-1 py-0' : 'text-xs'}`}
+                        className={`bg-white/90 font-bold ${isMobile ? 'text-[7px] px-0.5 py-0' : 'text-xs'}`}
                       >
                         {totalItems}
                       </Badge>
@@ -282,7 +287,7 @@ export function VehicleEquipmentPlanView({ vehicle }: VehicleEquipmentPlanViewPr
                   </div>
 
                   {/* Lista wyposażenia - ROZWINIĘTA (bez scrollowania) */}
-                  <div className={isMobile ? "p-1" : "p-2"}>
+                  <div className={isMobile ? "p-0.5" : "p-2"}>
                     {showCategories ? (
                       // Widok z kategoriami
                       <div className={isMobile ? "space-y-0.5" : "space-y-2"}>
@@ -298,7 +303,7 @@ export function VehicleEquipmentPlanView({ vehicle }: VehicleEquipmentPlanViewPr
                                 key={item.id}
                                 className={`bg-white/95 rounded shadow-sm ${
                                   isMobile
-                                    ? 'px-1 py-0.5 text-[8px]'
+                                    ? 'px-0.5 py-0.5 text-[7px]'
                                     : 'px-2 py-1.5 text-xs hover:shadow-md transition-shadow'
                                 }`}
                               >
@@ -343,7 +348,7 @@ export function VehicleEquipmentPlanView({ vehicle }: VehicleEquipmentPlanViewPr
                             key={item.id}
                             className={`bg-white/95 rounded shadow-sm ${
                               isMobile
-                                ? 'px-1 py-0.5 text-[8px]'
+                                ? 'px-0.5 py-0.5 text-[7px]'
                                 : 'px-2 py-1.5 text-xs hover:shadow-md transition-shadow'
                             }`}
                           >
