@@ -263,7 +263,7 @@ export function VehicleEquipmentPlanView({ vehicle }: VehicleEquipmentPlanViewPr
                   style={{
                     width: isMobile ? 'fit-content' : `${compartment.size.width * 12}px`,
                     minWidth: isMobile ? 'auto' : (zoom < 0.5 ? '180px' : '250px'),
-                    maxWidth: isMobile ? '120px' : 'none',
+                    maxWidth: isMobile ? 'none' : 'none',
                     height: isMobile ? 'auto' : 'auto',
                     backgroundColor: compartment.color || '#94a3b8',
                     border: `${Math.max(1, 3 * zoom)}px solid rgba(0,0,0,0.2)`,
