@@ -85,14 +85,14 @@ export function VehicleEquipmentPlanView({ vehicle }: VehicleEquipmentPlanViewPr
   };
 
   const handleMouseDown = (compartmentId: string, e: React.MouseEvent) => {
-    if (!editMode || isMobile) return; // Wyłącz przeciąganie na mobile
+    if (!editMode) return; // Przeciąganie działa na mobile gdy editMode włączony
     e.preventDefault();
     e.stopPropagation();
     setDraggingCompartment(compartmentId);
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
-    if (!draggingCompartment || !containerRef.current || !editMode || isMobile) return;
+    if (!draggingCompartment || !containerRef.current || !editMode) return;
 
     const rect = containerRef.current.getBoundingClientRect();
     const x = ((e.clientX - rect.left) / rect.width) * 100;
@@ -129,27 +129,23 @@ export function VehicleEquipmentPlanView({ vehicle }: VehicleEquipmentPlanViewPr
               )}
             </div>
             <div className="flex flex-wrap gap-1 md:gap-2">
-              {/* Przyciski edycji - tylko na desktop */}
-              {!isMobile && (
-                <>
-                  <Button
-                    variant={editMode ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => setEditMode(!editMode)}
-                  >
-                    {editMode ? <Unlock className="h-4 w-4 mr-2" /> : <Lock className="h-4 w-4 mr-2" />}
-                    {editMode ? 'Zablokuj' : 'Edytuj pozycje'}
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setShowGrid(!showGrid)}
-                  >
-                    <Grid3x3 className="h-4 w-4 mr-2" />
-                    {showGrid ? 'Ukryj' : 'Pokaż'} siatkę
-                  </Button>
-                </>
-              )}
+              {/* Przyciski edycji - dostępne na mobile i desktop */}
+              <Button
+                variant={editMode ? "default" : "outline"}
+                size="sm"
+                onClick={() => setEditMode(!editMode)}
+              >
+                {editMode ? <Unlock className="h-3 w-3 md:h-4 md:w-4 md:mr-2" /> : <Lock className="h-3 w-3 md:h-4 md:w-4 md:mr-2" />}
+                <span className="hidden md:inline">{editMode ? 'Zablokuj' : 'Edytuj pozycje'}</span>
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowGrid(!showGrid)}
+              >
+                <Grid3x3 className="h-3 w-3 md:h-4 md:w-4 md:mr-2" />
+                <span className="hidden md:inline">{showGrid ? 'Ukryj' : 'Pokaż'} siatkę</span>
+              </Button>
               <Button
                 variant="outline"
                 size="sm"
@@ -390,65 +386,6 @@ export function VehicleEquipmentPlanView({ vehicle }: VehicleEquipmentPlanViewPr
               </div>
             );
           })}
-
-            {/* Legenda pojazdu */}
-            <div className="absolute top-8 left-8 bg-white/95 rounded-lg shadow-lg p-6 max-w-sm">
-              <h3 className="font-bold text-2xl mb-3">{vehicle.name}</h3>
-              {vehicle.specifications && (
-                <div className="space-y-2 text-base text-slate-600">
-                  {vehicle.specifications.waterTank && (
-                    <div className="flex items-center gap-3">
-                      <span className="text-xl text-blue-500">💧</span>
-                      <span>Zbiornik: {vehicle.specifications.waterTank}L</span>
-                    </div>
-                  )}
-                  {vehicle.specifications.foamTank && (
-                    <div className="flex items-center gap-3">
-                      <span className="text-xl text-orange-500">🧴</span>
-                      <span>Piana: {vehicle.specifications.foamTank}L</span>
-                    </div>
-                  )}
-                  {vehicle.specifications.pump && (
-                    <div className="flex items-center gap-3">
-                      <span className="text-xl text-red-500">⚙️</span>
-                      <span>Pompa: {vehicle.specifications.pump}</span>
-                    </div>
-                  )}
-                  {vehicle.specifications.crew && (
-                    <div className="flex items-center gap-3">
-                      <span className="text-xl text-green-500">👥</span>
-                      <span>Załoga: {vehicle.specifications.crew} osób</span>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-
-            {/* Statystyki */}
-            <div className="absolute bottom-8 right-8 bg-white/95 rounded-lg shadow-lg p-6">
-              <h4 className="font-bold text-lg mb-3">Podsumowanie</h4>
-              <div className="space-y-2 text-base">
-                <div className="flex items-center justify-between gap-6">
-                  <span className="text-slate-600">Schowki:</span>
-                  <Badge variant="secondary" className="text-base px-3 py-1">{vehicle.compartments.length}</Badge>
-                </div>
-                <div className="flex items-center justify-between gap-6">
-                  <span className="text-slate-600">Elementy:</span>
-                  <Badge variant="secondary" className="text-base px-3 py-1">
-                    {vehicle.compartments.reduce((sum, c) => sum + c.items.length, 0)}
-                  </Badge>
-                </div>
-                <div className="flex items-center justify-between gap-6">
-                  <span className="text-slate-600">Łącznie:</span>
-                  <Badge variant="secondary" className="text-base px-3 py-1">
-                    {vehicle.compartments.reduce(
-                      (sum, c) => sum + c.items.reduce((s, i) => s + i.quantity, 0),
-                      0
-                    )} szt.
-                  </Badge>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
       </div>
