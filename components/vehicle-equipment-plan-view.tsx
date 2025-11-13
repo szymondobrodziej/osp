@@ -261,8 +261,9 @@ export function VehicleEquipmentPlanView({ vehicle }: VehicleEquipmentPlanViewPr
                 <div
                   className="rounded overflow-hidden"
                   style={{
-                    width: isMobile ? '50px' : `${compartment.size.width * 12}px`,
-                    minWidth: isMobile ? '50px' : (zoom < 0.5 ? '180px' : '250px'),
+                    width: isMobile ? 'fit-content' : `${compartment.size.width * 12}px`,
+                    minWidth: isMobile ? 'auto' : (zoom < 0.5 ? '180px' : '250px'),
+                    maxWidth: isMobile ? '120px' : 'none',
                     height: isMobile ? 'auto' : 'auto',
                     backgroundColor: compartment.color || '#94a3b8',
                     border: `${Math.max(1, 3 * zoom)}px solid rgba(0,0,0,0.2)`,
@@ -307,8 +308,8 @@ export function VehicleEquipmentPlanView({ vehicle }: VehicleEquipmentPlanViewPr
                                     : 'px-2 py-1.5 text-xs hover:shadow-md transition-shadow'
                                 }`}
                               >
-                                <div className={`flex items-center justify-between ${isMobile ? 'gap-0.5' : 'gap-2'}`}>
-                                  <span className={`font-medium text-slate-800 flex-1 leading-tight ${isMobile ? 'truncate' : ''}`}>
+                                <div className={`${isMobile ? 'flex flex-col gap-0' : 'flex items-center justify-between gap-2'}`}>
+                                  <span className={`font-medium text-slate-800 leading-tight whitespace-nowrap`}>
                                     {item.name}
                                   </span>
                                   {!isMobile && (
@@ -352,8 +353,8 @@ export function VehicleEquipmentPlanView({ vehicle }: VehicleEquipmentPlanViewPr
                                 : 'px-2 py-1.5 text-xs hover:shadow-md transition-shadow'
                             }`}
                           >
-                            <div className={`flex items-center justify-between ${isMobile ? 'gap-0.5' : 'gap-2'}`}>
-                              <span className={`font-medium text-slate-800 flex-1 leading-tight ${isMobile ? 'truncate' : ''}`}>
+                            <div className={`${isMobile ? 'flex flex-col gap-0' : 'flex items-center justify-between gap-2'}`}>
+                              <span className={`font-medium text-slate-800 leading-tight whitespace-nowrap`}>
                                 {item.name}
                               </span>
                               {!isMobile && (
