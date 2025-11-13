@@ -439,91 +439,14 @@ import { VehicleCompartmentPositionEditor } from '@/components/vehicle-compartme
 
 ---
 
-## Generator rzutu z góry
+## Workflow: Przygotowanie zdjęć pojazdu
 
-### SVG Generator
+### Krok 1: Przygotuj zdjęcie pojazdu
 
-**Komponent:** `VehicleSVGGenerator`
-
-**Funkcje:**
-- ✅ Generowanie diagramu SVG pojazdu
-- ✅ Wsparcie dla różnych typów (GBA, GCBA, SLRt)
-- ✅ Konfigurowalne wymiary
-- ✅ Eksport do SVG (wektorowy)
-- ✅ Eksport do PNG (rastrowy)
-- ✅ Profesjonalny wygląd z legendą
-- ✅ Wymiary pojazdu
-- ✅ Kolorowe schowki
-
-**Strona:** `/vehicle-generator`
-
-**Użycie komponentu:**
-```tsx
-import { VehicleSVGGenerator } from '@/components/vehicle-svg-generator';
-
-<VehicleSVGGenerator
-  type="GBA"
-  width={800}
-  height={500}
-  className="max-w-full"
-/>
-```
-
-**Dostępne typy:**
-- `GBA` - Średni samochód ratowniczo-gaśniczy ✅ (gotowy)
-- `GCBA` - Ciężki samochód ratowniczo-gaśniczy (w przygotowaniu)
-- `SLRt` - Samochód lekki ratownictwa technicznego (w przygotowaniu)
-- `SLRr` - Samochód lekki ratownictwa ratowniczego (w przygotowaniu)
-- `SLOP` - Samochód lekki operacyjny (w przygotowaniu)
-
-**Eksport:**
-
-SVG (wektorowy):
-```typescript
-const handleDownloadSVG = () => {
-  const svg = document.getElementById('vehicle-svg');
-  const svgData = new XMLSerializer().serializeToString(svg);
-  const blob = new Blob([svgData], { type: 'image/svg+xml' });
-  // ... pobierz plik
-};
-```
-
-PNG (rastrowy):
-```typescript
-const handleDownloadPNG = () => {
-  // Konwersja SVG → Canvas → PNG
-  // Automatyczna obsługa w komponencie
-};
-```
-
-**Zalety SVG:**
-- ✅ Skalowalny bez utraty jakości
-- ✅ Mały rozmiar pliku
-- ✅ Edytowalny w Inkscape/Illustrator
-- ✅ Idealny do dokumentacji
-
-**Zalety PNG:**
-- ✅ Uniwersalny format
-- ✅ Lepszy do druku
-- ✅ Obsługiwany wszędzie
-
----
-
-## Workflow: Od zdjęcia do pełnej konfiguracji
-
-### Krok 1: Przygotuj zdjęcie lub wygeneruj diagram
-
-**Opcja A: Użyj własnego zdjęcia**
+**Użyj własnego zdjęcia:**
 1. Zrób zdjęcie pojazdu z góry (dron, drabina)
 2. Zapisz jako JPG/PNG
 3. Umieść w `public/vehicles/`
-
-**Opcja B: Wygeneruj diagram SVG**
-1. Przejdź do `/vehicle-generator`
-2. Wybierz typ pojazdu
-3. Dostosuj wymiary
-4. Pobierz SVG lub PNG
-5. Umieść w `public/vehicles/`
 
 ### Krok 2: Dodaj pojazd do konfiguracji
 
