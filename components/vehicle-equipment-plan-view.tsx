@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { VehicleConfiguration, EQUIPMENT_CATEGORY_LABELS } from '@/types/vehicle-equipment';
 import { useVehicleEquipmentStore } from '@/store/vehicle-equipment-store';
 import { Card, CardContent } from '@/components/ui/card';
@@ -24,11 +24,48 @@ interface VehicleEquipmentPlanViewProps {
 export function VehicleEquipmentPlanView({ vehicle }: VehicleEquipmentPlanViewProps) {
   const { updateCompartment } = useVehicleEquipmentStore();
   const containerRef = useRef<HTMLDivElement>(null);
+  const wrapperRef = useRef<HTMLDivElement>(null);
   const [zoom, setZoom] = useState(1);
+  const [autoZoom, setAutoZoom] = useState(true);
   const [showGrid, setShowGrid] = useState(false);
   const [showCategories, setShowCategories] = useState(true);
   const [editMode, setEditMode] = useState(false);
   const [draggingCompartment, setDraggingCompartment] = useState<string | null>(null);
+
+  // Automatyczne dopasowanie zoomu do szerokości ekranu
+  useEffect(() => {
+    const updateAutoZoom = () => {
+      if (!wrapperRef.current || !autoZoom) return;
+
+      const wrapperWidth = wrapperRef.current.clientWidth;
+      const canvasWidth = 2400;
+      const padding = 32; // 2 * 16px (p-4)
+
+      // Oblicz zoom tak, żeby canvas zmieścił się w szerokości
+      const calculatedZoom = (wrapperWidth - padding) / canvasWidth;
+
+      // Na mobile (< 768px) użyj obliczonego zoomu
+      // Na desktop (>= 768px) użyj 1.0 jako minimum
+      const isMobile = window.innerWidth < 768;
+      const finalZoom = isMobile ? Math.max(0.15, calculatedZoom) : Math.max(0.5, calculatedZoom);
+
+      setZoom(finalZoom);
+    };
+
+    updateAutoZoom();
+    window.addEventListener('resize', updateAutoZoom);
+
+    return () => window.removeEventListener('resize', updateAutoZoom);
+  }, [autoZoom]);
+
+  const handleZoomChange = (newZoom: number) => {
+    setAutoZoom(false);
+    setZoom(newZoom);
+  };
+
+  const handleResetZoom = () => {
+    setAutoZoom(true);
+  };
 
   const handleMouseDown = (compartmentId: string, e: React.MouseEvent) => {
     if (!editMode) return;
@@ -104,7 +141,7 @@ export function VehicleEquipmentPlanView({ vehicle }: VehicleEquipmentPlanViewPr
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setZoom(Math.max(0.5, zoom - 0.1))}
+                onClick={() => handleZoomChange(Math.max(0.1, zoom - 0.1))}
               >
                 <ZoomOut className="h-3 w-3 md:h-4 md:w-4" />
               </Button>
@@ -114,15 +151,16 @@ export function VehicleEquipmentPlanView({ vehicle }: VehicleEquipmentPlanViewPr
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setZoom(Math.min(2, zoom + 0.1))}
+                onClick={() => handleZoomChange(Math.min(2, zoom + 0.1))}
               >
                 <ZoomIn className="h-3 w-3 md:h-4 md:w-4" />
               </Button>
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setZoom(1)}
+                onClick={handleResetZoom}
                 className="hidden sm:flex"
+                title="Dopasuj do ekranu"
               >
                 <Maximize2 className="h-4 w-4" />
               </Button>
@@ -131,17 +169,22 @@ export function VehicleEquipmentPlanView({ vehicle }: VehicleEquipmentPlanViewPr
         </CardContent>
       </Card>
 
-      {/* Plan pojazdu - DUŻY CANVAS Z SCROLLOWANIEM */}
-      <div className="bg-slate-50 rounded-lg overflow-auto" style={{ height: 'calc(100vh - 250px)' }}>
-        <div className="p-4 md:p-8">
+      {/* Plan pojazdu - RESPONSYWNY CANVAS */}
+      <div
+        ref={wrapperRef}
+        className="bg-slate-50 rounded-lg overflow-auto md:overflow-auto"
+        style={{
+          height: 'calc(100vh - 250px)',
+        }}
+      >
+        <div className="p-4 md:p-8 flex items-center justify-center min-h-full">
           <div
             ref={containerRef}
             className={`relative bg-white rounded-lg shadow-lg ${editMode ? 'cursor-crosshair' : ''}`}
             style={{
               width: `${2400 * zoom}px`,
               height: `${1600 * zoom}px`,
-              minWidth: '100%',
-              minHeight: '1600px',
+              maxWidth: '100%',
             }}
             onMouseMove={handleMouseMove}
             onMouseUp={handleMouseUp}
@@ -198,10 +241,10 @@ export function VehicleEquipmentPlanView({ vehicle }: VehicleEquipmentPlanViewPr
                 <div
                   className="rounded-lg overflow-hidden"
                   style={{
-                    width: `${compartment.size.width * 12 * zoom}px`,
-                    minWidth: '250px',
+                    width: `${compartment.size.width * 12}px`,
+                    minWidth: zoom < 0.5 ? '180px' : '250px',
                     backgroundColor: compartment.color || '#94a3b8',
-                    border: '3px solid rgba(0,0,0,0.2)',
+                    border: `${Math.max(2, 3 * zoom)}px solid rgba(0,0,0,0.2)`,
                   }}
                 >
                   {/* Nagłówek schowka */}
