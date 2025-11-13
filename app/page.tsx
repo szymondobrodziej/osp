@@ -8,7 +8,7 @@ import IncidentHeader from '@/components/incident-header';
 import ChecklistView from '@/components/checklist-view';
 import dynamic from 'next/dynamic';
 import { IncidentType } from '@/types/incident';
-import { Flame, FileText, Users, Package, StickyNote, Camera, X, Sparkles, FolderOpen, CheckCircle2 } from 'lucide-react';
+import { Flame, FileText, Users, Package, StickyNote, Camera, X, Sparkles, FolderOpen, CheckCircle2, Truck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -101,12 +101,20 @@ export default function Home() {
                       Wybierz typ zdarzenia aby rozpocząć procedurę ratowniczą
                     </CardDescription>
                   </div>
-                  <Link href="/checklists">
-                    <Button variant="outline" className="gap-2">
-                      <FolderOpen className="w-4 h-4" />
-                      Biblioteka checklistów
-                    </Button>
-                  </Link>
+                  <div className="flex gap-2">
+                    <Link href="/vehicle-equipment">
+                      <Button variant="outline" className="gap-2">
+                        <Truck className="w-4 h-4" />
+                        <span className="hidden md:inline">Wyposażenie pojazdu</span>
+                      </Button>
+                    </Link>
+                    <Link href="/checklists">
+                      <Button variant="outline" className="gap-2">
+                        <FolderOpen className="w-4 h-4" />
+                        <span className="hidden md:inline">Biblioteka checklistów</span>
+                      </Button>
+                    </Link>
+                  </div>
                 </div>
               </CardHeader>
               <CardContent>
