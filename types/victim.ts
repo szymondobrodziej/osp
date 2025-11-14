@@ -1,364 +1,390 @@
 /**
- * MODUŁ POSZKODOWANI - PIERWSZA POMOC
- * Typy danych dla oceny stanu poszkodowanego
+ * MODUŁ POSZKODOWANI - DOKUMENTACJA MEDYCZNA
+ * System zbierania i dokumentowania danych medycznych o poszkodowanym
+ * do przekazania ZRM-owi
  */
 
 // ============================================================================
-// I. GRUPY WIEKOWE
+// I. PODSTAWOWE DANE
 // ============================================================================
 
-export type AgeGroup = 'ADULTS' | 'CHILDREN' | 'INFANTS' | 'SPECIAL_CASES';
+export type AgeGroup = 'ADULT' | 'CHILD' | 'INFANT';
 
 export const AGE_GROUP_LABELS: Record<AgeGroup, string> = {
-  ADULTS: 'DOROŚLI',
-  CHILDREN: 'DZIECI',
-  INFANTS: 'NIEMOWLĘTA',
-  SPECIAL_CASES: 'PRZYPADKI SPECJALNE',
+  ADULT: 'Dorosły',
+  CHILD: 'Dziecko',
+  INFANT: 'Niemowlę',
 };
 
 // ============================================================================
-// II. ACVPU - OCENA STANU ŚWIADOMOŚCI
+// II. STAN ŚWIADOMOŚCI (ACVPU)
 // ============================================================================
 
-export type ACVPULevel = 'A' | 'C' | 'V' | 'P' | 'U';
+export type ConsciousnessLevel = 'A' | 'C' | 'V' | 'P' | 'U';
 
-export interface ACVPUOption {
-  level: ACVPULevel;
-  label: string;
-  description: string;
-  nextStep: 'INJURY_ASSESSMENT' | 'SAMPLE' | 'ABC_HEAVY' | 'ABC_LIGHT' | 'ABC_IMMEDIATE';
-  severity: 'GREEN' | 'YELLOW' | 'RED';
-  alert?: string; // Komunikat alarmowy
-}
-
-export const ACVPU_OPTIONS: ACVPUOption[] = [
-  {
-    level: 'A',
-    label: 'Alert (Przytomny, reaguje, zorientowany)',
-    description: 'Poszkodowany jest przytomny, reaguje na otoczenie, jest zorientowany',
-    nextStep: 'INJURY_ASSESSMENT',
-    severity: 'GREEN',
-  },
-  {
-    level: 'C',
-    label: 'Confusion (Zdezorientowany, senny, splątany)',
-    description: 'Poszkodowany jest zdezorientowany, senny lub splątany',
-    nextStep: 'INJURY_ASSESSMENT',
-    severity: 'GREEN',
-  },
-  {
-    level: 'V',
-    label: 'Voice (Reaguje tylko na GŁOS)',
-    description: 'Poszkodowany reaguje tylko na bodźce głosowe',
-    nextStep: 'ABC_HEAVY',
-    severity: 'YELLOW',
-    alert: 'Przejdź do: Badanie ABC (stan ciężki)',
-  },
-  {
-    level: 'P',
-    label: 'Pain (Reaguje tylko na BÓL)',
-    description: 'Poszkodowany reaguje tylko na bodźce bólowe',
-    nextStep: 'ABC_LIGHT',
-    severity: 'YELLOW',
-    alert: 'Przejdź do: Badanie ABC (nieprzytomny)',
-  },
-  {
-    level: 'U',
-    label: 'Unresponsive (Nie reaguje na głos ani ból)',
-    description: 'Poszkodowany nie reaguje na żadne bodźce',
-    nextStep: 'ABC_IMMEDIATE',
-    severity: 'RED',
-    alert: 'Przejdź natychmiast do: Badanie ABC (A/B). PODEJRZEWAJ NZK!',
-  },
-];
-
-// ============================================================================
-// III. ABC - AIRWAY / BREATHING / CIRCULATION
-// ============================================================================
-
-// --- A - AIRWAY (Drogi Oddechowe) ---
-
-export interface AirwayAssessment {
-  step1_foreignBodies: boolean | null; // Czy w ustach widoczne są ciała obce?
-  step1_action?: 'REMOVE' | null; // CZERWONY! Usuń widoczne ciało obce/płyny
-  
-  step2_technique: 'INJURY' | 'PATENCY_RISK' | null; // Wybór techniki udrażniania
-  step2_injury_result: boolean | null; // Czy występuje podejrzenie urazu kręgosłupa szyjnego?
-  step2_injury_action?: 'HEAD_TILT_CHIN_LIFT' | 'JAW_THRUST' | null;
-  
-  status: 'CLEAR' | 'OBSTRUCTED' | 'CRITICAL' | null;
-}
-
-export const AIRWAY_TECHNIQUES = {
-  INJURY: {
-    label: 'Uraz',
-    question: 'Czy występuje podejrzenie urazu kręgosłupa szyjnego?',
-    options: {
-      NO: {
-        label: 'NIE',
-        action: 'HEAD_TILT_CHIN_LIFT',
-        alert: 'CZERWONY! Udrożnij rękoczynem CZOŁO-ŻUCHWA.',
-        severity: 'RED' as const,
-      },
-      YES: {
-        label: 'TAK',
-        action: 'JAW_THRUST',
-        alert: 'CZERWONY! Udrożnij rękoczynem UNIESIENIA ŻUCHWY (bez odgięcia głowy).',
-        severity: 'RED' as const,
-      },
-    },
-  },
-  PATENCY_RISK: {
-    label: 'Drożność',
-    question: 'Czy drogi oddechowe są drożne po kontroli?',
-    options: {
-      NO: {
-        label: 'NIE / Ryzyko niedrożności',
-        action: 'HEAD_TILT_CHIN_LIFT',
-        alert: 'CZERWONY! Udrożnij rękoczynem CZOŁO-ŻUCHWA.',
-        severity: 'RED' as const,
-      },
-      YES: {
-        label: 'TAK',
-        action: null,
-        alert: 'Drogi oddechowe drożne. Przejdź do Breathing.',
-        severity: 'GREEN' as const,
-      },
-    },
-  },
-};
-
-// --- B - BREATHING (Oddychanie) ---
-
-export interface BreathingAssessment {
-  respiratoryRate: number | null; // Liczba oddechów na minutę (L/min)
-  status: 'NORMAL' | 'ABNORMAL' | 'CRITICAL' | null;
-  alert?: string;
-}
-
-export const BREATHING_RANGES = {
-  NORMAL: { min: 10, max: 20, label: 'ZIELONY ✅', severity: 'GREEN' as const },
-  ABNORMAL: {
-    label: 'POMARAŃCZOWY ⚠️',
-    severity: 'YELLOW' as const,
-    alert: 'Kontynuuj kontrolę.',
-  },
-  CRITICAL: {
-    label: 'CZERWONY! 🔴',
-    severity: 'RED' as const,
-    alert: 'NATYCHMIAST ROZPOCZNIJ RKO! → Przejdź do sekcji RKO.',
-  },
-};
-
-// --- C - CIRCULATION (Krążenie) ---
-
-export interface CirculationAssessment {
-  // Pytanie A: Krwawienie
-  bleeding: 'NONE' | 'PRESENT' | 'SEVERE' | null;
-  bleeding_alert?: string;
-  
-  // Pytanie B: Tętno (uderzenia/min)
-  pulseRate: number | null;
-  
-  // Pytanie C: Jakość tętna
-  pulseQuality: 'NORMAL' | 'FAST' | 'SLOW' | 'WEAK' | 'ABSENT' | null;
-  
-  // Pytanie D: Objawy wstrząsu
-  shockSigns: boolean | null;
-  
-  status: 'NORMAL' | 'ABNORMAL' | 'CRITICAL' | null;
-  alert?: string;
-}
-
-export const CIRCULATION_BLEEDING = {
-  NONE: { label: 'BRAK', severity: 'GREEN' as const },
-  PRESENT: {
-    label: 'ŻYLNE / TĘTNICZE',
-    severity: 'YELLOW' as const,
-    alert: 'Pozycja przeciwwstrząsowa (o ile nie ma urazu), zabezpieczenie termiczne.',
-  },
-  SEVERE: {
-    label: 'TĘTNICZE',
-    severity: 'RED' as const,
-    alert: 'TAMUJ KRWOTOK SILNYM, BEZPOŚREDNIM UCIŚKIEM.',
-  },
-};
-
-export const CIRCULATION_PULSE_QUALITY = {
-  NORMAL: { label: 'PRAWIDŁE', severity: 'GREEN' as const, alert: undefined },
-  FAST: { label: 'SZYBKIE', severity: 'YELLOW' as const, alert: undefined },
-  SLOW: { label: 'WOLNE', severity: 'YELLOW' as const, alert: undefined },
-  WEAK: { label: 'NITKOWATE', severity: 'YELLOW' as const, alert: undefined },
-  ABSENT: {
-    label: 'NIEOBECNE',
-    severity: 'RED' as const,
-    alert: 'NATYCHMIAST ROZPOCZNIJ RKO!',
-  },
+export const CONSCIOUSNESS_LABELS: Record<ConsciousnessLevel, string> = {
+  A: 'Przytomny (Alert)',
+  C: 'Zdezorientowany (Confusion)',
+  V: 'Reaguje na głos (Voice)',
+  P: 'Reaguje na ból (Pain)',
+  U: 'Nie reaguje (Unresponsive)',
 };
 
 // ============================================================================
-// IV. BADANIE URAZOWE (Head-to-Toe)
+// III. PARAMETRY ŻYCIOWE (VITAL SIGNS)
 // ============================================================================
 
-export type BodyArea =
-  | 'HEAD_NECK'
-  | 'CHEST'
-  | 'ABDOMEN'
-  | 'PELVIS'
-  | 'UPPER_LIMBS'
-  | 'LOWER_LIMBS'
-  | 'BACK';
+export interface VitalSigns {
+  // Oddech
+  respiratoryRate: number | null; // Oddechów na minutę
+  respiratoryRateNote?: string; // Np. "1 oddech na 10 sekund"
 
-export interface BodyAreaAssessment {
-  area: BodyArea;
-  label: string;
-  questions: string; // Co sprawdzamy
-  findings: string; // Pole tekstowe / TAK/NIE
-  notes?: string; // Dodatkowe notatki
+  // Tętno
+  pulseRate: number | null; // Uderzeń na minutę
+  pulseQuality: 'NORMAL' | 'WEAK' | 'STRONG' | 'IRREGULAR' | 'ABSENT' | null;
+
+  // Saturacja (jeśli mamy pulsoksymetr)
+  oxygenSaturation: number | null; // % SpO2
+
+  // Temperatura (jeśli mamy termometr)
+  temperature: number | null; // °C
+
+  // Ciśnienie krwi (jeśli mamy ciśnieniomierz)
+  bloodPressureSystolic: number | null; // mmHg
+  bloodPressureDiastolic: number | null; // mmHg
+
+  // Czas pomiaru
+  measuredAt: Date | null;
 }
 
-export const BODY_AREAS: Record<BodyArea, { label: string; questions: string }> = {
-  HEAD_NECK: {
-    label: 'Głowa / Szyja',
-    questions: 'Ocena skóry, kości, asymetria, stabilność szyi',
-  },
-  CHEST: {
-    label: 'Klatka Piersiowa',
-    questions: 'Stabilność, symetria oddechu, rany, tkliwość, duszność',
-  },
-  ABDOMEN: {
-    label: 'Brzuch',
-    questions: 'Napięcie, tkliwość, obecność ran, wzdęcia',
-  },
-  PELVIS: {
-    label: 'Miednica',
-    questions: 'Stabilność miednicy (tylko w razie podejrzenia urazu)',
-  },
-  UPPER_LIMBS: {
-    label: 'Kończyny Górne',
-    questions: 'Ocena ruchomości, tętna, czucia, siły, złamania',
-  },
-  LOWER_LIMBS: {
-    label: 'Kończyny Dolne',
-    questions: 'Ocena ruchomości, tętna, czucia, siły, złamania',
-  },
-  BACK: {
-    label: 'Plecy',
-    questions: 'Ocena skóry i kręgosłupa (wyłącznie przy zabezpieczeniu)',
-  },
-};
-
-// ============================================================================
-// V. SAMPLE (Historia Medyczna)
-// ============================================================================
-
-export interface SAMPLEAssessment {
-  S_symptoms: string; // Objawy
-  A_allergies: string; // Alergie
-  M_medications: string; // Leki
-  P_pastMedicalHistory: string; // Przeszłość medyczna
-  L_lastOralIntake: string; // Ostatni posiłek
-  E_events: string; // Wydarzenia prowadzące do urazu
-}
-
-// ============================================================================
-// VI. GŁÓWNA STRUKTURA OCENY POSZKODOWANEGO
-// ============================================================================
-
-export interface VictimAssessment {
-  id: string;
-  actionId: string; // ID akcji
-  createdAt: Date;
-  updatedAt: Date;
-  
-  // Krok 1: Grupa wiekowa
-  ageGroup: AgeGroup | null;
-  
-  // Krok 2: ACVPU
-  acvpu: ACVPULevel | null;
-  
-  // Krok 3: ABC (jeśli wymagane)
-  airway: AirwayAssessment | null;
-  breathing: BreathingAssessment | null;
-  circulation: CirculationAssessment | null;
-  
-  // Krok 4: Badanie Urazowe (jeśli ACVPU = A lub C)
-  injuryAssessment: Record<BodyArea, BodyAreaAssessment> | null;
-  
-  // Krok 5: SAMPLE
-  sample: SAMPLEAssessment | null;
-  
-  // Status całości
-  overallStatus: 'GREEN' | 'YELLOW' | 'RED' | null;
-  criticalAlerts: string[]; // Lista krytycznych alertów
-}
-
-// ============================================================================
-// VII. FUNKCJE POMOCNICZE
-// ============================================================================
-
-export function getACVPUOption(level: ACVPULevel): ACVPUOption {
-  return ACVPU_OPTIONS.find((opt) => opt.level === level)!;
-}
-
-export function determineBreathingStatus(rate: number): {
+// Funkcja walidacji oddechów - automatyczne alerty
+export function validateRespiratoryRate(rate: number, ageGroup: AgeGroup): {
   status: 'NORMAL' | 'ABNORMAL' | 'CRITICAL';
-  severity: 'GREEN' | 'YELLOW' | 'RED';
   alert?: string;
 } {
   if (rate === 0) {
     return {
       status: 'CRITICAL',
-      severity: 'RED',
-      alert: BREATHING_RANGES.CRITICAL.alert,
+      alert: '🔴 BRAK ODDECHU - ROZPOCZNIJ NATYCHMIAST REANIMACJĘ!',
     };
   }
-  if (rate >= 10 && rate <= 20) {
-    return { status: 'NORMAL', severity: 'GREEN' };
+
+  // Normy dla dorosłych: 12-20/min
+  if (ageGroup === 'ADULT') {
+    if (rate < 10) {
+      return {
+        status: 'CRITICAL',
+        alert: '🔴 ODDECH ZBYT WOLNY - Ryzyko zatrzymania oddechu!',
+      };
+    }
+    if (rate < 12 || rate > 20) {
+      return {
+        status: 'ABNORMAL',
+        alert: '⚠️ Oddech poza normą (12-20/min)',
+      };
+    }
+    return { status: 'NORMAL' };
   }
-  return {
-    status: 'ABNORMAL',
-    severity: 'YELLOW',
-    alert: BREATHING_RANGES.ABNORMAL.alert,
-  };
+
+  // Normy dla dzieci: 20-30/min
+  if (ageGroup === 'CHILD') {
+    if (rate < 15 || rate > 40) {
+      return {
+        status: 'ABNORMAL',
+        alert: '⚠️ Oddech poza normą (20-30/min)',
+      };
+    }
+    return { status: 'NORMAL' };
+  }
+
+  // Normy dla niemowląt: 30-60/min
+  if (ageGroup === 'INFANT') {
+    if (rate < 25 || rate > 70) {
+      return {
+        status: 'ABNORMAL',
+        alert: '⚠️ Oddech poza normą (30-60/min)',
+      };
+    }
+    return { status: 'NORMAL' };
+  }
+
+  return { status: 'NORMAL' };
 }
 
-export function createEmptyVictimAssessment(actionId: string): VictimAssessment {
+// Funkcja walidacji tętna
+export function validatePulseRate(rate: number, ageGroup: AgeGroup): {
+  status: 'NORMAL' | 'ABNORMAL' | 'CRITICAL';
+  alert?: string;
+} {
+  if (rate === 0) {
+    return {
+      status: 'CRITICAL',
+      alert: '🔴 BRAK TĘTNA - ROZPOCZNIJ NATYCHMIAST REANIMACJĘ!',
+    };
+  }
+
+  // Normy dla dorosłych: 60-100/min
+  if (ageGroup === 'ADULT') {
+    if (rate < 50) {
+      return {
+        status: 'ABNORMAL',
+        alert: '⚠️ Tętno zbyt wolne (bradykardia)',
+      };
+    }
+    if (rate > 120) {
+      return {
+        status: 'ABNORMAL',
+        alert: '⚠️ Tętno zbyt szybkie (tachykardia)',
+      };
+    }
+    return { status: 'NORMAL' };
+  }
+
+  return { status: 'NORMAL' };
+}
+
+// ============================================================================
+// IV. URAZY I STWIERDZONE PROBLEMY
+// ============================================================================
+
+export type InjuryType =
+  | 'FRACTURE' // Złamanie
+  | 'DISLOCATION' // Zwichnięcie
+  | 'WOUND' // Rana
+  | 'BURN' // Oparzenie
+  | 'BLEEDING' // Krwawienie
+  | 'HEAD_INJURY' // Uraz głowy
+  | 'SPINAL_INJURY' // Uraz kręgosłupa
+  | 'CHEST_INJURY' // Uraz klatki piersiowej
+  | 'ABDOMINAL_INJURY' // Uraz brzucha
+  | 'OTHER'; // Inny
+
+export const INJURY_TYPE_LABELS: Record<InjuryType, string> = {
+  FRACTURE: 'Złamanie',
+  DISLOCATION: 'Zwichnięcie',
+  WOUND: 'Rana',
+  BURN: 'Oparzenie',
+  BLEEDING: 'Krwawienie',
+  HEAD_INJURY: 'Uraz głowy',
+  SPINAL_INJURY: 'Uraz kręgosłupa',
+  CHEST_INJURY: 'Uraz klatki piersiowej',
+  ABDOMINAL_INJURY: 'Uraz brzucha',
+  OTHER: 'Inny',
+};
+
+export type BodyPart =
+  | 'HEAD' // Głowa
+  | 'NECK' // Szyja
+  | 'CHEST' // Klatka piersiowa
+  | 'ABDOMEN' // Brzuch
+  | 'PELVIS' // Miednica
+  | 'BACK' // Plecy
+  | 'LEFT_ARM' // Lewa ręka
+  | 'RIGHT_ARM' // Prawa ręka
+  | 'LEFT_LEG' // Lewa noga
+  | 'RIGHT_LEG' // Prawa noga
+  | 'OTHER'; // Inne
+
+export const BODY_PART_LABELS: Record<BodyPart, string> = {
+  HEAD: 'Głowa',
+  NECK: 'Szyja',
+  CHEST: 'Klatka piersiowa',
+  ABDOMEN: 'Brzuch',
+  PELVIS: 'Miednica',
+  BACK: 'Plecy',
+  LEFT_ARM: 'Lewa ręka',
+  RIGHT_ARM: 'Prawa ręka',
+  LEFT_LEG: 'Lewa noga',
+  RIGHT_LEG: 'Prawa noga',
+  OTHER: 'Inne',
+};
+
+export interface Injury {
+  id: string;
+  type: InjuryType;
+  bodyPart: BodyPart;
+  description: string; // Np. "Złamanie prawej goleni"
+  severity: 'MINOR' | 'MODERATE' | 'SEVERE' | 'CRITICAL';
+  createdAt: Date;
+}
+
+// ============================================================================
+// V. DZIAŁANIA PODJĘTE
+// ============================================================================
+
+export type ActionType =
+  | 'AIRWAY_CLEARANCE' // Udrożnienie dróg oddechowych
+  | 'CPR' // Reanimacja
+  | 'BLEEDING_CONTROL' // Tamowanie krwotoku
+  | 'IMMOBILIZATION' // Unieruchomienie
+  | 'WOUND_DRESSING' // Opatrzenie rany
+  | 'OXYGEN_THERAPY' // Tlenoterapia
+  | 'RECOVERY_POSITION' // Pozycja boczna ustalona
+  | 'SHOCK_POSITION' // Pozycja przeciwwstrząsowa
+  | 'THERMAL_PROTECTION' // Zabezpieczenie termiczne
+  | 'AED_USE' // Użycie AED
+  | 'OTHER'; // Inne
+
+export const ACTION_TYPE_LABELS: Record<ActionType, string> = {
+  AIRWAY_CLEARANCE: 'Udrożnienie dróg oddechowych',
+  CPR: 'Reanimacja (RKO)',
+  BLEEDING_CONTROL: 'Tamowanie krwotoku',
+  IMMOBILIZATION: 'Unieruchomienie',
+  WOUND_DRESSING: 'Opatrzenie rany',
+  OXYGEN_THERAPY: 'Tlenoterapia',
+  RECOVERY_POSITION: 'Pozycja boczna ustalona',
+  SHOCK_POSITION: 'Pozycja przeciwwstrząsowa',
+  THERMAL_PROTECTION: 'Zabezpieczenie termiczne (koc)',
+  AED_USE: 'Użycie AED',
+  OTHER: 'Inne działanie',
+};
+
+export interface ActionTaken {
+  id: string;
+  type: ActionType;
+  description: string; // Np. "Unieruchomienie prawej nogi szynami Kramera"
+  time: Date;
+  performedBy?: string; // Kto wykonał
+}
+
+// ============================================================================
+// VI. WYWIAD (SAMPLE)
+// ============================================================================
+
+export interface SAMPLEInterview {
+  symptoms: string; // S - Objawy (co boli, co się stało)
+  allergies: string; // A - Alergie
+  medications: string; // M - Leki (jakie przyjmuje)
+  pastMedicalHistory: string; // P - Przeszłość medyczna (choroby przewlekłe)
+  lastOralIntake: string; // L - Ostatni posiłek (kiedy i co jadł/pił)
+  events: string; // E - Zdarzenie (co się stało, mechanizm urazu)
+}
+
+// ============================================================================
+// VII. INFORMACJE OD ŚWIADKÓW/RODZINY
+// ============================================================================
+
+export interface WitnessInformation {
+  id: string;
+  source: string; // Kto przekazał (np. "Żona poszkodowanego", "Świadek zdarzenia")
+  information: string; // Treść informacji
+  time: Date;
+}
+
+// ============================================================================
+// VIII. GŁÓWNA STRUKTURA - DOKUMENTACJA MEDYCZNA POSZKODOWANEGO
+// ============================================================================
+
+export interface VictimMedicalRecord {
+  id: string;
+  casualtyId: string; // ID poszkodowanego z casualties-list
+  createdAt: Date;
+  updatedAt: Date;
+
+  // Podstawowe dane
+  ageGroup: AgeGroup | null;
+  consciousness: ConsciousnessLevel | null;
+
+  // Parametry życiowe (można dodawać wiele pomiarów w czasie)
+  vitalSigns: VitalSigns[];
+
+  // Stwierdzone urazy
+  injuries: Injury[];
+
+  // Podjęte działania
+  actionsTaken: ActionTaken[];
+
+  // Wywiad SAMPLE
+  sample: SAMPLEInterview;
+
+  // Informacje od świadków/rodziny
+  witnessInfo: WitnessInformation[];
+
+  // Dodatkowe notatki
+  additionalNotes: string;
+
+  // Status ogólny
+  overallStatus: 'STABLE' | 'UNSTABLE' | 'CRITICAL';
+}
+
+// ============================================================================
+// IX. FUNKCJE POMOCNICZE
+// ============================================================================
+
+export function createEmptyVictimRecord(casualtyId: string): VictimMedicalRecord {
   return {
     id: crypto.randomUUID(),
-    actionId,
+    casualtyId,
     createdAt: new Date(),
     updatedAt: new Date(),
     ageGroup: null,
-    acvpu: null,
-    airway: {
-      step1_foreignBodies: null,
-      step2_technique: null,
-      step2_injury_result: null,
-      status: null,
-    },
-    breathing: {
-      respiratoryRate: null,
-      status: null,
-    },
-    circulation: {
-      bleeding: null,
-      pulseRate: null,
-      pulseQuality: null,
-      shockSigns: null,
-      status: null,
-    },
-    injuryAssessment: null,
+    consciousness: null,
+    vitalSigns: [],
+    injuries: [],
+    actionsTaken: [],
     sample: {
-      S_symptoms: '',
-      A_allergies: '',
-      M_medications: '',
-      P_pastMedicalHistory: '',
-      L_lastOralIntake: '',
-      E_events: '',
+      symptoms: '',
+      allergies: '',
+      medications: '',
+      pastMedicalHistory: '',
+      lastOralIntake: '',
+      events: '',
     },
-    overallStatus: null,
-    criticalAlerts: [],
+    witnessInfo: [],
+    additionalNotes: '',
+    overallStatus: 'STABLE',
+  };
+}
+
+export function createVitalSignsEntry(): VitalSigns {
+  return {
+    respiratoryRate: null,
+    pulseRate: null,
+    pulseQuality: null,
+    oxygenSaturation: null,
+    temperature: null,
+    bloodPressureSystolic: null,
+    bloodPressureDiastolic: null,
+    measuredAt: new Date(),
+  };
+}
+
+export function createInjury(
+  type: InjuryType,
+  bodyPart: BodyPart,
+  description: string,
+  severity: 'MINOR' | 'MODERATE' | 'SEVERE' | 'CRITICAL'
+): Injury {
+  return {
+    id: crypto.randomUUID(),
+    type,
+    bodyPart,
+    description,
+    severity,
+    createdAt: new Date(),
+  };
+}
+
+export function createAction(
+  type: ActionType,
+  description: string,
+  performedBy?: string
+): ActionTaken {
+  return {
+    id: crypto.randomUUID(),
+    type,
+    description,
+    time: new Date(),
+    performedBy,
+  };
+}
+
+export function createWitnessInfo(source: string, information: string): WitnessInformation {
+  return {
+    id: crypto.randomUUID(),
+    source,
+    information,
+    time: new Date(),
   };
 }
 

@@ -14,7 +14,7 @@ import {
 } from '@/components/ui/dialog';
 import { Plus, User, AlertCircle, Trash2, Edit2, Check, X, Stethoscope, Info } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { VictimAssessmentComponent } from '@/components/actions/victim-assessment';
+import { VictimMedicalRecordComponent } from '@/components/actions/victim-medical-record';
 
 interface Casualty {
   id: string;
@@ -478,20 +478,22 @@ export default function CasualtiesList() {
         )}
       </div>
 
-      {/* Dialog oceny pierwszej pomocy */}
+      {/* Dialog dokumentacji medycznej */}
       <Dialog open={!!assessingId} onOpenChange={(open) => !open && setAssessingId(null)}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
-              Ocena Pierwszej Pomocy -{' '}
+              Dokumentacja Medyczna -{' '}
               {casualties.find((c) => c.id === assessingId)?.name}
             </DialogTitle>
           </DialogHeader>
           {assessingId && (
-            <VictimAssessmentComponent
-              actionId={assessingId}
-              onSave={(assessment) => {
-                console.log('Zapisano ocenę:', assessment);
+            <VictimMedicalRecordComponent
+              casualtyId={assessingId}
+              casualtyName={casualties.find((c) => c.id === assessingId)?.name || ''}
+              onSave={(record) => {
+                console.log('Zapisano dokumentację:', record);
+                // TODO: Zapisz do localStorage lub store
                 setAssessingId(null);
               }}
             />
