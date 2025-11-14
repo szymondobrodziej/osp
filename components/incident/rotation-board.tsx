@@ -13,6 +13,7 @@ interface FirefighterEntry {
   name: string;
   entryTime: Date | null;
   exitTime: Date | null;
+  pressureBar: number | null; // Ciśnienie w barach
 }
 
 interface RotationData {
@@ -23,13 +24,13 @@ interface RotationData {
 
 export default function RotationBoard() {
   const [rotationData, setRotationData] = useState<RotationData>({
-    rotation1: Array(4).fill(null).map((_, i) => ({ id: `r1-${i}`, name: '', entryTime: null, exitTime: null })),
-    rotation2: Array(4).fill(null).map((_, i) => ({ id: `r2-${i}`, name: '', entryTime: null, exitTime: null })),
-    ritRotation: Array(4).fill(null).map((_, i) => ({ id: `rit-${i}`, name: '', entryTime: null, exitTime: null })),
+    rotation1: Array(4).fill(null).map((_, i) => ({ id: `r1-${i}`, name: '', entryTime: null, exitTime: null, pressureBar: null })),
+    rotation2: Array(4).fill(null).map((_, i) => ({ id: `r2-${i}`, name: '', entryTime: null, exitTime: null, pressureBar: null })),
+    ritRotation: Array(4).fill(null).map((_, i) => ({ id: `rit-${i}`, name: '', entryTime: null, exitTime: null, pressureBar: null })),
   });
 
   const [currentTime, setCurrentTime] = useState(new Date());
-  const [editingCell, setEditingCell] = useState<{ rotation: keyof RotationData; index: number; field: 'name' | 'entryTime' | 'exitTime' } | null>(null);
+  const [editingCell, setEditingCell] = useState<{ rotation: keyof RotationData; index: number; field: 'name' | 'entryTime' | 'exitTime' | 'pressureBar' } | null>(null);
 
   // Update current time every second
   useEffect(() => {
@@ -57,7 +58,7 @@ export default function RotationBoard() {
     return 'bg-white';
   };
 
-  const handleCellClick = (rotation: keyof RotationData, index: number, field: 'name' | 'entryTime' | 'exitTime') => {
+  const handleCellClick = (rotation: keyof RotationData, index: number, field: 'name' | 'entryTime' | 'exitTime' | 'pressureBar') => {
     setEditingCell({ rotation, index, field });
   };
 
@@ -83,8 +84,18 @@ export default function RotationBoard() {
   const handleTimeClear = (rotation: keyof RotationData, index: number, field: 'entryTime' | 'exitTime') => {
     setRotationData(prev => ({
       ...prev,
-      [rotation]: prev[rotation].map((entry, i) => 
+      [rotation]: prev[rotation].map((entry, i) =>
         i === index ? { ...entry, [field]: null } : entry
+      )
+    }));
+  };
+
+  const handlePressureChange = (rotation: keyof RotationData, index: number, value: string) => {
+    const numValue = value === '' ? null : parseInt(value, 10);
+    setRotationData(prev => ({
+      ...prev,
+      [rotation]: prev[rotation].map((entry, i) =>
+        i === index ? { ...entry, pressureBar: numValue } : entry
       )
     }));
   };
@@ -159,22 +170,32 @@ export default function RotationBoard() {
                 )}
               </div>
 
-              {/* BAR label + Exit Time */}
+              {/* BAR label + Pressure */}
               <div className="grid grid-rows-[auto_1fr]">
                 <div className="border-b border-black p-1 bg-gray-100 text-center">
                   <span className="text-xs font-bold">BAR</span>
                 </div>
                 <div
                   className="p-3 flex items-center justify-center cursor-pointer hover:bg-gray-100 bg-white"
-                  onClick={() => handleTimeSet(rotation, index, 'exitTime')}
-                  onContextMenu={(e) => {
-                    e.preventDefault();
-                    handleTimeClear(rotation, index, 'exitTime');
-                  }}
+                  onClick={() => handleCellClick(rotation, index, 'pressureBar')}
                 >
-                  <span className="font-mono font-bold text-xl">
-                    {formatTime(entry.exitTime) || '—:—'}
-                  </span>
+                  {editingCell?.rotation === rotation && editingCell?.index === index && editingCell?.field === 'pressureBar' ? (
+                    <Input
+                      type="number"
+                      value={entry.pressureBar ?? ''}
+                      onChange={(e) => handlePressureChange(rotation, index, e.target.value)}
+                      onBlur={() => setEditingCell(null)}
+                      autoFocus
+                      className="h-10 text-center font-bold text-xl w-20"
+                      placeholder="0"
+                      min="0"
+                      max="300"
+                    />
+                  ) : (
+                    <span className="font-bold text-3xl">
+                      {entry.pressureBar ?? '—'}
+                    </span>
+                  )}
                 </div>
               </div>
             </div>
@@ -202,41 +223,42 @@ export default function RotationBoard() {
 
   return (
     <div className="space-y-4">
-      {/* Header with current time and alerts */}
-      <Card className="p-4">
-        <div className="flex items-center justify-between flex-wrap gap-4">
-          <div className="flex items-center gap-3">
-            <Users className="w-6 h-6 text-blue-600" />
-            <div>
-              <h2 className="text-xl font-bold">Tablica Rot w Aparatach</h2>
-              <p className="text-sm text-gray-600">Kliknij komórkę aby ustawić czas, PPM aby wyczyścić</p>
+      {/* Big Clock */}
+      <Card className="p-6 bg-gradient-to-br from-blue-50 to-blue-100 border-4 border-blue-600">
+        <div className="flex items-center justify-center gap-6">
+          <Clock className="w-16 h-16 text-blue-600" />
+          <div className="text-center">
+            <div className="font-mono text-7xl font-black text-blue-900 tracking-wider">
+              {currentTime.toLocaleTimeString('pl-PL')}
+            </div>
+            <div className="text-sm text-blue-600 font-semibold mt-2">
+              {currentTime.toLocaleDateString('pl-PL', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
             </div>
           </div>
 
-          <div className="flex items-center gap-4">
-            {/* Current time */}
-            <div className="flex items-center gap-2 bg-blue-50 px-4 py-2 rounded-lg">
-              <Clock className="w-5 h-5 text-blue-600" />
-              <span className="font-mono text-2xl font-bold">
-                {currentTime.toLocaleTimeString('pl-PL')}
-              </span>
-            </div>
-
-            {/* Alert badges */}
+          {/* Alert badges */}
+          <div className="flex flex-col gap-2">
             {showCriticalAlert && (
-              <Badge className="bg-red-600 animate-pulse text-base px-3 py-1">
-                <AlertTriangle className="w-4 h-4 mr-1" />
+              <Badge className="bg-red-600 animate-pulse text-lg px-4 py-2">
+                <AlertTriangle className="w-5 h-5 mr-2" />
                 {maxActiveTime} MIN - ZMIEŃ ROTĘ!
               </Badge>
             )}
             {showWarningAlert && (
-              <Badge className="bg-orange-500 text-base px-3 py-1">
-                <AlertTriangle className="w-4 h-4 mr-1" />
+              <Badge className="bg-orange-500 text-lg px-4 py-2">
+                <AlertTriangle className="w-5 h-5 mr-2" />
                 {maxActiveTime} min w aparatach
               </Badge>
             )}
           </div>
         </div>
+      </Card>
+
+      {/* Instructions */}
+      <Card className="p-3 bg-yellow-50 border-2 border-yellow-400">
+        <p className="text-sm text-center font-semibold text-gray-700">
+          💡 Kliknij nazwisko/BAR aby edytować | Kliknij czas wejścia aby ustawić | PPM aby wyczyścić
+        </p>
       </Card>
 
       {/* Rotation Board */}
