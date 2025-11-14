@@ -232,6 +232,89 @@ export default function CasualtiesList() {
                   <li>Drogi niedrożne → <strong>UDROŻNIJ!</strong></li>
                 </ul>
               </div>
+
+              {/* RKO */}
+              <div className="pt-2 border-t border-red-300">
+                <p className="font-bold text-red-700">
+                  💔 JAK PRZEPROWADZIĆ PRAWIDŁOWO RKO:
+                </p>
+                <div className="space-y-1 text-xs">
+                  <p className="font-semibold">
+                    1. WEZWIJ POMOC - Zadzwoń 112 / Wyślij kogoś po AED
+                  </p>
+                  <p className="font-semibold">2. UŁÓŻ POSZKODOWANEGO:</p>
+                  <ul className="list-disc list-inside pl-2 space-y-0.5">
+                    <li>Na twardym, płaskim podłożu</li>
+                    <li>Na plecach, ręce wzdłuż ciała</li>
+                    <li>Udrożnij drogi oddechowe (czoło-żuchwa)</li>
+                  </ul>
+                  <p className="font-semibold">3. UCISKANIE KLATKI PIERSIOWEJ:</p>
+                  <ul className="list-disc list-inside pl-2 space-y-0.5">
+                    <li>
+                      <strong>Miejsce:</strong> Środek klatki piersiowej (dolna połowa
+                      mostka)
+                    </li>
+                    <li>
+                      <strong>Pozycja rąk:</strong> Nadgarstek jednej ręki na mostku,
+                      druga ręka na wierzchu, palce splecionе
+                    </li>
+                    <li>
+                      <strong>Pozycja ciała:</strong> Ramiona proste, barki nad mostkiem,
+                      uciskaj ciężarem ciała
+                    </li>
+                    <li>
+                      <strong>Głębokość:</strong> 5-6 cm (dorośli), 1/3 głębokości klatki
+                      (dzieci/niemowlęta)
+                    </li>
+                    <li>
+                      <strong>Tempo:</strong> 100-120 uciśnięć/minutę (rytm: "Staying
+                      Alive")
+                    </li>
+                    <li>
+                      <strong>Ważne:</strong> Pozwól klatce całkowicie się wyprostować po
+                      każdym uciśnięciu
+                    </li>
+                  </ul>
+                  <p className="font-semibold">4. ODDECHY RATOWNICZE (jeśli umiesz):</p>
+                  <ul className="list-disc list-inside pl-2 space-y-0.5">
+                    <li>
+                      <strong>Stosunek:</strong> 30 uciśnięć : 2 oddechy
+                    </li>
+                    <li>
+                      <strong>Technika:</strong> Udrożnij drogi oddechowe, zaciśnij nos,
+                      wdmuchnij powietrze (1 sek)
+                    </li>
+                    <li>
+                      <strong>Obserwuj:</strong> Czy klatka się unosi
+                    </li>
+                    <li>
+                      <strong>Jeśli nie umiesz:</strong> Wykonuj TYLKO uciskanie klatki
+                      (ciągłe, bez przerw)
+                    </li>
+                  </ul>
+                  <p className="font-semibold">5. AED (jeśli dostępny):</p>
+                  <ul className="list-disc list-inside pl-2 space-y-0.5">
+                    <li>Włącz AED i postępuj zgodnie z instrukcjami głosowymi</li>
+                    <li>Przyklej elektrody na nagą klatkę (prawa górna, lewa dolna)</li>
+                    <li>
+                      Nie dotykaj poszkodowanego podczas analizy i defibrylacji
+                    </li>
+                    <li>Po wstrząsie natychmiast kontynuuj RKO (30:2)</li>
+                  </ul>
+                  <p className="font-semibold text-red-700">
+                    6. KONTYNUUJ RKO do czasu:
+                  </p>
+                  <ul className="list-disc list-inside pl-2 space-y-0.5">
+                    <li>Przyjazdu zespołu ratunkowego</li>
+                    <li>Poszkodowany zaczyna oddychać normalnie</li>
+                    <li>Jesteś całkowicie wyczerpany</li>
+                  </ul>
+                  <p className="font-semibold mt-1">
+                    ⏱️ CZAS = ŻYCIE! Każda minuta bez RKO zmniejsza szanse przeżycia o
+                    10%
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
