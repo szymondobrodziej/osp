@@ -7,7 +7,6 @@ import IncidentTypeSelector from '@/components/incident-type-selector';
 import IncidentHeaderV2 from '@/components/incident/incident-header-v2';
 import ChecklistViewV2 from '@/components/checklist/checklist-view-v2';
 import FloatingActionMenu from '@/components/incident/floating-action-menu';
-import CriticalAlerts, { useIncidentAlerts } from '@/components/incident/critical-alerts';
 import dynamic from 'next/dynamic';
 import { IncidentType } from '@/types/incident';
 import { Flame, FileText, Users, Package, StickyNote, Camera, X } from 'lucide-react';
@@ -36,9 +35,6 @@ export default function Home() {
 
   const [activeTab, setActiveTab] = useState<'checklist' | 'casualties' | 'resources' | 'notes' | 'photos'>('checklist');
   const [showIncidentSelector, setShowIncidentSelector] = useState(false);
-
-  // Hook musi być zawsze wywołany (nie warunkowo)
-  const { alerts, dismissAlert } = useIncidentAlerts(currentIncident);
 
   const handleCreateIncident = (type: IncidentType) => {
     // Natychmiastowe rozpoczęcie zdarzenia - bez formularza!
@@ -112,9 +108,6 @@ export default function Home() {
   if (currentIncident) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 pb-24">
-        {/* Critical Alerts */}
-        <CriticalAlerts alerts={alerts} onDismiss={dismissAlert} />
-
         {/* Incident Header V2 - Sticky */}
         <IncidentHeaderV2 incident={currentIncident} />
 
