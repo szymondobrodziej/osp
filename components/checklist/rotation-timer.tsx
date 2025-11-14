@@ -107,7 +107,7 @@ export default function RotationTimer({ onRotationChange }: RotationTimerProps) 
         {/* Label */}
         <div className="flex items-center gap-2">
           <Users className="w-4 h-4 text-gray-600" />
-          <span className="text-sm font-semibold text-gray-700">Rotacje:</span>
+          <span className="text-sm font-semibold text-gray-700">Rota w aparatach:</span>
         </div>
 
         {/* Rota 1 */}
