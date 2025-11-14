@@ -138,36 +138,54 @@ export default function Home() {
           {/* Modern Tabs */}
           <Card className="backdrop-blur-sm bg-white/80 border-white/20 shadow-xl animate-slide-up-delayed">
             <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as any)} className="w-full">
-              <TabsList className="w-full justify-start h-auto p-1 bg-gray-100/50 rounded-t-lg overflow-x-auto flex-nowrap">
-                <TabsTrigger value="checklist" className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:shadow-sm text-sm px-4 py-3 whitespace-nowrap min-h-[52px] min-w-[60px] touch-manipulation">
-                  <FileText className="w-6 h-6 md:w-4 md:h-4" />
-                  <span className="font-semibold hidden md:inline">Lista</span>
-                </TabsTrigger>
-                <TabsTrigger value="rotation" className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:shadow-sm text-sm px-4 py-3 whitespace-nowrap min-h-[52px] min-w-[60px] touch-manipulation">
-                  <Users className="w-6 h-6 md:w-4 md:h-4" />
-                  <span className="font-semibold hidden md:inline">Rota</span>
-                </TabsTrigger>
-                <TabsTrigger value="casualties" className="flex flex-col md:flex-row items-center gap-1 md:gap-2 data-[state=active]:bg-white data-[state=active]:shadow-sm text-sm px-4 py-3 whitespace-nowrap min-h-[52px] min-w-[60px] touch-manipulation">
-                  <Users className="w-6 h-6 md:w-4 md:h-4" />
-                  <Badge variant="secondary" className="text-xs font-bold min-w-[24px] h-5 flex items-center justify-center">{currentIncident.casualties.length}</Badge>
-                  <span className="font-semibold hidden md:inline">Poszkodowani</span>
-                </TabsTrigger>
-                <TabsTrigger value="resources" className="flex flex-col md:flex-row items-center gap-1 md:gap-2 data-[state=active]:bg-white data-[state=active]:shadow-sm text-sm px-4 py-3 whitespace-nowrap min-h-[52px] min-w-[60px] touch-manipulation">
-                  <Package className="w-6 h-6 md:w-4 md:h-4" />
-                  <Badge variant="secondary" className="text-xs font-bold min-w-[24px] h-5 flex items-center justify-center">{currentIncident.resources.length}</Badge>
-                  <span className="font-semibold hidden md:inline">Siły</span>
-                </TabsTrigger>
-                <TabsTrigger value="notes" className="flex flex-col md:flex-row items-center gap-1 md:gap-2 data-[state=active]:bg-white data-[state=active]:shadow-sm text-sm px-4 py-3 whitespace-nowrap min-h-[52px] min-w-[60px] touch-manipulation">
-                  <StickyNote className="w-6 h-6 md:w-4 md:h-4" />
-                  <Badge variant="secondary" className="text-xs font-bold min-w-[24px] h-5 flex items-center justify-center">{currentIncident.notes.length}</Badge>
-                  <span className="font-semibold hidden md:inline">Notatki</span>
-                </TabsTrigger>
-                <TabsTrigger value="photos" className="flex flex-col md:flex-row items-center gap-1 md:gap-2 data-[state=active]:bg-white data-[state=active]:shadow-sm text-sm px-4 py-3 whitespace-nowrap min-h-[52px] min-w-[60px] touch-manipulation">
-                  <Camera className="w-6 h-6 md:w-4 md:h-4" />
-                  <Badge variant="secondary" className="text-xs font-bold min-w-[24px] h-5 flex items-center justify-center">{currentIncident.photos.length}</Badge>
-                  <span className="font-semibold hidden md:inline">Zdjęcia</span>
-                </TabsTrigger>
-              </TabsList>
+              <div className="relative">
+                <TabsList className="w-full justify-start h-auto p-1 bg-gray-100/50 rounded-t-lg overflow-x-auto flex-nowrap scrollbar-hide">
+                  <TabsTrigger value="checklist" className="flex flex-col items-center gap-0.5 data-[state=active]:bg-white data-[state=active]:shadow-sm text-xs px-2.5 py-2 whitespace-nowrap min-h-[56px] min-w-[56px] touch-manipulation">
+                    <FileText className="w-7 h-7 md:w-4 md:h-4" />
+                    <span className="font-semibold text-[10px] md:text-sm md:hidden">Lista</span>
+                    <span className="font-semibold hidden md:inline">Lista</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="rotation" className="flex flex-col items-center gap-0.5 data-[state=active]:bg-white data-[state=active]:shadow-sm text-xs px-2.5 py-2 whitespace-nowrap min-h-[56px] min-w-[56px] touch-manipulation">
+                    <Users className="w-7 h-7 md:w-4 md:h-4" />
+                    <span className="font-semibold text-[10px] md:text-sm md:hidden">Rota</span>
+                    <span className="font-semibold hidden md:inline">Rota</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="casualties" className="flex flex-col items-center gap-0.5 data-[state=active]:bg-white data-[state=active]:shadow-sm text-xs px-2.5 py-2 whitespace-nowrap min-h-[56px] min-w-[56px] touch-manipulation relative">
+                    <Users className="w-7 h-7 md:w-4 md:h-4" />
+                    {currentIncident.casualties.length > 0 && (
+                      <Badge variant="secondary" className="absolute top-1 right-1 text-[10px] font-bold min-w-[18px] h-[18px] flex items-center justify-center p-0 md:relative md:top-auto md:right-auto">{currentIncident.casualties.length}</Badge>
+                    )}
+                    <span className="font-semibold text-[10px] md:text-sm md:hidden">Poszk</span>
+                    <span className="font-semibold hidden md:inline">Poszkodowani</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="resources" className="flex flex-col items-center gap-0.5 data-[state=active]:bg-white data-[state=active]:shadow-sm text-xs px-2.5 py-2 whitespace-nowrap min-h-[56px] min-w-[56px] touch-manipulation relative">
+                    <Package className="w-7 h-7 md:w-4 md:h-4" />
+                    {currentIncident.resources.length > 0 && (
+                      <Badge variant="secondary" className="absolute top-1 right-1 text-[10px] font-bold min-w-[18px] h-[18px] flex items-center justify-center p-0 md:relative md:top-auto md:right-auto">{currentIncident.resources.length}</Badge>
+                    )}
+                    <span className="font-semibold text-[10px] md:text-sm md:hidden">Siły</span>
+                    <span className="font-semibold hidden md:inline">Siły</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="notes" className="flex flex-col items-center gap-0.5 data-[state=active]:bg-white data-[state=active]:shadow-sm text-xs px-2.5 py-2 whitespace-nowrap min-h-[56px] min-w-[56px] touch-manipulation relative">
+                    <StickyNote className="w-7 h-7 md:w-4 md:h-4" />
+                    {currentIncident.notes.length > 0 && (
+                      <Badge variant="secondary" className="absolute top-1 right-1 text-[10px] font-bold min-w-[18px] h-[18px] flex items-center justify-center p-0 md:relative md:top-auto md:right-auto">{currentIncident.notes.length}</Badge>
+                    )}
+                    <span className="font-semibold text-[10px] md:text-sm md:hidden">Notat</span>
+                    <span className="font-semibold hidden md:inline">Notatki</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="photos" className="flex flex-col items-center gap-0.5 data-[state=active]:bg-white data-[state=active]:shadow-sm text-xs px-2.5 py-2 whitespace-nowrap min-h-[56px] min-w-[56px] touch-manipulation relative">
+                    <Camera className="w-7 h-7 md:w-4 md:h-4" />
+                    {currentIncident.photos.length > 0 && (
+                      <Badge variant="secondary" className="absolute top-1 right-1 text-[10px] font-bold min-w-[18px] h-[18px] flex items-center justify-center p-0 md:relative md:top-auto md:right-auto">{currentIncident.photos.length}</Badge>
+                    )}
+                    <span className="font-semibold text-[10px] md:text-sm md:hidden">Zdjęć</span>
+                    <span className="font-semibold hidden md:inline">Zdjęcia</span>
+                  </TabsTrigger>
+                </TabsList>
+                {/* Scroll indicator */}
+                <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-gray-100/90 to-transparent pointer-events-none md:hidden" />
+              </div>
 
               <TabsContent value="checklist" className="mt-0 p-3 md:p-6 space-y-4">
                 {/* Mapa z hydrantami */}
