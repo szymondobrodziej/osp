@@ -114,9 +114,9 @@ export default function RotationBoard() {
     const entries = rotationData[rotation];
 
     return (
-      <div className="grid grid-cols-[100px_repeat(4,1fr)] gap-0 border-b-2 border-black">
+      <div className="grid grid-cols-[56px_repeat(4,1fr)] md:grid-cols-[100px_repeat(4,1fr)] gap-0 border-b-2 border-black">
         {/* Number Label */}
-        <div className={cn("flex items-center justify-center font-black text-2xl md:text-4xl border-r-2 border-black py-4 md:py-8", numberBgColor)}>
+        <div className={cn("flex items-center justify-center font-black text-xl md:text-4xl border-r-2 border-black py-2 md:py-8", numberBgColor)}>
           {label}
         </div>
 
@@ -319,22 +319,22 @@ export default function RotationBoard() {
 
       {/* Rotation Board */}
       <Card className="overflow-hidden border-2 md:border-4 border-black">
-        <div className="overflow-x-auto">
-          <div className="min-w-[900px]">
+        <div className="overflow-x-auto scrollbar-hide">
+          <div className="min-w-full md:min-w-[900px]">
             {/* Top header - unit name */}
-            <div className="bg-yellow-400 border-b-2 border-black p-2 md:p-3 text-center">
-              <h3 className="font-black text-sm md:text-lg uppercase">Tablica Rot w Aparatach - Jednostka OSP</h3>
+            <div className="bg-yellow-400 border-b-2 border-black p-1.5 md:p-3 text-center">
+              <h3 className="font-black text-xs md:text-lg uppercase">Tablica Rot w Aparatach</h3>
             </div>
 
             {/* Header row - yellow */}
-            <div className="grid grid-cols-[100px_repeat(4,1fr)] gap-0 bg-yellow-400 border-b-2 border-black">
-              <div className="border-r-2 border-black p-2 md:p-4 flex items-center justify-center">
-                <span className="font-black text-xs md:text-sm">ROTA</span>
+            <div className="grid grid-cols-[56px_repeat(4,1fr)] md:grid-cols-[100px_repeat(4,1fr)] gap-0 bg-yellow-400 border-b-2 border-black">
+              <div className="border-r-2 border-black p-1 md:p-4 flex items-center justify-center">
+                <span className="font-black text-[10px] md:text-sm">ROTA</span>
               </div>
-              <div className="border-r-2 border-black p-2 md:p-4 flex items-center justify-center font-black text-lg md:text-2xl">1</div>
-              <div className="border-r-2 border-black p-2 md:p-4 flex items-center justify-center font-black text-lg md:text-2xl">2</div>
-              <div className="border-r-2 border-black p-2 md:p-4 flex items-center justify-center font-black text-lg md:text-2xl">3</div>
-              <div className="p-2 md:p-4 flex items-center justify-center font-black text-lg md:text-2xl">4</div>
+              <div className="border-r-2 border-black p-1 md:p-4 flex items-center justify-center font-black text-sm md:text-2xl">1</div>
+              <div className="border-r-2 border-black p-1 md:p-4 flex items-center justify-center font-black text-sm md:text-2xl">2</div>
+              <div className="border-r-2 border-black p-1 md:p-4 flex items-center justify-center font-black text-sm md:text-2xl">3</div>
+              <div className="p-1 md:p-4 flex items-center justify-center font-black text-sm md:text-2xl">4</div>
             </div>
 
             {/* Rotation 1 - yellow number */}
