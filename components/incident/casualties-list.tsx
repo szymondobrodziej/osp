@@ -6,28 +6,64 @@ import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import { Plus, User, AlertCircle, Trash2, Edit2, Check, X, Stethoscope, Info } from 'lucide-react';
+import { Label } from '@/components/ui/label';
+import { Plus, User, Trash2, AlertCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { VictimMedicalRecordComponent } from '@/components/actions/victim-medical-record';
+
+interface VitalSigns {
+  respiratoryRate: number | null;
+  respiratoryRateNote?: string;
+  pulseRate: number | null;
+  pulseQuality: 'NORMAL' | 'WEAK' | 'STRONG' | 'IRREGULAR' | 'ABSENT' | null;
+  oxygenSaturation: number | null;
+  temperature: number | null;
+  bloodPressureSystolic: number | null;
+  bloodPressureDiastolic: number | null;
+  measuredAt: string;
+}
 
 interface Casualty {
   id: string;
   name: string;
   age?: string;
-  condition: 'critical' | 'serious' | 'moderate' | 'minor';
-  description: string;
-  timestamp: string; // Changed to string for localStorage
+  ageGroup: 'ADULT' | 'CHILD' | 'INFANT' | null;
+  consciousness: 'A' | 'C' | 'V' | 'P' | 'U' | null;
+  vitalSigns: VitalSigns[];
+  injuries: string; // Free text for now
+  actionsTaken: string; // Free text for now
+  sampleNotes: string; // SAMPLE interview notes
+  additionalNotes: string;
+  timestamp: string;
 }
+
+const createEmptyCasualty = (): Omit<Casualty, 'id' | 'timestamp'> => ({
+  name: '',
+  age: '',
+  ageGroup: null,
+  consciousness: null,
+  vitalSigns: [],
+  injuries: '',
+  actionsTaken: '',
+  sampleNotes: '',
+  additionalNotes: '',
+});
+
+const createEmptyVitalSigns = (): VitalSigns => ({
+  respiratoryRate: null,
+  respiratoryRateNote: '',
+  pulseRate: null,
+  pulseQuality: null,
+  oxygenSaturation: null,
+  temperature: null,
+  bloodPressureSystolic: null,
+  bloodPressureDiastolic: null,
+  measuredAt: new Date().toISOString(),
+});
 
 export default function CasualtiesList() {
   const [casualties, setCasualties] = useState<Casualty[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
 
   // Load from localStorage
   useEffect(() => {
@@ -48,78 +84,56 @@ export default function CasualtiesList() {
       localStorage.setItem('incident-casualties', JSON.stringify(casualties));
     }
   }, [casualties, isLoaded]);
-  const [isAdding, setIsAdding] = useState(false);
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [assessingId, setAssessingId] = useState<string | null>(null);
-
-  const [formData, setFormData] = useState({
-    name: '',
-    age: '',
-    condition: 'moderate' as Casualty['condition'],
-    description: '',
-  });
 
   const handleAdd = () => {
-    if (!formData.name.trim()) return;
-
     const newCasualty: Casualty = {
       id: Date.now().toString(),
-      name: formData.name,
-      age: formData.age,
-      condition: formData.condition,
-      description: formData.description,
+      ...createEmptyCasualty(),
       timestamp: new Date().toISOString(),
     };
-
     setCasualties([newCasualty, ...casualties]);
-    setFormData({ name: '', age: '', condition: 'moderate', description: '' });
-    setIsAdding(false);
+    setExpandedId(newCasualty.id);
   };
 
-  const handleEdit = (casualty: Casualty) => {
-    setEditingId(casualty.id);
-    setFormData({
-      name: casualty.name,
-      age: casualty.age || '',
-      condition: casualty.condition,
-      description: casualty.description,
-    });
+  const handleUpdate = (id: string, updates: Partial<Casualty>) => {
+    setCasualties(casualties.map(c =>
+      c.id === id ? { ...c, ...updates } : c
+    ));
   };
 
-  const handleUpdate = () => {
-    if (!editingId || !formData.name.trim()) return;
-
-    setCasualties(casualties.map(c => 
-      c.id === editingId 
-        ? { ...c, ...formData, age: formData.age || undefined }
+  const handleAddVitalSigns = (id: string, vitalSigns: VitalSigns) => {
+    setCasualties(casualties.map(c =>
+      c.id === id
+        ? { ...c, vitalSigns: [...c.vitalSigns, vitalSigns] }
         : c
     ));
-    setEditingId(null);
-    setFormData({ name: '', age: '', condition: 'moderate', description: '' });
   };
 
   const handleDelete = (id: string) => {
     if (confirm('Czy na pewno usunąć poszkodowanego?')) {
       setCasualties(casualties.filter(c => c.id !== id));
+      if (expandedId === id) setExpandedId(null);
     }
   };
 
-  const getConditionColor = (condition: Casualty['condition']) => {
-    switch (condition) {
-      case 'critical': return 'bg-red-600';
-      case 'serious': return 'bg-orange-500';
-      case 'moderate': return 'bg-yellow-500';
-      case 'minor': return 'bg-green-500';
+  const validateRespiratoryRate = (rate: number | null, ageGroup: string | null) => {
+    if (rate === null || ageGroup === null) return null;
+    if (rate === 0) return { status: 'CRITICAL', alert: '🔴 BRAK ODDECHU - ROZPOCZNIJ NATYCHMIAST REANIMACJĘ!' };
+    if (ageGroup === 'ADULT') {
+      if (rate < 10) return { status: 'CRITICAL', alert: '🔴 Oddech zbyt wolny - Ryzyko zatrzymania oddechu!' };
+      if (rate < 12 || rate > 20) return { status: 'ABNORMAL', alert: '⚠️ Oddech poza normą (12-20/min)' };
     }
+    return { status: 'NORMAL', alert: '✅ Oddech w normie' };
   };
 
-  const getConditionLabel = (condition: Casualty['condition']) => {
-    switch (condition) {
-      case 'critical': return '🚨 Krytyczny';
-      case 'serious': return '⚠️ Poważny';
-      case 'moderate': return '⚡ Umiarkowany';
-      case 'minor': return '✓ Lekki';
+  const validatePulseRate = (rate: number | null, ageGroup: string | null) => {
+    if (rate === null || ageGroup === null) return null;
+    if (rate === 0) return { status: 'CRITICAL', alert: '🔴 BRAK TĘTNA - ROZPOCZNIJ NATYCHMIAST REANIMACJĘ!' };
+    if (ageGroup === 'ADULT') {
+      if (rate < 50) return { status: 'ABNORMAL', alert: '⚠️ Bradykardia (tętno < 50/min)' };
+      if (rate > 120) return { status: 'ABNORMAL', alert: '⚠️ Tachykardia (tętno > 120/min)' };
     }
+    return { status: 'NORMAL', alert: '✅ Tętno w normie' };
   };
 
   return (
@@ -133,7 +147,7 @@ export default function CasualtiesList() {
           </p>
         </div>
         <Button
-          onClick={() => setIsAdding(true)}
+          onClick={handleAdd}
           className="bg-red-600 hover:bg-red-700 w-full sm:w-auto h-12 sm:h-10"
         >
           <Plus className="w-5 h-5 sm:w-4 sm:h-4 sm:mr-2" />
@@ -141,274 +155,7 @@ export default function CasualtiesList() {
         </Button>
       </div>
 
-      {/* Instrukcja medyczna dla strażaka */}
-      <Card className="p-4 bg-red-50 border-red-200">
-        <div className="flex items-start gap-3">
-          <AlertCircle className="w-6 h-6 text-red-600 flex-shrink-0 mt-0.5" />
-          <div className="space-y-2">
-            <h4 className="font-bold text-red-900 text-base">
-              🚑 INSTRUKCJA OCENY POSZKODOWANEGO - PIERWSZA POMOC
-            </h4>
-            <div className="text-sm text-red-900 space-y-2">
-              {/* ACVPU */}
-              <div>
-                <p className="font-semibold">1️⃣ OCENA ŚWIADOMOŚCI (ACVPU):</p>
-                <ul className="list-disc list-inside pl-2 space-y-0.5 text-xs">
-                  <li>
-                    <strong>A (Przytomny)</strong> - Przytomny, reaguje, zorientowany →
-                    Badanie urazowe
-                  </li>
-                  <li>
-                    <strong>C (Zdezorientowany)</strong> - Zdezorientowany, senny → Badanie
-                    urazowe
-                  </li>
-                  <li>
-                    <strong>V (Głos)</strong> - Reaguje tylko na głos → Badanie ABC
-                  </li>
-                  <li>
-                    <strong>P (Ból)</strong> - Reaguje tylko na ból → Badanie ABC
-                  </li>
-                  <li>
-                    <strong className="text-red-700">U (Nie reaguje)</strong> - Nie reaguje
-                    → <strong>ABC + PODEJRZEWAJ NZK!</strong>
-                  </li>
-                </ul>
-              </div>
-
-              {/* ABC */}
-              <div>
-                <p className="font-semibold">2️⃣ BADANIE ABC (jeśli V/P/U):</p>
-                <ul className="list-disc list-inside pl-2 space-y-0.5 text-xs">
-                  <li>
-                    <strong>A (Drogi oddechowe)</strong> - Usuń ciała obce, udrożnij drogi
-                    oddechowe (czoło-żuchwa lub uniesienie żuchwy przy urazie kręgosłupa)
-                  </li>
-                  <li>
-                    <strong>B (Oddychanie)</strong> - Policz oddechy/min:{' '}
-                    <span className="text-green-700">10-20 OK</span>,{' '}
-                    <span className="text-red-700">&lt;10 lub &gt;20 UWAGA</span>,{' '}
-                    <strong className="text-red-700">0 = RKO!</strong>
-                  </li>
-                  <li>
-                    <strong>C (Krążenie)</strong> - Sprawdź tętno, krwawienie:{' '}
-                    <strong className="text-red-700">
-                      Tętnicze = TAMUJ KRWOTOK!
-                    </strong>
-                    , Brak tętna = <strong className="text-red-700">RKO!</strong>
-                  </li>
-                </ul>
-              </div>
-
-              {/* Badanie urazowe */}
-              <div>
-                <p className="font-semibold">
-                  3️⃣ BADANIE URAZOWE (Od głowy do stóp):
-                </p>
-                <p className="text-xs pl-2">
-                  Sprawdź: Głowa/Szyja → Klatka → Brzuch → Miednica → Kończyny → Plecy
-                  (DEFORMACJE, OTARCIA, RANY, TKLIWOŚĆ, OBRZĘKI)
-                </p>
-              </div>
-
-              {/* SAMPLE */}
-              <div>
-                <p className="font-semibold">4️⃣ SAMPLE (Wywiad):</p>
-                <p className="text-xs pl-2">
-                  <strong>O</strong>bjawy, <strong>A</strong>lergie,{' '}
-                  <strong>L</strong>eki, <strong>P</strong>rzeszłość medyczna,{' '}
-                  <strong>O</strong>statni posiłek, <strong>Z</strong>darzenie
-                </p>
-              </div>
-
-              {/* Alerty */}
-              <div className="pt-2 border-t border-red-300">
-                <p className="font-bold text-red-700">
-                  ⚠️ NATYCHMIASTOWE DZIAŁANIE:
-                </p>
-                <ul className="list-disc list-inside pl-2 space-y-0.5 text-xs">
-                  <li>Brak oddechu (0/min) → <strong>RKO!</strong></li>
-                  <li>Brak tętna → <strong>RKO!</strong></li>
-                  <li>Krwawienie tętnicze → <strong>TAMUJ KRWOTOK!</strong></li>
-                  <li>Drogi niedrożne → <strong>UDROŻNIJ!</strong></li>
-                </ul>
-              </div>
-
-              {/* RKO */}
-              <div className="pt-2 border-t border-red-300">
-                <p className="font-bold text-red-700">
-                  💔 JAK PRZEPROWADZIĆ PRAWIDŁOWO RKO:
-                </p>
-                <div className="space-y-1 text-xs">
-                  <p className="font-semibold">
-                    1. WEZWIJ POMOC - Zadzwoń 112 / Wyślij kogoś po AED
-                  </p>
-                  <p className="font-semibold">2. UŁÓŻ POSZKODOWANEGO:</p>
-                  <ul className="list-disc list-inside pl-2 space-y-0.5">
-                    <li>Na twardym, płaskim podłożu</li>
-                    <li>Na plecach, ręce wzdłuż ciała</li>
-                    <li>Udrożnij drogi oddechowe (czoło-żuchwa)</li>
-                  </ul>
-                  <p className="font-semibold">3. UCISKANIE KLATKI PIERSIOWEJ:</p>
-                  <ul className="list-disc list-inside pl-2 space-y-0.5">
-                    <li>
-                      <strong>Miejsce:</strong> Środek klatki piersiowej (dolna połowa
-                      mostka)
-                    </li>
-                    <li>
-                      <strong>Pozycja rąk:</strong> Nadgarstek jednej ręki na mostku,
-                      druga ręka na wierzchu, palce splecionе
-                    </li>
-                    <li>
-                      <strong>Pozycja ciała:</strong> Ramiona proste, barki nad mostkiem,
-                      uciskaj ciężarem ciała
-                    </li>
-                    <li>
-                      <strong>Głębokość:</strong> 5-6 cm (dorośli), 1/3 głębokości klatki
-                      (dzieci/niemowlęta)
-                    </li>
-                    <li>
-                      <strong>Tempo:</strong> 100-120 uciśnięć/minutę (rytm: "Staying
-                      Alive")
-                    </li>
-                    <li>
-                      <strong>Ważne:</strong> Pozwól klatce całkowicie się wyprostować po
-                      każdym uciśnięciu
-                    </li>
-                  </ul>
-                  <p className="font-semibold">4. ODDECHY RATOWNICZE (jeśli umiesz):</p>
-                  <ul className="list-disc list-inside pl-2 space-y-0.5">
-                    <li>
-                      <strong>Stosunek:</strong> 30 uciśnięć : 2 oddechy
-                    </li>
-                    <li>
-                      <strong>Technika:</strong> Udrożnij drogi oddechowe, zaciśnij nos,
-                      wdmuchnij powietrze (1 sek)
-                    </li>
-                    <li>
-                      <strong>Obserwuj:</strong> Czy klatka się unosi
-                    </li>
-                    <li>
-                      <strong>Jeśli nie umiesz:</strong> Wykonuj TYLKO uciskanie klatki
-                      (ciągłe, bez przerw)
-                    </li>
-                  </ul>
-                  <p className="font-semibold">5. AED (jeśli dostępny):</p>
-                  <ul className="list-disc list-inside pl-2 space-y-0.5">
-                    <li>Włącz AED i postępuj zgodnie z instrukcjami głosowymi</li>
-                    <li>Przyklej elektrody na nagą klatkę (prawa górna, lewa dolna)</li>
-                    <li>
-                      Nie dotykaj poszkodowanego podczas analizy i defibrylacji
-                    </li>
-                    <li>Po wstrząsie natychmiast kontynuuj RKO (30:2)</li>
-                  </ul>
-                  <p className="font-semibold text-red-700">
-                    6. KONTYNUUJ RKO do czasu:
-                  </p>
-                  <ul className="list-disc list-inside pl-2 space-y-0.5">
-                    <li>Przyjazdu zespołu ratunkowego</li>
-                    <li>Poszkodowany zaczyna oddychać normalnie</li>
-                    <li>Jesteś całkowicie wyczerpany</li>
-                  </ul>
-                  <p className="font-semibold mt-1">
-                    ⏱️ CZAS = ŻYCIE! Każda minuta bez RKO zmniejsza szanse przeżycia o
-                    10%
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </Card>
-
-      {/* Add/Edit Form */}
-      {(isAdding || editingId) && (
-        <Card className="p-4 border-2 border-blue-500">
-          <div className="space-y-3">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div>
-                <label className="text-xs font-semibold text-gray-700 mb-1 block">
-                  Imię i nazwisko *
-                </label>
-                <Input
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  placeholder="Jan Kowalski"
-                  className="h-12 sm:h-9"
-                />
-              </div>
-              <div>
-                <label className="text-xs font-semibold text-gray-700 mb-1 block">
-                  Wiek
-                </label>
-                <Input
-                  value={formData.age}
-                  onChange={(e) => setFormData({ ...formData, age: e.target.value })}
-                  placeholder="np. 45"
-                  className="h-12 sm:h-9"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="text-xs font-semibold text-gray-700 mb-1 block">
-                Stan
-              </label>
-              <div className="grid grid-cols-2 sm:flex gap-2">
-                {(['critical', 'serious', 'moderate', 'minor'] as const).map((cond) => (
-                  <Button
-                    key={cond}
-                    onClick={() => setFormData({ ...formData, condition: cond })}
-                    variant={formData.condition === cond ? 'default' : 'outline'}
-                    className={cn(
-                      'flex-1 h-12 sm:h-9 text-xs sm:text-xs',
-                      formData.condition === cond && getConditionColor(cond)
-                    )}
-                  >
-                    {getConditionLabel(cond)}
-                  </Button>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <label className="text-xs font-semibold text-gray-700 mb-1 block">
-                Opis / Obrażenia
-              </label>
-              <Textarea
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                placeholder="Opis stanu, obrażeń, podjętych działań..."
-                rows={3}
-                className="text-sm"
-              />
-            </div>
-
-            <div className="flex gap-2">
-              <Button
-                onClick={editingId ? handleUpdate : handleAdd}
-                className="flex-1 bg-green-600 hover:bg-green-700 h-12 sm:h-10"
-              >
-                <Check className="w-4 h-4 mr-2" />
-                {editingId ? 'Zapisz' : 'Dodaj'}
-              </Button>
-              <Button
-                onClick={() => {
-                  setIsAdding(false);
-                  setEditingId(null);
-                  setFormData({ name: '', age: '', condition: 'moderate', description: '' });
-                }}
-                variant="outline"
-                className="flex-1 sm:flex-none h-12 sm:h-10"
-              >
-                <X className="w-4 h-4 mr-2" />
-                Anuluj
-              </Button>
-            </div>
-          </div>
-        </Card>
-      )}
-
-      {/* List */}
+      {/* Lista poszkodowanych */}
       <div className="space-y-2">
         {casualties.length === 0 ? (
           <Card className="p-8 text-center">
@@ -418,88 +165,231 @@ export default function CasualtiesList() {
           </Card>
         ) : (
           casualties.map((casualty) => (
-            <Card
-              key={casualty.id}
-              className={cn(
-                'p-3 border-l-4 transition-all',
-                editingId === casualty.id && 'ring-2 ring-blue-500'
-              )}
-              style={{ borderLeftColor: getConditionColor(casualty.condition).replace('bg-', '#') }}
-            >
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
-                    <h4 className="font-bold text-sm">{casualty.name}</h4>
-                    {casualty.age && (
-                      <span className="text-xs text-gray-500">({casualty.age} lat)</span>
-                    )}
-                    <Badge className={cn('text-xs', getConditionColor(casualty.condition))}>
-                      {getConditionLabel(casualty.condition)}
-                    </Badge>
-                  </div>
-                  {casualty.description && (
-                    <p className="text-xs text-gray-600 mt-1">{casualty.description}</p>
-                  )}
-                  <p className="text-xs text-gray-400 mt-1">
-                    {new Date(casualty.timestamp).toLocaleTimeString('pl-PL')}
-                  </p>
+            <Card key={casualty.id} className="p-4 border-l-4 border-l-red-600">
+              {/* Header z imieniem i przyciskiem usuń */}
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <User className="w-5 h-5 text-red-600" />
+                  <Input
+                    value={casualty.name}
+                    onChange={(e) => handleUpdate(casualty.id, { name: e.target.value })}
+                    placeholder="Imię i nazwisko"
+                    className="font-semibold text-base h-9"
+                  />
                 </div>
+                <Button
+                  onClick={() => handleDelete(casualty.id)}
+                  variant="ghost"
+                  size="sm"
+                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </Button>
+              </div>
 
-                <div className="flex gap-1 flex-shrink-0">
-                  <Button
-                    onClick={() => setAssessingId(casualty.id)}
-                    size="sm"
-                    variant="ghost"
-                    className="h-10 w-10 sm:h-8 sm:w-8 p-0 hover:bg-blue-100 hover:text-blue-600"
-                    title="Ocena pierwszej pomocy"
+              {/* Podstawowe dane */}
+              <div className="grid grid-cols-2 gap-3 mb-3">
+                <div>
+                  <Label className="text-xs text-gray-600">Wiek</Label>
+                  <Input
+                    value={casualty.age || ''}
+                    onChange={(e) => handleUpdate(casualty.id, { age: e.target.value })}
+                    placeholder="np. 45"
+                    className="h-9 mt-1"
+                  />
+                </div>
+                <div>
+                  <Label className="text-xs text-gray-600">Grupa wiekowa</Label>
+                  <select
+                    value={casualty.ageGroup || ''}
+                    onChange={(e) => handleUpdate(casualty.id, { ageGroup: e.target.value as any })}
+                    className="w-full h-9 mt-1 px-3 border rounded-md text-sm"
                   >
-                    <Stethoscope className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
-                  </Button>
-                  <Button
-                    onClick={() => handleEdit(casualty)}
-                    size="sm"
-                    variant="ghost"
-                    className="h-10 w-10 sm:h-8 sm:w-8 p-0"
-                  >
-                    <Edit2 className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
-                  </Button>
-                  <Button
-                    onClick={() => handleDelete(casualty.id)}
-                    size="sm"
-                    variant="ghost"
-                    className="h-10 w-10 sm:h-8 sm:w-8 p-0 hover:bg-red-100 hover:text-red-600"
-                  >
-                    <Trash2 className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
-                  </Button>
+                    <option value="">Wybierz...</option>
+                    <option value="ADULT">Dorosły</option>
+                    <option value="CHILD">Dziecko</option>
+                    <option value="INFANT">Niemowlę</option>
+                  </select>
                 </div>
               </div>
+
+              {/* Świadomość ACVPU */}
+              <div className="mb-3">
+                <Label className="text-xs text-gray-600">Świadomość (ACVPU)</Label>
+                <div className="grid grid-cols-5 gap-1 mt-1">
+                  {(['A', 'C', 'V', 'P', 'U'] as const).map((level) => (
+                    <Button
+                      key={level}
+                      onClick={() => handleUpdate(casualty.id, { consciousness: level })}
+                      variant={casualty.consciousness === level ? 'default' : 'outline'}
+                      className={cn(
+                        'h-9 text-xs',
+                        casualty.consciousness === level && (level === 'U' ? 'bg-red-600' : level === 'P' || level === 'V' ? 'bg-orange-500' : 'bg-green-600')
+                      )}
+                    >
+                      {level}
+                    </Button>
+                  ))}
+                </div>
+                <p className="text-xs text-gray-500 mt-1">
+                  A=Przytomny, C=Zdezorientowany, V=Głos, P=Ból, U=Nie reaguje
+                </p>
+              </div>
+
+              {/* Przycisk rozwiń/zwiń */}
+              <Button
+                onClick={() => setExpandedId(expandedId === casualty.id ? null : casualty.id)}
+                variant="outline"
+                className="w-full mb-3"
+                size="sm"
+              >
+                {expandedId === casualty.id ? '▲ Zwiń szczegóły' : '▼ Rozwiń szczegóły (parametry, urazy, działania)'}
+              </Button>
+
+              {/* Rozwinięte szczegóły */}
+              {expandedId === casualty.id && (
+                <div className="space-y-4 pt-3 border-t">
+                  {/* Parametry życiowe */}
+                  <div>
+                    <Label className="text-sm font-semibold text-gray-700 mb-2 block">
+                      📊 Parametry życiowe
+                    </Label>
+                    <div className="space-y-2 bg-gray-50 p-3 rounded-md">
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <Label className="text-xs text-gray-600">Oddech (oddechy/min)</Label>
+                          <Input
+                            type="number"
+                            placeholder="np. 16"
+                            className="h-9 mt-1"
+                            onBlur={(e) => {
+                              const value = parseInt(e.target.value);
+                              if (!isNaN(value)) {
+                                const newVitalSigns = createEmptyVitalSigns();
+                                newVitalSigns.respiratoryRate = value;
+                                handleAddVitalSigns(casualty.id, newVitalSigns);
+                              }
+                            }}
+                          />
+                        </div>
+                        <div>
+                          <Label className="text-xs text-gray-600">Tętno (uderzeń/min)</Label>
+                          <Input
+                            type="number"
+                            placeholder="np. 80"
+                            className="h-9 mt-1"
+                            onBlur={(e) => {
+                              const value = parseInt(e.target.value);
+                              if (!isNaN(value)) {
+                                const newVitalSigns = createEmptyVitalSigns();
+                                newVitalSigns.pulseRate = value;
+                                handleAddVitalSigns(casualty.id, newVitalSigns);
+                              }
+                            }}
+                          />
+                        </div>
+                      </div>
+
+                      {/* Historia pomiarów */}
+                      {casualty.vitalSigns.length > 0 && (
+                        <div className="mt-3 pt-3 border-t">
+                          <Label className="text-xs text-gray-600 mb-2 block">Historia pomiarów:</Label>
+                          <div className="space-y-1">
+                            {casualty.vitalSigns.map((vs, idx) => {
+                              const respAlert = validateRespiratoryRate(vs.respiratoryRate, casualty.ageGroup);
+                              const pulseAlert = validatePulseRate(vs.pulseRate, casualty.ageGroup);
+                              return (
+                                <div key={idx} className="text-xs bg-white p-2 rounded border">
+                                  <div className="font-semibold text-gray-600">
+                                    {new Date(vs.measuredAt).toLocaleTimeString('pl-PL')}
+                                  </div>
+                                  {vs.respiratoryRate !== null && (
+                                    <div className={cn(
+                                      'mt-1',
+                                      respAlert?.status === 'CRITICAL' && 'text-red-700 font-semibold',
+                                      respAlert?.status === 'ABNORMAL' && 'text-orange-600'
+                                    )}>
+                                      Oddech: {vs.respiratoryRate}/min {respAlert?.alert}
+                                    </div>
+                                  )}
+                                  {vs.pulseRate !== null && (
+                                    <div className={cn(
+                                      'mt-1',
+                                      pulseAlert?.status === 'CRITICAL' && 'text-red-700 font-semibold',
+                                      pulseAlert?.status === 'ABNORMAL' && 'text-orange-600'
+                                    )}>
+                                      Tętno: {vs.pulseRate}/min {pulseAlert?.alert}
+                                    </div>
+                                  )}
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Urazy */}
+                  <div>
+                    <Label className="text-sm font-semibold text-gray-700 mb-2 block">
+                      🩹 Urazy i obrażenia
+                    </Label>
+                    <Textarea
+                      value={casualty.injuries}
+                      onChange={(e) => handleUpdate(casualty.id, { injuries: e.target.value })}
+                      placeholder="np. Złamanie prawej goleni, rana cięta lewego ramienia..."
+                      rows={3}
+                      className="text-sm"
+                    />
+                  </div>
+
+                  {/* Działania podjęte */}
+                  <div>
+                    <Label className="text-sm font-semibold text-gray-700 mb-2 block">
+                      🚑 Działania podjęte
+                    </Label>
+                    <Textarea
+                      value={casualty.actionsTaken}
+                      onChange={(e) => handleUpdate(casualty.id, { actionsTaken: e.target.value })}
+                      placeholder="np. Unieruchomienie prawej nogi szynami Kramera, pozycja boczna ustalona..."
+                      rows={3}
+                      className="text-sm"
+                    />
+                  </div>
+
+                  {/* Wywiad SAMPLE */}
+                  <div>
+                    <Label className="text-sm font-semibold text-gray-700 mb-2 block">
+                      📋 Wywiad SAMPLE
+                    </Label>
+                    <Textarea
+                      value={casualty.sampleNotes}
+                      onChange={(e) => handleUpdate(casualty.id, { sampleNotes: e.target.value })}
+                      placeholder="Objawy, Alergie, Leki, Przeszłość medyczna, Ostatni posiłek, Zdarzenie..."
+                      rows={4}
+                      className="text-sm"
+                    />
+                  </div>
+
+                  {/* Dodatkowe notatki */}
+                  <div>
+                    <Label className="text-sm font-semibold text-gray-700 mb-2 block">
+                      📝 Dodatkowe notatki
+                    </Label>
+                    <Textarea
+                      value={casualty.additionalNotes}
+                      onChange={(e) => handleUpdate(casualty.id, { additionalNotes: e.target.value })}
+                      placeholder="Inne istotne informacje..."
+                      rows={2}
+                      className="text-sm"
+                    />
+                  </div>
+                </div>
             </Card>
           ))
         )}
       </div>
-
-      {/* Dialog dokumentacji medycznej */}
-      <Dialog open={!!assessingId} onOpenChange={(open) => !open && setAssessingId(null)}>
-        <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>
-              Dokumentacja Medyczna -{' '}
-              {casualties.find((c) => c.id === assessingId)?.name}
-            </DialogTitle>
-          </DialogHeader>
-          {assessingId && (
-            <VictimMedicalRecordComponent
-              casualtyId={assessingId}
-              casualtyName={casualties.find((c) => c.id === assessingId)?.name || ''}
-              onSave={(record) => {
-                console.log('Zapisano dokumentację:', record);
-                // TODO: Zapisz do localStorage lub store
-                setAssessingId(null);
-              }}
-            />
-          )}
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
