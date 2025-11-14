@@ -130,7 +130,7 @@ export default function RotationBoard() {
               "grid grid-rows-[auto_auto_auto_1fr_1fr] border-r-2 border-black last:border-r-0 transition-all",
               entry.hasExited && "opacity-50 bg-gray-200"
             )}>
-              {/* WYSZLI button */}
+              {/* KONIEC button */}
               <div className="border-b border-black p-1">
                 <Button
                   size="sm"
@@ -141,7 +141,7 @@ export default function RotationBoard() {
                   )}
                   onClick={() => handleToggleExited(rotation, index)}
                 >
-                  {entry.hasExited ? "✓ WYSZLI" : "WYSZLI"}
+                  {entry.hasExited ? "✓ KONIEC" : "KONIEC"}
                 </Button>
               </div>
 
@@ -288,7 +288,7 @@ export default function RotationBoard() {
       {/* Instructions */}
       <Card className="p-3 bg-yellow-50 border-2 border-yellow-400">
         <p className="text-sm text-center font-semibold text-gray-700">
-          💡 Kliknij WYSZLI aby oznaczyć wyjście | Kliknij nazwisko/BAR aby edytować | Kliknij kontrolę czasu aby ustawić | PPM aby wyczyścić
+          💡 Kliknij KONIEC aby oznaczyć zakończenie | Kliknij nazwisko/BAR aby edytować | Kliknij kontrolę czasu aby ustawić | PPM aby wyczyścić
         </p>
       </Card>
 
