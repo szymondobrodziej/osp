@@ -294,31 +294,33 @@ export default function ChecklistItemV2({
                 <div className="flex items-start gap-2 md:gap-3 flex-1 min-w-0">
                   <div className="mt-0.5 md:mt-1 flex-shrink-0">{getStatusIcon()}</div>
                   <div className="flex-1 space-y-1.5 md:space-y-2 min-w-0">
-                    <div className="flex items-start gap-1.5 md:gap-2 flex-wrap">
-                      <h4
-                        className={cn(
-                          'font-semibold text-xs md:text-sm',
-                          isCompleted && 'line-through text-gray-500'
+                    <div className="space-y-1">
+                      <div className="flex items-start gap-1.5 md:gap-2 flex-wrap">
+                        <h4
+                          className={cn(
+                            'font-semibold text-xs md:text-sm',
+                            isCompleted && 'line-through text-gray-500'
+                          )}
+                        >
+                          {item.title}
+                        </h4>
+                        {getPriorityBadge()}
+                      </div>
+                      <div className="flex flex-col md:flex-row md:items-center gap-1 md:gap-3 text-xs text-gray-500">
+                        {item.estimatedDuration && (
+                          <div className="flex items-center gap-1">
+                            <Clock className="w-3 h-3" />
+                            <span>~{item.estimatedDuration} min</span>
+                          </div>
                         )}
-                      >
-                        {item.title}
-                      </h4>
-                      {getPriorityBadge()}
-                    </div>
-                    <div className="flex items-center gap-2 md:gap-3 text-xs text-gray-500 flex-wrap">
-                      {item.estimatedDuration && (
-                        <div className="flex items-center gap-1">
-                          <Clock className="w-3 h-3" />
-                          <span>~{item.estimatedDuration} min</span>
-                        </div>
-                      )}
-                      {/* Note preview - zawsze widoczna */}
-                      {item.notes && (
-                        <div className="flex items-center gap-1 text-blue-600 font-medium">
-                          <StickyNote className="w-3 h-3" />
-                          <span className="truncate max-w-[200px] md:max-w-[300px]">{item.notes}</span>
-                        </div>
-                      )}
+                        {/* Note preview - zawsze widoczna */}
+                        {item.notes && (
+                          <div className="flex items-center gap-1 text-blue-600 font-medium">
+                            <StickyNote className="w-3 h-3 flex-shrink-0" />
+                            <span className="truncate">{item.notes}</span>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
