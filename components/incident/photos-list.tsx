@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -12,11 +12,32 @@ interface Photo {
   id: string;
   url: string;
   description: string;
-  timestamp: Date;
+  timestamp: string; // Changed to string for localStorage
 }
 
 export default function PhotosList() {
   const [photos, setPhotos] = useState<Photo[]>([]);
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  // Load from localStorage
+  useEffect(() => {
+    const stored = localStorage.getItem('incident-photos');
+    if (stored) {
+      try {
+        setPhotos(JSON.parse(stored));
+      } catch (e) {
+        console.error('Failed to load photos:', e);
+      }
+    }
+    setIsLoaded(true);
+  }, []);
+
+  // Save to localStorage
+  useEffect(() => {
+    if (isLoaded) {
+      localStorage.setItem('incident-photos', JSON.stringify(photos));
+    }
+  }, [photos, isLoaded]);
   const [selectedPhoto, setSelectedPhoto] = useState<Photo | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -33,7 +54,7 @@ export default function PhotosList() {
           id: Date.now().toString() + Math.random(),
           url: event.target?.result as string,
           description: '',
-          timestamp: new Date(),
+          timestamp: new Date().toISOString(),
         };
         setPhotos(prev => [newPhoto, ...prev]);
       };
@@ -144,7 +165,7 @@ export default function PhotosList() {
               <div className="p-2">
                 <div className="flex items-center gap-1 text-xs text-gray-500 mb-1">
                   <Clock className="w-3 h-3" />
-                  {photo.timestamp.toLocaleTimeString('pl-PL')}
+                  {new Date(photo.timestamp).toLocaleTimeString('pl-PL')}
                 </div>
                 {photo.description && (
                   <p className="text-xs text-gray-700 truncate">{photo.description}</p>
@@ -169,7 +190,7 @@ export default function PhotosList() {
             <div className="p-4 border-b flex items-center justify-between">
               <div className="flex items-center gap-2 text-sm text-gray-600">
                 <Clock className="w-4 h-4" />
-                {selectedPhoto.timestamp.toLocaleString('pl-PL')}
+                {new Date(selectedPhoto.timestamp).toLocaleString('pl-PL')}
               </div>
               <div className="flex gap-2">
                 <Button

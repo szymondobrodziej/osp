@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -15,11 +15,32 @@ interface Casualty {
   age?: string;
   condition: 'critical' | 'serious' | 'moderate' | 'minor';
   description: string;
-  timestamp: Date;
+  timestamp: string; // Changed to string for localStorage
 }
 
 export default function CasualtiesList() {
   const [casualties, setCasualties] = useState<Casualty[]>([]);
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  // Load from localStorage
+  useEffect(() => {
+    const stored = localStorage.getItem('incident-casualties');
+    if (stored) {
+      try {
+        setCasualties(JSON.parse(stored));
+      } catch (e) {
+        console.error('Failed to load casualties:', e);
+      }
+    }
+    setIsLoaded(true);
+  }, []);
+
+  // Save to localStorage
+  useEffect(() => {
+    if (isLoaded) {
+      localStorage.setItem('incident-casualties', JSON.stringify(casualties));
+    }
+  }, [casualties, isLoaded]);
   const [isAdding, setIsAdding] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   
@@ -39,7 +60,7 @@ export default function CasualtiesList() {
       age: formData.age,
       condition: formData.condition,
       description: formData.description,
-      timestamp: new Date(),
+      timestamp: new Date().toISOString(),
     };
 
     setCasualties([newCasualty, ...casualties]);
@@ -232,7 +253,7 @@ export default function CasualtiesList() {
                     <p className="text-xs text-gray-600 mt-1">{casualty.description}</p>
                   )}
                   <p className="text-xs text-gray-400 mt-1">
-                    {casualty.timestamp.toLocaleTimeString('pl-PL')}
+                    {new Date(casualty.timestamp).toLocaleTimeString('pl-PL')}
                   </p>
                 </div>
 

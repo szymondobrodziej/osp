@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
@@ -11,12 +11,33 @@ import { cn } from '@/lib/utils';
 interface Note {
   id: string;
   content: string;
-  timestamp: Date;
+  timestamp: string; // Changed to string for localStorage
   important: boolean;
 }
 
 export default function NotesList() {
   const [notes, setNotes] = useState<Note[]>([]);
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  // Load from localStorage
+  useEffect(() => {
+    const stored = localStorage.getItem('incident-notes');
+    if (stored) {
+      try {
+        setNotes(JSON.parse(stored));
+      } catch (e) {
+        console.error('Failed to load notes:', e);
+      }
+    }
+    setIsLoaded(true);
+  }, []);
+
+  // Save to localStorage
+  useEffect(() => {
+    if (isLoaded) {
+      localStorage.setItem('incident-notes', JSON.stringify(notes));
+    }
+  }, [notes, isLoaded]);
   const [isAdding, setIsAdding] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [content, setContent] = useState('');
@@ -28,7 +49,7 @@ export default function NotesList() {
     const newNote: Note = {
       id: Date.now().toString(),
       content: content.trim(),
-      timestamp: new Date(),
+      timestamp: new Date().toISOString(),
       important: isImportant,
     };
 
@@ -178,7 +199,7 @@ export default function NotesList() {
                     )}
                     <div className="flex items-center gap-1 text-xs text-gray-500">
                       <Clock className="w-3 h-3" />
-                      {note.timestamp.toLocaleString('pl-PL')}
+                      {new Date(note.timestamp).toLocaleString('pl-PL')}
                     </div>
                   </div>
                   <p className="text-sm whitespace-pre-wrap">{note.content}</p>
