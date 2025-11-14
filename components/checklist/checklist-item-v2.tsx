@@ -13,6 +13,8 @@ import {
   XCircle,
   Square,
   CheckSquare,
+  StickyNote,
+  Edit3,
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { pl } from 'date-fns/locale';
@@ -42,6 +44,7 @@ export default function ChecklistItemV2({
   const [showNoteInput, setShowNoteInput] = useState(false);
   const [note, setNote] = useState(item.notes || '');
   const [showSkipDialog, setShowSkipDialog] = useState(false);
+  const [isEditingNote, setIsEditingNote] = useState(false);
 
   const { updateChecklistItem, completeChecklistItem, skipChecklistItem } = useIncidentStore();
 
@@ -60,6 +63,18 @@ export default function ChecklistItemV2({
 
   const handleStart = () => {
     updateChecklistItem(categoryId, item.id, { status: 'IN_PROGRESS' });
+  };
+
+  const handleSaveNote = () => {
+    updateChecklistItem(categoryId, item.id, { notes: note });
+    setIsEditingNote(false);
+  };
+
+  const handleToggleNoteEdit = () => {
+    if (!isEditingNote) {
+      setNote(item.notes || '');
+    }
+    setIsEditingNote(!isEditingNote);
   };
 
   const getStatusIcon = () => {
@@ -167,6 +182,20 @@ export default function ChecklistItemV2({
             )}
             onClick={(e) => e.stopPropagation()}
           >
+            {/* Przycisk notatki - zawsze widoczny gdy są notatki */}
+            <Button
+              onClick={handleToggleNoteEdit}
+              size="sm"
+              variant={item.notes ? "default" : "ghost"}
+              className={cn(
+                "h-7 w-7 p-0",
+                item.notes ? "bg-blue-500 hover:bg-blue-600" : "hover:bg-gray-200"
+              )}
+              title={item.notes ? "Edytuj notatkę" : "Dodaj notatkę"}
+            >
+              <StickyNote className="w-3.5 h-3.5" />
+            </Button>
+
             {!isCompleted && !isSkipped && (
               <>
                 {!isInProgress ? (
@@ -201,6 +230,28 @@ export default function ChecklistItemV2({
             )}
           </div>
         </div>
+
+        {/* Note editor - compact view */}
+        {isEditingNote && (
+          <div className="px-3 pb-2 space-y-1.5 animate-slide-up">
+            <Textarea
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+              placeholder="Dodaj notatkę..."
+              className="min-h-[60px] text-xs"
+              autoFocus
+            />
+            <div className="flex gap-1">
+              <Button onClick={handleSaveNote} size="sm" className="h-7 bg-blue-500 hover:bg-blue-600 text-xs px-2">
+                <Check className="w-3 h-3 mr-1" />
+                Zapisz
+              </Button>
+              <Button onClick={() => setIsEditingNote(false)} size="sm" variant="outline" className="h-7 text-xs px-2">
+                Anuluj
+              </Button>
+            </div>
+          </div>
+        )}
 
         <SkipDialog
           open={showSkipDialog}
@@ -261,6 +312,21 @@ export default function ChecklistItemV2({
                 </div>
 
                 <div className="flex gap-1 md:gap-2 flex-shrink-0">
+                  {/* Przycisk notatki */}
+                  <Button
+                    onClick={handleToggleNoteEdit}
+                    size="sm"
+                    variant={item.notes ? "default" : "outline"}
+                    className={cn(
+                      "h-7 md:h-8 text-xs md:text-sm px-2 md:px-3",
+                      item.notes && "bg-blue-500 hover:bg-blue-600"
+                    )}
+                    title={item.notes ? "Edytuj notatkę" : "Dodaj notatkę"}
+                  >
+                    <StickyNote className="w-3 h-3 md:mr-1" />
+                    <span className="hidden sm:inline">{item.notes ? "Notatka" : "Notatka"}</span>
+                  </Button>
+
                   {!isCompleted && !isSkipped && (
                     <>
                       {!isInProgress && (
@@ -314,11 +380,47 @@ export default function ChecklistItemV2({
                   </div>
                 )}
 
-                {item.notes && (
+                {/* Note editor */}
+                {isEditingNote && (
+                  <div className="space-y-2 animate-slide-up">
+                    <Textarea
+                      value={note}
+                      onChange={(e) => setNote(e.target.value)}
+                      placeholder="Dodaj notatkę..."
+                      className="min-h-[60px] md:min-h-[80px] text-sm"
+                      autoFocus
+                    />
+                    <div className="flex gap-1.5 md:gap-2">
+                      <Button onClick={handleSaveNote} size="sm" className="bg-blue-500 hover:bg-blue-600 h-8 text-xs md:text-sm">
+                        <Check className="w-3 h-3 mr-1" />
+                        Zapisz
+                      </Button>
+                      <Button onClick={() => setIsEditingNote(false)} size="sm" variant="outline" className="h-8 text-xs md:text-sm">
+                        Anuluj
+                      </Button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Display existing note */}
+                {item.notes && !isEditingNote && (
                   <Card className="bg-blue-50/50 border-blue-200">
                     <CardContent className="p-2 md:p-3">
-                      <p className="text-xs font-semibold text-blue-900 mb-1">📝 Notatki:</p>
-                      <p className="text-xs md:text-sm text-blue-800">{item.notes}</p>
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex-1">
+                          <p className="text-xs font-semibold text-blue-900 mb-1">📝 Notatka:</p>
+                          <p className="text-xs md:text-sm text-blue-800 whitespace-pre-wrap">{item.notes}</p>
+                        </div>
+                        <Button
+                          onClick={handleToggleNoteEdit}
+                          size="sm"
+                          variant="ghost"
+                          className="h-6 w-6 p-0 hover:bg-blue-100"
+                          title="Edytuj notatkę"
+                        >
+                          <Edit3 className="w-3 h-3" />
+                        </Button>
+                      </div>
                     </CardContent>
                   </Card>
                 )}
