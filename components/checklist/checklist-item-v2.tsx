@@ -167,6 +167,14 @@ export default function ChecklistItemV2({
           {item.priority === 'CRITICAL' && <span className="text-sm">🚨</span>}
           {item.priority === 'HIGH' && <span className="text-sm">⚠️</span>}
 
+          {/* Note indicator - zawsze widoczny gdy są notatki */}
+          {item.notes && (
+            <div className="flex items-center gap-1 flex-shrink-0 text-blue-600">
+              <StickyNote className="w-3.5 h-3.5" />
+              <span className="text-xs font-medium truncate max-w-[100px]">{item.notes}</span>
+            </div>
+          )}
+
           {/* Duration - kompaktowy */}
           {item.estimatedDuration && (
             <span className="text-xs text-gray-500 flex-shrink-0">
@@ -182,15 +190,12 @@ export default function ChecklistItemV2({
             )}
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Przycisk notatki - zawsze widoczny gdy są notatki */}
+            {/* Przycisk notatki */}
             <Button
               onClick={handleToggleNoteEdit}
               size="sm"
-              variant={item.notes ? "default" : "ghost"}
-              className={cn(
-                "h-7 w-7 p-0",
-                item.notes ? "bg-blue-500 hover:bg-blue-600" : "hover:bg-gray-200"
-              )}
+              variant="ghost"
+              className="h-7 w-7 p-0 hover:bg-gray-200"
               title={item.notes ? "Edytuj notatkę" : "Dodaj notatkę"}
             >
               <StickyNote className="w-3.5 h-3.5" />
@@ -300,11 +305,18 @@ export default function ChecklistItemV2({
                       </h4>
                       {getPriorityBadge()}
                     </div>
-                    <div className="flex items-center gap-2 md:gap-3 text-xs text-gray-500">
+                    <div className="flex items-center gap-2 md:gap-3 text-xs text-gray-500 flex-wrap">
                       {item.estimatedDuration && (
                         <div className="flex items-center gap-1">
                           <Clock className="w-3 h-3" />
                           <span>~{item.estimatedDuration} min</span>
+                        </div>
+                      )}
+                      {/* Note preview - zawsze widoczna */}
+                      {item.notes && (
+                        <div className="flex items-center gap-1 text-blue-600 font-medium">
+                          <StickyNote className="w-3 h-3" />
+                          <span className="truncate max-w-[200px] md:max-w-[300px]">{item.notes}</span>
                         </div>
                       )}
                     </div>
@@ -400,29 +412,6 @@ export default function ChecklistItemV2({
                       </Button>
                     </div>
                   </div>
-                )}
-
-                {/* Display existing note */}
-                {item.notes && !isEditingNote && (
-                  <Card className="bg-blue-50/50 border-blue-200">
-                    <CardContent className="p-2 md:p-3">
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="flex-1">
-                          <p className="text-xs font-semibold text-blue-900 mb-1">📝 Notatka:</p>
-                          <p className="text-xs md:text-sm text-blue-800 whitespace-pre-wrap">{item.notes}</p>
-                        </div>
-                        <Button
-                          onClick={handleToggleNoteEdit}
-                          size="sm"
-                          variant="ghost"
-                          className="h-6 w-6 p-0 hover:bg-blue-100"
-                          title="Edytuj notatkę"
-                        >
-                          <Edit3 className="w-3 h-3" />
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
                 )}
 
                 {showNoteInput && (
