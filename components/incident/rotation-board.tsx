@@ -14,6 +14,7 @@ interface FirefighterEntry {
   entryTime: Date | null;
   exitTime: Date | null;
   pressureBar: number | null; // Ciśnienie w barach
+  hasExited: boolean; // Czy strażak wyszedł
 }
 
 interface RotationData {
@@ -24,9 +25,9 @@ interface RotationData {
 
 export default function RotationBoard() {
   const [rotationData, setRotationData] = useState<RotationData>({
-    rotation1: Array(4).fill(null).map((_, i) => ({ id: `r1-${i}`, name: '', entryTime: null, exitTime: null, pressureBar: null })),
-    rotation2: Array(4).fill(null).map((_, i) => ({ id: `r2-${i}`, name: '', entryTime: null, exitTime: null, pressureBar: null })),
-    ritRotation: Array(4).fill(null).map((_, i) => ({ id: `rit-${i}`, name: '', entryTime: null, exitTime: null, pressureBar: null })),
+    rotation1: Array(4).fill(null).map((_, i) => ({ id: `r1-${i}`, name: '', entryTime: null, exitTime: null, pressureBar: null, hasExited: false })),
+    rotation2: Array(4).fill(null).map((_, i) => ({ id: `r2-${i}`, name: '', entryTime: null, exitTime: null, pressureBar: null, hasExited: false })),
+    ritRotation: Array(4).fill(null).map((_, i) => ({ id: `rit-${i}`, name: '', entryTime: null, exitTime: null, pressureBar: null, hasExited: false })),
   });
 
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -100,6 +101,15 @@ export default function RotationBoard() {
     }));
   };
 
+  const handleToggleExited = (rotation: keyof RotationData, index: number) => {
+    setRotationData(prev => ({
+      ...prev,
+      [rotation]: prev[rotation].map((entry, i) =>
+        i === index ? { ...entry, hasExited: !entry.hasExited } : entry
+      )
+    }));
+  };
+
   const renderRotationRow = (rotation: keyof RotationData, label: string, numberBgColor: string) => {
     const entries = rotationData[rotation];
 
@@ -116,22 +126,40 @@ export default function RotationBoard() {
           const timeColor = entry.entryTime && !entry.exitTime ? getTimeColor(elapsed) : 'bg-white';
 
           return (
-            <div key={entry.id} className="grid grid-rows-[auto_auto_1fr_1fr] border-r-2 border-black last:border-r-0">
-              {/* CZAS / WEJŚCIE label */}
+            <div key={entry.id} className={cn(
+              "grid grid-rows-[auto_auto_auto_1fr_1fr] border-r-2 border-black last:border-r-0 transition-all",
+              entry.hasExited && "opacity-50 bg-gray-200"
+            )}>
+              {/* WYSZLI button */}
+              <div className="border-b border-black p-1">
+                <Button
+                  size="sm"
+                  variant={entry.hasExited ? "default" : "outline"}
+                  className={cn(
+                    "w-full h-7 text-xs font-bold",
+                    entry.hasExited ? "bg-green-600 hover:bg-green-700" : "bg-white hover:bg-gray-100"
+                  )}
+                  onClick={() => handleToggleExited(rotation, index)}
+                >
+                  {entry.hasExited ? "✓ WYSZLI" : "WYSZLI"}
+                </Button>
+              </div>
+
+              {/* CZAS label */}
               <div className="border-b border-black p-1 bg-gray-100 text-center">
                 <span className="text-xs font-bold">CZAS</span>
               </div>
 
-              {/* WEJŚCIE label */}
+              {/* KONTROLA CZASU label */}
               <div className="border-b border-black p-1 bg-gray-100 text-center">
-                <span className="text-xs font-bold">WEJŚCIE</span>
+                <span className="text-xs font-bold">KONTROLA CZASU</span>
               </div>
 
               {/* Name + Entry Time */}
               <div
                 className={cn(
                   "border-b border-black p-3 flex flex-col items-center justify-center cursor-pointer hover:opacity-80 transition-all min-h-[80px]",
-                  timeColor
+                  entry.hasExited ? "bg-gray-300" : timeColor
                 )}
                 onClick={() => handleCellClick(rotation, index, 'name')}
               >
@@ -176,7 +204,10 @@ export default function RotationBoard() {
                   <span className="text-xs font-bold">BAR</span>
                 </div>
                 <div
-                  className="p-3 flex items-center justify-center cursor-pointer hover:bg-gray-100 bg-white"
+                  className={cn(
+                    "p-3 flex items-center justify-center cursor-pointer hover:bg-gray-100",
+                    entry.hasExited ? "bg-gray-300" : "bg-white"
+                  )}
                   onClick={() => handleCellClick(rotation, index, 'pressureBar')}
                 >
                   {editingCell?.rotation === rotation && editingCell?.index === index && editingCell?.field === 'pressureBar' ? (
@@ -257,7 +288,7 @@ export default function RotationBoard() {
       {/* Instructions */}
       <Card className="p-3 bg-yellow-50 border-2 border-yellow-400">
         <p className="text-sm text-center font-semibold text-gray-700">
-          💡 Kliknij nazwisko/BAR aby edytować | Kliknij czas wejścia aby ustawić | PPM aby wyczyścić
+          💡 Kliknij WYSZLI aby oznaczyć wyjście | Kliknij nazwisko/BAR aby edytować | Kliknij kontrolę czasu aby ustawić | PPM aby wyczyścić
         </p>
       </Card>
 
