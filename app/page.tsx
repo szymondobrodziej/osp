@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useIncidentStore } from '@/store/incident-store';
 import { useChecklistStore } from '@/store/checklist-store';
 import IncidentTypeSelector from '@/components/incident-type-selector';
@@ -8,14 +8,19 @@ import IncidentHeader from '@/components/incident-header';
 import ChecklistView from '@/components/checklist-view';
 import dynamic from 'next/dynamic';
 import { IncidentType } from '@/types/incident';
-import { Flame, FileText, Users, Package, StickyNote, Camera, X, Sparkles, FolderOpen, CheckCircle2, Truck } from 'lucide-react';
+import { Flame, FileText, Users, Package, StickyNote, Camera, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
+import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import Link from 'next/link';
+
+// Landing page components
+import Navbar from '@/components/landing/navbar';
+import HeroSection from '@/components/landing/hero-section';
+import ModulesSection from '@/components/landing/modules-section';
+import QuickActions from '@/components/landing/quick-actions';
+import FeaturesList from '@/components/landing/features-list';
+import Footer from '@/components/landing/footer';
 
 // Dynamiczny import mapy (wyłącza SSR dla Leaflet)
 const HydrantMap = dynamic(() => import('@/components/hydrant-map'), {
@@ -28,6 +33,7 @@ export default function Home() {
   const getTemplatesByType = useChecklistStore(state => state.getTemplatesByType);
 
   const [activeTab, setActiveTab] = useState<'checklist' | 'casualties' | 'resources' | 'notes' | 'photos'>('checklist');
+  const [showIncidentSelector, setShowIncidentSelector] = useState(false);
 
   const handleCreateIncident = (type: IncidentType) => {
     // Natychmiastowe rozpoczęcie zdarzenia - bez formularza!
@@ -41,6 +47,7 @@ export default function Home() {
       'Do uzupełnienia', // Dowódca do uzupełnienia później
       defaultTemplate?.id
     );
+    setShowIncidentSelector(false);
   };
 
   const handleEndIncident = () => {
@@ -49,90 +56,49 @@ export default function Home() {
     }
   };
 
-  // Ekran startowy - wybór typu zdarzenia
+  const handleStartAction = () => {
+    setShowIncidentSelector(true);
+    // Scroll to incident selector
+    setTimeout(() => {
+      document.getElementById('start')?.scrollIntoView({ behavior: 'smooth' });
+    }, 100);
+  };
+
+  // Landing page - gdy nie ma aktywnego zdarzenia
   if (!currentIncident) {
     return (
-      <div className="min-h-screen relative overflow-hidden">
-        {/* Animated gradient background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-red-600 via-orange-500 to-yellow-500 animate-gradient" />
+      <div className="min-h-screen bg-white">
+        <Navbar />
 
-        {/* Glassmorphism overlay */}
-        <div className="absolute inset-0 backdrop-blur-3xl bg-white/10" />
+        <main>
+          <HeroSection onStartAction={handleStartAction} />
+          <ModulesSection />
+          <QuickActions />
+          <FeaturesList />
 
-        {/* Floating shapes for depth */}
-        <div className="absolute top-20 left-10 w-72 h-72 bg-white/20 rounded-full blur-3xl animate-float" />
-        <div className="absolute bottom-20 right-10 w-96 h-96 bg-orange-400/20 rounded-full blur-3xl animate-float-delayed" />
-
-        {/* Content */}
-        <div className="relative z-10 min-h-screen flex flex-col items-center justify-center p-3 md:p-4">
-          <div className="max-w-6xl w-full mx-auto space-y-4 md:space-y-8">
-
-            {/* Hero Section */}
-            <div className="text-center space-y-3 md:space-y-6 animate-fade-in">
-              <div className="inline-flex items-center gap-2 md:gap-3 px-4 md:px-6 py-2 md:py-3 rounded-full bg-white/20 backdrop-blur-md border border-white/30 shadow-lg">
-                <Sparkles className="w-4 h-4 md:w-5 md:h-5 text-yellow-200 animate-pulse" />
-                <span className="text-white font-medium text-sm md:text-base">Profesjonalny system dla OSP</span>
-              </div>
-
-              <div className="flex items-center justify-center gap-2 md:gap-4 mb-2 md:mb-4">
-                <div className="relative">
-                  <Flame className="w-12 h-12 md:w-20 md:h-20 text-white drop-shadow-2xl animate-pulse" />
-                  <div className="absolute inset-0 bg-white/30 blur-xl rounded-full" />
+          {/* Incident Type Selector - pokazuje się po kliknięciu CTA */}
+          {showIncidentSelector && (
+            <section id="start" className="py-16 bg-gray-50 scroll-mt-16">
+              <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="text-center mb-8">
+                  <h2 className="text-3xl font-bold text-gray-900 mb-2">
+                    Wybierz typ zdarzenia
+                  </h2>
+                  <p className="text-gray-600">
+                    Rozpocznij nową akcję ratowniczą z gotowymi checklistami
+                  </p>
                 </div>
-                <h1 className="text-3xl md:text-6xl lg:text-7xl font-bold text-white drop-shadow-2xl">
-                  OSP Commander
-                </h1>
+                <Card className="border-2 border-red-200 shadow-xl">
+                  <CardContent className="p-6">
+                    <IncidentTypeSelector onSelect={handleCreateIncident} />
+                  </CardContent>
+                </Card>
               </div>
+            </section>
+          )}
+        </main>
 
-              <p className="text-base md:text-xl lg:text-2xl text-white/90 font-light max-w-2xl mx-auto px-4">
-                Nowoczesne wsparcie dla Kierujących Działaniem Ratowniczym
-              </p>
-            </div>
-
-            {/* Main Card */}
-            <Card className="backdrop-blur-xl bg-white/95 border-white/20 shadow-2xl animate-slide-up">
-              <CardHeader className="space-y-1 pb-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle className="text-3xl font-bold bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent">
-                      Rozpocznij nową akcję
-                    </CardTitle>
-                    <CardDescription className="text-base">
-                      Wybierz typ zdarzenia aby rozpocząć procedurę ratowniczą
-                    </CardDescription>
-                  </div>
-                  <div className="flex gap-2">
-                    <Link href="/vehicle-equipment">
-                      <Button variant="outline" className="gap-2">
-                        <Truck className="w-4 h-4" />
-                        <span className="hidden md:inline">Wyposażenie pojazdu</span>
-                      </Button>
-                    </Link>
-                    <Link href="/checklists">
-                      <Button variant="outline" className="gap-2">
-                        <FolderOpen className="w-4 h-4" />
-                        <span className="hidden md:inline">Biblioteka checklistów</span>
-                      </Button>
-                    </Link>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <IncidentTypeSelector onSelect={handleCreateIncident} />
-              </CardContent>
-            </Card>
-
-            {/* Footer */}
-            <div className="text-center space-y-2 animate-fade-in-delayed">
-              <p className="text-white/80 text-sm font-medium">
-                © 2025 OSP Commander
-              </p>
-              <p className="text-white/60 text-xs">
-                Zbudowane z ❤️ dla polskich strażaków
-              </p>
-            </div>
-          </div>
-        </div>
+        <Footer />
       </div>
     );
   }
