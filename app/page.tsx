@@ -7,6 +7,9 @@ import IncidentTypeSelector from '@/components/incident-type-selector';
 import IncidentHeaderV2 from '@/components/incident/incident-header-v2';
 import ChecklistViewV2 from '@/components/checklist/checklist-view-v2';
 import FloatingActionMenu from '@/components/incident/floating-action-menu';
+import CasualtiesList from '@/components/incident/casualties-list';
+import NotesList from '@/components/incident/notes-list';
+import PhotosList from '@/components/incident/photos-list';
 import dynamic from 'next/dynamic';
 import { IncidentType } from '@/types/incident';
 import { Flame, FileText, Users, Package, StickyNote, Camera, X } from 'lucide-react';
@@ -176,12 +179,8 @@ export default function Home() {
                 <ChecklistViewV2 categories={currentIncident.checklists} />
               </TabsContent>
 
-              <TabsContent value="casualties" className="mt-0 p-6">
-                <div className="text-center py-12">
-                  <Users className="w-16 h-16 mx-auto text-gray-300 mb-4" />
-                  <h3 className="text-lg font-semibold text-gray-700 mb-2">Moduł poszkodowanych</h3>
-                  <p className="text-gray-500">Funkcjonalność w przygotowaniu</p>
-                </div>
+              <TabsContent value="casualties" className="mt-0 p-4">
+                <CasualtiesList />
               </TabsContent>
 
               <TabsContent value="resources" className="mt-0 p-6">
@@ -192,20 +191,12 @@ export default function Home() {
                 </div>
               </TabsContent>
 
-              <TabsContent value="notes" className="mt-0 p-6">
-                <div className="text-center py-12">
-                  <StickyNote className="w-16 h-16 mx-auto text-gray-300 mb-4" />
-                  <h3 className="text-lg font-semibold text-gray-700 mb-2">Moduł notatek</h3>
-                  <p className="text-gray-500">Funkcjonalność w przygotowaniu</p>
-                </div>
+              <TabsContent value="notes" className="mt-0 p-4">
+                <NotesList />
               </TabsContent>
 
-              <TabsContent value="photos" className="mt-0 p-6">
-                <div className="text-center py-12">
-                  <Camera className="w-16 h-16 mx-auto text-gray-300 mb-4" />
-                  <h3 className="text-lg font-semibold text-gray-700 mb-2">Moduł zdjęć</h3>
-                  <p className="text-gray-500">Funkcjonalność w przygotowaniu</p>
-                </div>
+              <TabsContent value="photos" className="mt-0 p-4">
+                <PhotosList />
               </TabsContent>
             </Tabs>
           </Card>
