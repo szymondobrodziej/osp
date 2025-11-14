@@ -7,7 +7,7 @@ import 'leaflet/dist/leaflet.css';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { MapPin, Droplet, Navigation, Maximize2, Minimize2, RefreshCw } from 'lucide-react';
+import { Droplet, Maximize2, Minimize2, RefreshCw } from 'lucide-react';
 import { useIncidentStore } from '@/store/incident-store';
 
 // Fix dla domyślnych ikon Leaflet w Next.js
@@ -234,11 +234,11 @@ export default function HydrantMap({ incidentLocation, onHydrantSelect }: Hydran
     <Card className="overflow-hidden">
       <CardContent className="p-0">
         <div className="relative">
-          {/* Mapa */}
-          <div className={`relative ${isExpanded ? 'h-[500px] md:h-[600px]' : 'h-[200px] md:h-[300px]'} transition-all duration-300`}>
+          {/* Mapa - większa, bez listy hydrantów */}
+          <div className={`relative ${isExpanded ? 'h-[70vh]' : 'h-[400px] md:h-[500px]'} transition-all duration-300`}>
             <MapContainer
               center={centerLocation}
-              zoom={14}
+              zoom={15}
               style={{ height: '100%', width: '100%' }}
               zoomControl={true}
             >
@@ -247,7 +247,7 @@ export default function HydrantMap({ incidentLocation, onHydrantSelect }: Hydran
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
               />
-              
+
               {/* Marker lokalizacji zdarzenia */}
               <Marker position={centerLocation} icon={incidentIcon}>
                 <Popup>
@@ -258,7 +258,7 @@ export default function HydrantMap({ incidentLocation, onHydrantSelect }: Hydran
                 </Popup>
               </Marker>
 
-              {/* Markery hydrantów - wszystkie w promieniu 2 km */}
+              {/* Markery hydrantów - tylko ikony, szczegóły w popup */}
               {hydrantsInRange.map((hydrant) => (
                 <Marker
                   key={hydrant.id}
@@ -269,14 +269,14 @@ export default function HydrantMap({ incidentLocation, onHydrantSelect }: Hydran
                   }}
                 >
                   <Popup>
-                    <div className="p-2 space-y-2">
-                      <p className="font-bold">{getHydrantTypeLabel(hydrant.type)}</p>
-                      {hydrant.pressure && <p className="text-sm">Ciśnienie: {hydrant.pressure}</p>}
-                      {hydrant.diameter && <p className="text-sm">Średnica: {hydrant.diameter}</p>}
-                      {hydrant.notes && <p className="text-xs text-gray-600">{hydrant.notes}</p>}
+                    <div className="p-2 space-y-1">
+                      <p className="font-bold text-sm">{getHydrantTypeLabel(hydrant.type)}</p>
                       <p className="text-xs font-semibold text-blue-600">
-                        📍 {hydrant.distance}m od zdarzenia
+                        📍 {hydrant.distance}m
                       </p>
+                      {hydrant.pressure && <p className="text-xs">Ciśnienie: {hydrant.pressure}</p>}
+                      {hydrant.diameter && <p className="text-xs">Średnica: {hydrant.diameter}</p>}
+                      {hydrant.notes && <p className="text-xs text-gray-600 mt-1">{hydrant.notes}</p>}
                     </div>
                   </Popup>
                 </Marker>
@@ -303,75 +303,14 @@ export default function HydrantMap({ incidentLocation, onHydrantSelect }: Hydran
                 {isExpanded ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
               </Button>
             </div>
-          </div>
 
-          {/* Lista hydrantów */}
-          <div className="p-3 md:p-4 bg-gray-50 border-t space-y-3">
-            {/* Informacja o lokalizacji */}
-            <div className="flex items-center justify-between gap-2 p-2 bg-white rounded-lg border">
-              <div className="flex items-center gap-2 flex-1 min-w-0">
-                <MapPin className="w-4 h-4 text-red-600 flex-shrink-0" />
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs text-gray-500">Lokalizacja zdarzenia</p>
-                  <p className="text-xs md:text-sm font-medium truncate">
-                    {incidentLocation.lat.toFixed(6)}, {incidentLocation.lng.toFixed(6)}
-                  </p>
-                </div>
-              </div>
-              <Button
-                onClick={handleRefreshLocation}
-                size="sm"
-                variant="outline"
-                disabled={isRefreshing}
-                className="h-8 px-2 md:px-3 flex-shrink-0"
-              >
-                <RefreshCw className={`w-3 h-3 md:w-3.5 md:h-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
-                <span className="hidden sm:inline ml-1 text-xs">Odśwież</span>
-              </Button>
-            </div>
-
-            {/* Nagłówek hydrantów */}
-            <div className="flex items-center justify-between gap-2">
-              <div className="flex items-center gap-2">
-                <Droplet className="w-4 h-4 md:w-5 md:h-5 text-blue-600" />
-                <h3 className="font-semibold text-sm md:text-base">4 najbliższe hydranty</h3>
-              </div>
-              <Badge variant="secondary" className="text-xs">
-                {hydrantsInRange.length} w zasięgu 2 km
+            {/* Info badge - liczba hydrantów */}
+            <div className="absolute bottom-2 left-2 z-[1000]">
+              <Badge className="bg-white/90 text-gray-700 border shadow-lg">
+                <Droplet className="w-3 h-3 mr-1" />
+                {hydrantsInRange.length} hydrantów w zasięgu
               </Badge>
             </div>
-
-            {nearestHydrants.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                {nearestHydrants.map((hydrant) => (
-                  <div
-                    key={hydrant.id}
-                    className="p-2 md:p-3 bg-white rounded-lg border hover:border-blue-500 cursor-pointer transition-colors"
-                    onClick={() => onHydrantSelect?.(hydrant)}
-                  >
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="flex-1 min-w-0">
-                        <p className="text-xs md:text-sm font-medium">{getHydrantTypeLabel(hydrant.type)}</p>
-                        {hydrant.pressure && (
-                          <p className="text-xs text-gray-600">Ciśnienie: {hydrant.pressure}</p>
-                        )}
-                        {hydrant.diameter && (
-                          <p className="text-xs text-gray-600">Średnica: {hydrant.diameter}</p>
-                        )}
-                      </div>
-                      <Badge variant="outline" className="text-xs whitespace-nowrap">
-                        {hydrant.distance}m
-                      </Badge>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-6 text-gray-500">
-                <Droplet className="w-12 h-12 mx-auto mb-2 opacity-30" />
-                <p className="text-sm">Brak hydrantów w promieniu 2 km</p>
-              </div>
-            )}
           </div>
         </div>
       </CardContent>
