@@ -12,7 +12,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Plus, User, AlertCircle, Trash2, Edit2, Check, X, Stethoscope } from 'lucide-react';
+import { Plus, User, AlertCircle, Trash2, Edit2, Check, X, Stethoscope, Info } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { VictimAssessmentComponent } from '@/components/actions/victim-assessment';
 
@@ -140,6 +140,55 @@ export default function CasualtiesList() {
           <span className="ml-2 sm:ml-0">Dodaj poszkodowanego</span>
         </Button>
       </div>
+
+      {/* Instrukcja - karta informacyjna */}
+      <Card className="p-4 bg-blue-50 border-blue-200">
+        <div className="flex items-start gap-3">
+          <Info className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+          <div className="space-y-2">
+            <h4 className="font-semibold text-blue-900">
+              📋 Jak korzystać z modułu Poszkodowani
+            </h4>
+            <div className="text-sm text-blue-800 space-y-1">
+              <p>
+                <strong>1. Dodaj poszkodowanego</strong> - Kliknij przycisk "Dodaj
+                poszkodowanego" i wypełnij podstawowe dane (imię, wiek, stan).
+              </p>
+              <p>
+                <strong>2. Przeprowadź ocenę pierwszej pomocy</strong> - Kliknij ikonę{' '}
+                <Stethoscope className="w-4 h-4 inline" /> przy poszkodowanym, aby
+                otworzyć pełny algorytm oceny:
+              </p>
+              <ul className="list-disc list-inside pl-4 space-y-0.5">
+                <li>
+                  <strong>Grupa wiekowa</strong> - Wybierz: Dorośli / Dzieci / Niemowlęta
+                  / Przypadki specjalne
+                </li>
+                <li>
+                  <strong>ACVPU</strong> - Oceń stan świadomości (A/C/V/P/U)
+                </li>
+                <li>
+                  <strong>ABC</strong> - Drogi oddechowe / Oddychanie / Krążenie (jeśli
+                  wymagane)
+                </li>
+                <li>
+                  <strong>Badanie urazowe</strong> - Head-to-Toe (7 obszarów ciała)
+                </li>
+                <li>
+                  <strong>SAMPLE</strong> - Historia medyczna
+                </li>
+              </ul>
+              <p className="mt-2">
+                <strong>⚠️ Alerty:</strong> System automatycznie wyświetli{' '}
+                <span className="text-red-600 font-semibold">🔴 CZERWONE</span> alerty
+                dla stanów krytycznych (np. brak oddechu, krwawienie tętnicze) oraz{' '}
+                <span className="text-yellow-600 font-semibold">⚠️ POMARAŃCZOWE</span>{' '}
+                ostrzeżenia dla stanów wymagających uwagi.
+              </p>
+            </div>
+          </div>
+        </div>
+      </Card>
 
       {/* Add/Edit Form */}
       {(isAdding || editingId) && (
