@@ -41,10 +41,10 @@ export default function ChecklistViewV2({ categories }: ChecklistViewV2Props) {
   // Bulk actions
   const handleSelectAll = useCallback(() => {
     const allItemIds = new Set(
-      filteredCategories.flatMap(cat => cat.items.map(item => item.id))
+      categories.flatMap(cat => cat.items.map(item => item.id))
     );
     setSelectedItems(allItemIds);
-  }, [filteredCategories]);
+  }, [categories]);
 
   const handleDeselectAll = useCallback(() => {
     setSelectedItems(new Set());
