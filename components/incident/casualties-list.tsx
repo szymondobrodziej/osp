@@ -6,8 +6,15 @@ import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { Plus, User, AlertCircle, Trash2, Edit2, Check, X } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Plus, User, AlertCircle, Trash2, Edit2, Check, X, Stethoscope } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { VictimAssessmentComponent } from '@/components/actions/victim-assessment';
 
 interface Casualty {
   id: string;
@@ -43,7 +50,8 @@ export default function CasualtiesList() {
   }, [casualties, isLoaded]);
   const [isAdding, setIsAdding] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
-  
+  const [assessingId, setAssessingId] = useState<string | null>(null);
+
   const [formData, setFormData] = useState({
     name: '',
     age: '',
@@ -260,6 +268,15 @@ export default function CasualtiesList() {
 
                 <div className="flex gap-1 flex-shrink-0">
                   <Button
+                    onClick={() => setAssessingId(casualty.id)}
+                    size="sm"
+                    variant="ghost"
+                    className="h-10 w-10 sm:h-8 sm:w-8 p-0 hover:bg-blue-100 hover:text-blue-600"
+                    title="Ocena pierwszej pomocy"
+                  >
+                    <Stethoscope className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
+                  </Button>
+                  <Button
                     onClick={() => handleEdit(casualty)}
                     size="sm"
                     variant="ghost"
@@ -281,6 +298,27 @@ export default function CasualtiesList() {
           ))
         )}
       </div>
+
+      {/* Dialog oceny pierwszej pomocy */}
+      <Dialog open={!!assessingId} onOpenChange={(open) => !open && setAssessingId(null)}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>
+              Ocena Pierwszej Pomocy -{' '}
+              {casualties.find((c) => c.id === assessingId)?.name}
+            </DialogTitle>
+          </DialogHeader>
+          {assessingId && (
+            <VictimAssessmentComponent
+              actionId={assessingId}
+              onSave={(assessment) => {
+                console.log('Zapisano ocenę:', assessment);
+                setAssessingId(null);
+              }}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
