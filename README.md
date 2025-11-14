@@ -2,6 +2,11 @@
 
 **Profesjonalny system wsparcia dla Kierujących Działaniem Ratowniczym OSP**
 
+[![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](https://github.com/szymondobrodziej/osp)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![Next.js](https://img.shields.io/badge/Next.js-16.0-black.svg)](https://nextjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue.svg)](https://www.typescriptlang.org/)
+
 ## 📋 Opis
 
 OSP Commander to nowoczesna aplikacja webowa stworzona specjalnie dla dowódców Ochotniczych Straży Pożarnych. Aplikacja wspiera proces zarządzania działaniami ratowniczymi poprzez:
@@ -12,6 +17,31 @@ OSP Commander to nowoczesna aplikacja webowa stworzona specjalnie dla dowódców
 - 💾 **Działanie offline** - pełna funkcjonalność bez dostępu do internetu (PWA)
 - 📱 **Responsywność** - działa na telefonach, tabletach i komputerach
 - 🔒 **Lokalne przechowywanie** - dane zapisywane bezpiecznie w przeglądarce
+
+## 🔀 Git Workflow
+
+Projekt używa **Git Flow** z dwoma głównymi branchami:
+
+- **`main`** - Produkcja (stabilny, wdrożony na Vercel)
+- **`dev`** - Development (rozwój, testowanie)
+
+📖 **[Pełna dokumentacja Git Workflow →](GIT_WORKFLOW.md)**
+
+### Quick Start dla developerów:
+
+```bash
+# Nowa funkcja
+git checkout dev
+git pull origin dev
+git checkout -b feature/nazwa-funkcji
+# ... praca ...
+git commit -m "feat: opis"
+git push -u origin feature/nazwa-funkcji
+# Stwórz PR: feature/nazwa-funkcji → dev
+
+# Release do produkcji
+# Stwórz PR: dev → main na GitHub
+```
 
 ## 🎯 Główne funkcjonalności
 
