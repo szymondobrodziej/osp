@@ -89,13 +89,13 @@ export default function RotationBoard() {
     }));
   };
 
-  const renderRotationRow = (rotation: keyof RotationData, label: string, bgColor: string) => {
+  const renderRotationRow = (rotation: keyof RotationData, label: string, numberBgColor: string) => {
     const entries = rotationData[rotation];
-    
+
     return (
-      <div className="grid grid-cols-[80px_repeat(4,1fr)] gap-0 border-b-2 border-gray-800">
-        {/* Label */}
-        <div className={cn("flex items-center justify-center font-bold text-lg border-r-2 border-gray-800 py-4", bgColor)}>
+      <div className="grid grid-cols-[100px_repeat(4,1fr)] gap-0 border-b-2 border-black">
+        {/* Number Label */}
+        <div className={cn("flex items-center justify-center font-black text-4xl border-r-2 border-black py-8", numberBgColor)}>
           {label}
         </div>
 
@@ -105,10 +105,23 @@ export default function RotationBoard() {
           const timeColor = entry.entryTime && !entry.exitTime ? getTimeColor(elapsed) : 'bg-white';
 
           return (
-            <div key={entry.id} className="grid grid-rows-[auto_1fr_1fr] border-r-2 border-gray-800">
-              {/* Name */}
-              <div 
-                className="border-b border-gray-400 p-2 min-h-[50px] flex items-center justify-center cursor-pointer hover:bg-gray-100"
+            <div key={entry.id} className="grid grid-rows-[auto_auto_1fr_1fr] border-r-2 border-black last:border-r-0">
+              {/* CZAS / WEJŚCIE label */}
+              <div className="border-b border-black p-1 bg-gray-100 text-center">
+                <span className="text-xs font-bold">CZAS</span>
+              </div>
+
+              {/* WEJŚCIE label */}
+              <div className="border-b border-black p-1 bg-gray-100 text-center">
+                <span className="text-xs font-bold">WEJŚCIE</span>
+              </div>
+
+              {/* Name + Entry Time */}
+              <div
+                className={cn(
+                  "border-b border-black p-3 flex flex-col items-center justify-center cursor-pointer hover:opacity-80 transition-all min-h-[80px]",
+                  timeColor
+                )}
                 onClick={() => handleCellClick(rotation, index, 'name')}
               >
                 {editingCell?.rotation === rotation && editingCell?.index === index && editingCell?.field === 'name' ? (
@@ -117,50 +130,52 @@ export default function RotationBoard() {
                     onChange={(e) => handleNameChange(rotation, index, e.target.value)}
                     onBlur={() => setEditingCell(null)}
                     autoFocus
-                    className="h-8 text-center font-semibold"
+                    className="h-8 text-center font-bold text-sm"
                     placeholder="Nazwisko"
                   />
                 ) : (
-                  <span className="font-semibold text-sm">{entry.name || '—'}</span>
+                  <>
+                    <span className="font-bold text-sm mb-2">{entry.name || '—'}</span>
+                    <div
+                      className="font-mono font-bold text-xl cursor-pointer"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleTimeSet(rotation, index, 'entryTime');
+                      }}
+                      onContextMenu={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        handleTimeClear(rotation, index, 'entryTime');
+                      }}
+                    >
+                      {formatTime(entry.entryTime) || '—:—'}
+                    </div>
+                    {entry.entryTime && !entry.exitTime && (
+                      <Badge variant="secondary" className="mt-1 text-xs font-bold">
+                        {elapsed} min
+                      </Badge>
+                    )}
+                  </>
                 )}
               </div>
 
-              {/* Entry Time (WEJŚCIE) */}
-              <div 
-                className={cn(
-                  "border-b border-gray-400 p-2 flex flex-col items-center justify-center cursor-pointer hover:opacity-80 transition-all",
-                  timeColor
-                )}
-                onClick={() => handleTimeSet(rotation, index, 'entryTime')}
-                onContextMenu={(e) => {
-                  e.preventDefault();
-                  handleTimeClear(rotation, index, 'entryTime');
-                }}
-              >
-                <span className="text-xs text-gray-600 font-medium">WEJŚCIE</span>
-                <span className="font-mono font-bold text-lg">
-                  {formatTime(entry.entryTime) || '—:—'}
-                </span>
-                {entry.entryTime && !entry.exitTime && (
-                  <Badge variant="secondary" className="mt-1 text-xs">
-                    {elapsed} min
-                  </Badge>
-                )}
-              </div>
-
-              {/* Exit Time (WYJŚCIE) */}
-              <div 
-                className="p-2 flex flex-col items-center justify-center cursor-pointer hover:bg-gray-100"
-                onClick={() => handleTimeSet(rotation, index, 'exitTime')}
-                onContextMenu={(e) => {
-                  e.preventDefault();
-                  handleTimeClear(rotation, index, 'exitTime');
-                }}
-              >
-                <span className="text-xs text-gray-600 font-medium">WYJŚCIE</span>
-                <span className="font-mono font-bold text-lg">
-                  {formatTime(entry.exitTime) || '—:—'}
-                </span>
+              {/* BAR label + Exit Time */}
+              <div className="grid grid-rows-[auto_1fr]">
+                <div className="border-b border-black p-1 bg-gray-100 text-center">
+                  <span className="text-xs font-bold">BAR</span>
+                </div>
+                <div
+                  className="p-3 flex items-center justify-center cursor-pointer hover:bg-gray-100 bg-white"
+                  onClick={() => handleTimeSet(rotation, index, 'exitTime')}
+                  onContextMenu={(e) => {
+                    e.preventDefault();
+                    handleTimeClear(rotation, index, 'exitTime');
+                  }}
+                >
+                  <span className="font-mono font-bold text-xl">
+                    {formatTime(entry.exitTime) || '—:—'}
+                  </span>
+                </div>
               </div>
             </div>
           );
@@ -225,28 +240,33 @@ export default function RotationBoard() {
       </Card>
 
       {/* Rotation Board */}
-      <Card className="overflow-hidden">
+      <Card className="overflow-hidden border-4 border-black">
         <div className="overflow-x-auto">
-          <div className="min-w-[800px]">
-            {/* Header row */}
-            <div className="grid grid-cols-[80px_repeat(4,1fr)] gap-0 bg-yellow-400 border-b-2 border-gray-800">
-              <div className="border-r-2 border-gray-800 p-3 flex items-center justify-center font-bold">
-                ROTA
-              </div>
-              <div className="border-r-2 border-gray-800 p-3 flex items-center justify-center font-bold">1</div>
-              <div className="border-r-2 border-gray-800 p-3 flex items-center justify-center font-bold">2</div>
-              <div className="border-r-2 border-gray-800 p-3 flex items-center justify-center font-bold">3</div>
-              <div className="p-3 flex items-center justify-center font-bold">4</div>
+          <div className="min-w-[900px]">
+            {/* Top header - unit name */}
+            <div className="bg-yellow-400 border-b-2 border-black p-3 text-center">
+              <h3 className="font-black text-lg uppercase">Tablica Rot w Aparatach - Jednostka OSP</h3>
             </div>
 
-            {/* Rotation 1 */}
-            {renderRotationRow('rotation1', 'ROTA 1', 'bg-yellow-200')}
+            {/* Header row - yellow */}
+            <div className="grid grid-cols-[100px_repeat(4,1fr)] gap-0 bg-yellow-400 border-b-2 border-black">
+              <div className="border-r-2 border-black p-4 flex items-center justify-center">
+                <span className="font-black text-sm">ROTA</span>
+              </div>
+              <div className="border-r-2 border-black p-4 flex items-center justify-center font-black text-2xl">1</div>
+              <div className="border-r-2 border-black p-4 flex items-center justify-center font-black text-2xl">2</div>
+              <div className="border-r-2 border-black p-4 flex items-center justify-center font-black text-2xl">3</div>
+              <div className="p-4 flex items-center justify-center font-black text-2xl">4</div>
+            </div>
 
-            {/* Rotation 2 */}
-            {renderRotationRow('rotation2', 'ROTA 2', 'bg-blue-200')}
+            {/* Rotation 1 - yellow number */}
+            {renderRotationRow('rotation1', '1', 'bg-yellow-300')}
 
-            {/* RIT Rotation */}
-            {renderRotationRow('ritRotation', 'ROTA RIT', 'bg-red-200')}
+            {/* Rotation 2 - blue number */}
+            {renderRotationRow('rotation2', '2', 'bg-blue-300')}
+
+            {/* RIT Rotation - red number */}
+            {renderRotationRow('ritRotation', 'R', 'bg-red-400')}
           </div>
         </div>
       </Card>
