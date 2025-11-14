@@ -158,13 +158,13 @@ export default function Home() {
                     <span className="font-semibold text-[10px] md:text-sm md:hidden">Poszk</span>
                     <span className="font-semibold hidden md:inline">Poszkodowani</span>
                   </TabsTrigger>
-                  <TabsTrigger value="resources" className="flex flex-col items-center gap-0.5 data-[state=active]:bg-white data-[state=active]:shadow-sm text-xs px-2.5 py-2 whitespace-nowrap min-h-[56px] min-w-[56px] touch-manipulation relative">
-                    <Package className="w-7 h-7 md:w-4 md:h-4" />
-                    {currentIncident.resources.length > 0 && (
-                      <Badge variant="secondary" className="absolute top-1 right-1 text-[10px] font-bold min-w-[18px] h-[18px] flex items-center justify-center p-0 md:relative md:top-auto md:right-auto">{currentIncident.resources.length}</Badge>
+                  <TabsTrigger value="photos" className="flex flex-col items-center gap-0.5 data-[state=active]:bg-white data-[state=active]:shadow-sm text-xs px-2.5 py-2 whitespace-nowrap min-h-[56px] min-w-[56px] touch-manipulation relative">
+                    <Camera className="w-7 h-7 md:w-4 md:h-4" />
+                    {currentIncident.photos.length > 0 && (
+                      <Badge variant="secondary" className="absolute top-1 right-1 text-[10px] font-bold min-w-[18px] h-[18px] flex items-center justify-center p-0 md:relative md:top-auto md:right-auto">{currentIncident.photos.length}</Badge>
                     )}
-                    <span className="font-semibold text-[10px] md:text-sm md:hidden">Siły</span>
-                    <span className="font-semibold hidden md:inline">Siły</span>
+                    <span className="font-semibold text-[10px] md:text-sm md:hidden">Zdjęć</span>
+                    <span className="font-semibold hidden md:inline">Zdjęcia</span>
                   </TabsTrigger>
                   <TabsTrigger value="notes" className="flex flex-col items-center gap-0.5 data-[state=active]:bg-white data-[state=active]:shadow-sm text-xs px-2.5 py-2 whitespace-nowrap min-h-[56px] min-w-[56px] touch-manipulation relative">
                     <StickyNote className="w-7 h-7 md:w-4 md:h-4" />
@@ -174,13 +174,13 @@ export default function Home() {
                     <span className="font-semibold text-[10px] md:text-sm md:hidden">Notat</span>
                     <span className="font-semibold hidden md:inline">Notatki</span>
                   </TabsTrigger>
-                  <TabsTrigger value="photos" className="flex flex-col items-center gap-0.5 data-[state=active]:bg-white data-[state=active]:shadow-sm text-xs px-2.5 py-2 whitespace-nowrap min-h-[56px] min-w-[56px] touch-manipulation relative">
-                    <Camera className="w-7 h-7 md:w-4 md:h-4" />
-                    {currentIncident.photos.length > 0 && (
-                      <Badge variant="secondary" className="absolute top-1 right-1 text-[10px] font-bold min-w-[18px] h-[18px] flex items-center justify-center p-0 md:relative md:top-auto md:right-auto">{currentIncident.photos.length}</Badge>
+                  <TabsTrigger value="resources" className="flex flex-col items-center gap-0.5 data-[state=active]:bg-white data-[state=active]:shadow-sm text-xs px-2.5 py-2 whitespace-nowrap min-h-[56px] min-w-[56px] touch-manipulation relative">
+                    <Package className="w-7 h-7 md:w-4 md:h-4" />
+                    {currentIncident.resources.length > 0 && (
+                      <Badge variant="secondary" className="absolute top-1 right-1 text-[10px] font-bold min-w-[18px] h-[18px] flex items-center justify-center p-0 md:relative md:top-auto md:right-auto">{currentIncident.resources.length}</Badge>
                     )}
-                    <span className="font-semibold text-[10px] md:text-sm md:hidden">Zdjęć</span>
-                    <span className="font-semibold hidden md:inline">Zdjęcia</span>
+                    <span className="font-semibold text-[10px] md:text-sm md:hidden">Siły</span>
+                    <span className="font-semibold hidden md:inline">Siły</span>
                   </TabsTrigger>
                 </TabsList>
                 {/* Scroll indicator */}
