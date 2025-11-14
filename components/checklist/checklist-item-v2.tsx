@@ -128,7 +128,7 @@ export default function ChecklistItemV2({
       <>
         <div
           className={cn(
-            'flex items-center gap-2 px-3 py-2 border-l-4 rounded-r transition-all duration-150',
+            'border-l-4 rounded-r transition-all duration-150',
             'hover:bg-gray-50 cursor-pointer group',
             getPriorityColor(),
             isCompleted && 'opacity-60',
@@ -137,108 +137,113 @@ export default function ChecklistItemV2({
           )}
           onClick={() => onToggleSelect?.(item.id)}
         >
-          {/* Checkbox - tylko gdy selection enabled */}
-          {onToggleSelect && (
-            <Checkbox
-              checked={selected}
-              onCheckedChange={() => onToggleSelect(item.id)}
-              onClick={(e) => e.stopPropagation()}
-              className="flex-shrink-0"
-            />
-          )}
+          {/* Main row */}
+          <div className="flex items-center gap-2 px-3 py-2">
+            {/* Checkbox - tylko gdy selection enabled */}
+            {onToggleSelect && (
+              <Checkbox
+                checked={selected}
+                onCheckedChange={() => onToggleSelect(item.id)}
+                onClick={(e) => e.stopPropagation()}
+                className="flex-shrink-0"
+              />
+            )}
 
-          {/* Status Icon - mniejszy */}
-          <div className="flex-shrink-0">{getStatusIcon()}</div>
+            {/* Status Icon - mniejszy */}
+            <div className="flex-shrink-0">{getStatusIcon()}</div>
 
-          {/* Title - truncate */}
-          <div className="flex-1 min-w-0">
-            <span
+            {/* Title - truncate */}
+            <div className="flex-1 min-w-0">
+              <span
+                className={cn(
+                  'text-sm font-medium',
+                  isCompleted && 'line-through text-gray-500',
+                  isSkipped && 'line-through text-gray-400'
+                )}
+              >
+                {item.title}
+              </span>
+            </div>
+
+            {/* Priority emoji - tylko dla HIGH i CRITICAL */}
+            {item.priority === 'CRITICAL' && <span className="text-sm flex-shrink-0">🚨</span>}
+            {item.priority === 'HIGH' && <span className="text-sm flex-shrink-0">⚠️</span>}
+
+            {/* Duration - kompaktowy */}
+            {item.estimatedDuration && (
+              <span className="text-xs text-gray-500 flex-shrink-0">
+                {item.estimatedDuration}m
+              </span>
+            )}
+
+            {/* Actions - pokazują się na hover lub gdy in progress */}
+            <div
               className={cn(
-                'text-sm font-medium',
-                isCompleted && 'line-through text-gray-500',
-                isSkipped && 'line-through text-gray-400'
+                'flex gap-1 flex-shrink-0 transition-opacity',
+                !isInProgress && 'opacity-0 group-hover:opacity-100'
               )}
+              onClick={(e) => e.stopPropagation()}
             >
-              {item.title}
-            </span>
+              {/* Przycisk notatki */}
+              <Button
+                onClick={handleToggleNoteEdit}
+                size="sm"
+                variant="ghost"
+                className="h-7 w-7 p-0 hover:bg-gray-200"
+                title={item.notes ? "Edytuj notatkę" : "Dodaj notatkę"}
+              >
+                <StickyNote className="w-3.5 h-3.5" />
+              </Button>
+
+              {!isCompleted && !isSkipped && (
+                <>
+                  {!isInProgress ? (
+                    <Button
+                      onClick={handleStart}
+                      size="sm"
+                      className="h-7 w-7 p-0 bg-blue-500 hover:bg-blue-600"
+                      title="Rozpocznij"
+                    >
+                      <Play className="w-3.5 h-3.5" />
+                    </Button>
+                  ) : (
+                    <Button
+                      onClick={handleComplete}
+                      size="sm"
+                      className="h-7 w-7 p-0 bg-green-500 hover:bg-green-600"
+                      title="Zakończ"
+                    >
+                      <Check className="w-3.5 h-3.5" />
+                    </Button>
+                  )}
+                  <Button
+                    onClick={() => setShowSkipDialog(true)}
+                    size="sm"
+                    variant="ghost"
+                    className="h-7 w-7 p-0 hover:bg-gray-200"
+                    title="Pomiń"
+                  >
+                    <XCircle className="w-3.5 h-3.5" />
+                  </Button>
+                </>
+              )}
+            </div>
           </div>
 
-          {/* Priority emoji - tylko dla HIGH i CRITICAL */}
-          {item.priority === 'CRITICAL' && <span className="text-sm">🚨</span>}
-          {item.priority === 'HIGH' && <span className="text-sm">⚠️</span>}
-
-          {/* Note indicator - zawsze widoczny gdy są notatki */}
+          {/* Note row - pod tytułem */}
           {item.notes && (
-            <div className="flex items-center gap-1 flex-shrink-0 text-blue-600">
-              <StickyNote className="w-3.5 h-3.5" />
-              <span className="text-xs font-medium truncate max-w-[100px]">{item.notes}</span>
+            <div className="px-3 pb-2 pl-[52px]">
+              <div className="flex items-start gap-1 text-blue-600">
+                <StickyNote className="w-3 h-3 mt-0.5 flex-shrink-0" />
+                <span className="text-xs font-medium leading-tight">{item.notes}</span>
+              </div>
             </div>
           )}
-
-          {/* Duration - kompaktowy */}
-          {item.estimatedDuration && (
-            <span className="text-xs text-gray-500 flex-shrink-0">
-              {item.estimatedDuration}m
-            </span>
-          )}
-
-          {/* Actions - pokazują się na hover lub gdy in progress */}
-          <div
-            className={cn(
-              'flex gap-1 flex-shrink-0 transition-opacity',
-              !isInProgress && 'opacity-0 group-hover:opacity-100'
-            )}
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Przycisk notatki */}
-            <Button
-              onClick={handleToggleNoteEdit}
-              size="sm"
-              variant="ghost"
-              className="h-7 w-7 p-0 hover:bg-gray-200"
-              title={item.notes ? "Edytuj notatkę" : "Dodaj notatkę"}
-            >
-              <StickyNote className="w-3.5 h-3.5" />
-            </Button>
-
-            {!isCompleted && !isSkipped && (
-              <>
-                {!isInProgress ? (
-                  <Button
-                    onClick={handleStart}
-                    size="sm"
-                    className="h-7 w-7 p-0 bg-blue-500 hover:bg-blue-600"
-                    title="Rozpocznij"
-                  >
-                    <Play className="w-3.5 h-3.5" />
-                  </Button>
-                ) : (
-                  <Button
-                    onClick={handleComplete}
-                    size="sm"
-                    className="h-7 w-7 p-0 bg-green-500 hover:bg-green-600"
-                    title="Zakończ"
-                  >
-                    <Check className="w-3.5 h-3.5" />
-                  </Button>
-                )}
-                <Button
-                  onClick={() => setShowSkipDialog(true)}
-                  size="sm"
-                  variant="ghost"
-                  className="h-7 w-7 p-0 hover:bg-gray-200"
-                  title="Pomiń"
-                >
-                  <XCircle className="w-3.5 h-3.5" />
-                </Button>
-              </>
-            )}
-          </div>
         </div>
 
         {/* Note editor - compact view */}
         {isEditingNote && (
-          <div className="px-3 pb-2 space-y-1.5 animate-slide-up">
+          <div className="px-3 pb-2 pl-[52px] space-y-1.5 animate-slide-up">
             <Textarea
               value={note}
               onChange={(e) => setNote(e.target.value)}
