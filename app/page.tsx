@@ -10,6 +10,7 @@ import FloatingActionMenu from '@/components/incident/floating-action-menu';
 import CasualtiesList from '@/components/incident/casualties-list';
 import NotesList from '@/components/incident/notes-list';
 import PhotosList from '@/components/incident/photos-list';
+import RotationBoard from '@/components/incident/rotation-board';
 import dynamic from 'next/dynamic';
 import { IncidentType } from '@/types/incident';
 import { Flame, FileText, Users, Package, StickyNote, Camera, X } from 'lucide-react';
@@ -37,7 +38,7 @@ export default function Home() {
   const { currentIncident, createIncident, clearCurrentIncident } = useIncidentStore();
   const getTemplatesByType = useChecklistStore(state => state.getTemplatesByType);
 
-  const [activeTab, setActiveTab] = useState<'checklist' | 'casualties' | 'resources' | 'notes' | 'photos'>('checklist');
+  const [activeTab, setActiveTab] = useState<'checklist' | 'rotation' | 'casualties' | 'resources' | 'notes' | 'photos'>('checklist');
   const [showIncidentSelector, setShowIncidentSelector] = useState(false);
   const [isCriticalRotation, setIsCriticalRotation] = useState(false);
 
@@ -142,6 +143,10 @@ export default function Home() {
                   <FileText className="w-3.5 h-3.5 md:w-4 md:h-4" />
                   <span>Lista</span>
                 </TabsTrigger>
+                <TabsTrigger value="rotation" className="flex items-center gap-1 md:gap-2 data-[state=active]:bg-white data-[state=active]:shadow-sm text-xs md:text-sm px-2 md:px-3 py-1.5 md:py-2 whitespace-nowrap">
+                  <Users className="w-3.5 h-3.5 md:w-4 md:h-4" />
+                  <span>Rota w aparatach</span>
+                </TabsTrigger>
                 <TabsTrigger value="casualties" className="flex items-center gap-1 md:gap-2 data-[state=active]:bg-white data-[state=active]:shadow-sm text-xs md:text-sm px-2 md:px-3 py-1.5 md:py-2 whitespace-nowrap">
                   <Users className="w-3.5 h-3.5 md:w-4 md:h-4" />
                   <span className="hidden sm:inline">Poszkodowani</span>
@@ -185,6 +190,10 @@ export default function Home() {
                   categories={currentIncident.checklists}
                   onCriticalRotation={setIsCriticalRotation}
                 />
+              </TabsContent>
+
+              <TabsContent value="rotation" className="mt-0 p-4">
+                <RotationBoard />
               </TabsContent>
 
               <TabsContent value="casualties" className="mt-0 p-4">
