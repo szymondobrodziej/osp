@@ -141,50 +141,97 @@ export default function CasualtiesList() {
         </Button>
       </div>
 
-      {/* Instrukcja - karta informacyjna */}
-      <Card className="p-4 bg-blue-50 border-blue-200">
+      {/* Instrukcja medyczna dla strażaka */}
+      <Card className="p-4 bg-red-50 border-red-200">
         <div className="flex items-start gap-3">
-          <Info className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+          <AlertCircle className="w-6 h-6 text-red-600 flex-shrink-0 mt-0.5" />
           <div className="space-y-2">
-            <h4 className="font-semibold text-blue-900">
-              📋 Jak korzystać z modułu Poszkodowani
+            <h4 className="font-bold text-red-900 text-base">
+              🚑 INSTRUKCJA OCENY POSZKODOWANEGO - PIERWSZA POMOC
             </h4>
-            <div className="text-sm text-blue-800 space-y-1">
-              <p>
-                <strong>1. Dodaj poszkodowanego</strong> - Kliknij przycisk "Dodaj
-                poszkodowanego" i wypełnij podstawowe dane (imię, wiek, stan).
-              </p>
-              <p>
-                <strong>2. Przeprowadź ocenę pierwszej pomocy</strong> - Kliknij ikonę{' '}
-                <Stethoscope className="w-4 h-4 inline" /> przy poszkodowanym, aby
-                otworzyć pełny algorytm oceny:
-              </p>
-              <ul className="list-disc list-inside pl-4 space-y-0.5">
-                <li>
-                  <strong>Grupa wiekowa</strong> - Wybierz: Dorośli / Dzieci / Niemowlęta
-                  / Przypadki specjalne
-                </li>
-                <li>
-                  <strong>ACVPU</strong> - Oceń stan świadomości (A/C/V/P/U)
-                </li>
-                <li>
-                  <strong>ABC</strong> - Drogi oddechowe / Oddychanie / Krążenie (jeśli
-                  wymagane)
-                </li>
-                <li>
-                  <strong>Badanie urazowe</strong> - Head-to-Toe (7 obszarów ciała)
-                </li>
-                <li>
-                  <strong>SAMPLE</strong> - Historia medyczna
-                </li>
-              </ul>
-              <p className="mt-2">
-                <strong>⚠️ Alerty:</strong> System automatycznie wyświetli{' '}
-                <span className="text-red-600 font-semibold">🔴 CZERWONE</span> alerty
-                dla stanów krytycznych (np. brak oddechu, krwawienie tętnicze) oraz{' '}
-                <span className="text-yellow-600 font-semibold">⚠️ POMARAŃCZOWE</span>{' '}
-                ostrzeżenia dla stanów wymagających uwagi.
-              </p>
+            <div className="text-sm text-red-900 space-y-2">
+              {/* ACVPU */}
+              <div>
+                <p className="font-semibold">1️⃣ OCENA ŚWIADOMOŚCI (ACVPU):</p>
+                <ul className="list-disc list-inside pl-2 space-y-0.5 text-xs">
+                  <li>
+                    <strong>A (Przytomny)</strong> - Przytomny, reaguje, zorientowany →
+                    Badanie urazowe
+                  </li>
+                  <li>
+                    <strong>C (Zdezorientowany)</strong> - Zdezorientowany, senny → Badanie
+                    urazowe
+                  </li>
+                  <li>
+                    <strong>V (Głos)</strong> - Reaguje tylko na głos → Badanie ABC
+                  </li>
+                  <li>
+                    <strong>P (Ból)</strong> - Reaguje tylko na ból → Badanie ABC
+                  </li>
+                  <li>
+                    <strong className="text-red-700">U (Nie reaguje)</strong> - Nie reaguje
+                    → <strong>ABC + PODEJRZEWAJ NZK!</strong>
+                  </li>
+                </ul>
+              </div>
+
+              {/* ABC */}
+              <div>
+                <p className="font-semibold">2️⃣ BADANIE ABC (jeśli V/P/U):</p>
+                <ul className="list-disc list-inside pl-2 space-y-0.5 text-xs">
+                  <li>
+                    <strong>A (Drogi oddechowe)</strong> - Usuń ciała obce, udrożnij drogi
+                    oddechowe (czoło-żuchwa lub uniesienie żuchwy przy urazie kręgosłupa)
+                  </li>
+                  <li>
+                    <strong>B (Oddychanie)</strong> - Policz oddechy/min:{' '}
+                    <span className="text-green-700">10-20 OK</span>,{' '}
+                    <span className="text-red-700">&lt;10 lub &gt;20 UWAGA</span>,{' '}
+                    <strong className="text-red-700">0 = RKO!</strong>
+                  </li>
+                  <li>
+                    <strong>C (Krążenie)</strong> - Sprawdź tętno, krwawienie:{' '}
+                    <strong className="text-red-700">
+                      Tętnicze = TAMUJ KRWOTOK!
+                    </strong>
+                    , Brak tętna = <strong className="text-red-700">RKO!</strong>
+                  </li>
+                </ul>
+              </div>
+
+              {/* Badanie urazowe */}
+              <div>
+                <p className="font-semibold">
+                  3️⃣ BADANIE URAZOWE (Od głowy do stóp):
+                </p>
+                <p className="text-xs pl-2">
+                  Sprawdź: Głowa/Szyja → Klatka → Brzuch → Miednica → Kończyny → Plecy
+                  (DEFORMACJE, OTARCIA, RANY, TKLIWOŚĆ, OBRZĘKI)
+                </p>
+              </div>
+
+              {/* SAMPLE */}
+              <div>
+                <p className="font-semibold">4️⃣ SAMPLE (Wywiad):</p>
+                <p className="text-xs pl-2">
+                  <strong>O</strong>bjawy, <strong>A</strong>lergie,{' '}
+                  <strong>L</strong>eki, <strong>P</strong>rzeszłość medyczna,{' '}
+                  <strong>O</strong>statni posiłek, <strong>Z</strong>darzenie
+                </p>
+              </div>
+
+              {/* Alerty */}
+              <div className="pt-2 border-t border-red-300">
+                <p className="font-bold text-red-700">
+                  ⚠️ NATYCHMIASTOWE DZIAŁANIE:
+                </p>
+                <ul className="list-disc list-inside pl-2 space-y-0.5 text-xs">
+                  <li>Brak oddechu (0/min) → <strong>RKO!</strong></li>
+                  <li>Brak tętna → <strong>RKO!</strong></li>
+                  <li>Krwawienie tętnicze → <strong>TAMUJ KRWOTOK!</strong></li>
+                  <li>Drogi niedrożne → <strong>UDROŻNIJ!</strong></li>
+                </ul>
+              </div>
             </div>
           </div>
         </div>
