@@ -126,9 +126,77 @@ export default function IncidentHeaderV2({ incident }: IncidentHeaderV2Props) {
       {/* Status bar - cienki */}
       <div className={cn('h-1', getStatusColor())} />
 
-      {/* JEDNA LINIA - wszystko najważniejsze */}
-      <div className="px-2 md:px-4 py-2">
-        <div className="flex items-center gap-2 md:gap-3 flex-wrap">
+      {/* MOBILE: 2 linie kompaktowe */}
+      <div className="md:hidden px-2 py-2 space-y-2">
+        {/* Linia 1: Timer + Status + Priority + Title */}
+        <div className="flex items-center gap-2">
+          {/* Timer */}
+          <div className={cn(
+            'flex items-center gap-1.5 px-2.5 py-1.5 rounded',
+            isCriticalTime ? 'bg-red-100 animate-pulse' : 'bg-gray-100'
+          )}>
+            <Clock className={cn('w-5 h-5', isCriticalTime ? 'text-red-600' : 'text-gray-600')} />
+            <span className={cn(
+              'font-mono font-bold text-lg',
+              isCriticalTime ? 'text-red-600' : 'text-gray-900'
+            )}>
+              {formatElapsedTime(elapsedSeconds)}
+            </span>
+          </div>
+
+          {/* Priority emoji only */}
+          <div className="text-2xl">
+            {incident.priority === 'CRITICAL' && '🚨'}
+            {incident.priority === 'HIGH' && '⚠️'}
+            {incident.priority === 'MEDIUM' && '⚡'}
+            {incident.priority === 'LOW' && 'ℹ️'}
+          </div>
+
+          {/* Title */}
+          <div className="flex items-center gap-1.5 flex-1 min-w-0">
+            <Flame className="w-5 h-5 text-red-600 flex-shrink-0" />
+            <h1 className="text-sm font-bold text-gray-900 truncate">{incident.title}</h1>
+          </div>
+
+          {/* Next Action */}
+          {nextAction && (
+            <Button
+              onClick={nextAction.action}
+              className={cn('h-10 text-sm font-bold px-3 flex-shrink-0', nextAction.color)}
+            >
+              {nextAction.label}
+            </Button>
+          )}
+        </div>
+
+        {/* Linia 2: Progress + Location */}
+        <div className="flex items-center gap-2">
+          {/* Progress */}
+          <div className="flex items-center gap-2 flex-1">
+            <Badge variant="outline" className="font-mono text-xs">
+              {progress.percentage}%
+            </Badge>
+            <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-green-600 transition-all duration-300"
+                style={{ width: `${progress.percentage}%` }}
+              />
+            </div>
+          </div>
+
+          {/* Location - tylko ikona + skrót */}
+          <div className="flex items-center gap-1.5">
+            <MapPin className="w-4 h-4 text-red-600 flex-shrink-0" />
+            <span className="text-xs font-medium text-gray-700 truncate max-w-[100px]">
+              {incident.location.address.split(',')[0]}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* DESKTOP: 1 linia jak było */}
+      <div className="hidden md:block px-4 py-2">
+        <div className="flex items-center gap-3 flex-wrap">
           {/* Timer - kompaktowy */}
           <div className={cn(
             'flex items-center gap-1.5 px-2 py-1 rounded',
@@ -136,7 +204,7 @@ export default function IncidentHeaderV2({ incident }: IncidentHeaderV2Props) {
           )}>
             <Clock className={cn('w-4 h-4', isCriticalTime ? 'text-red-600' : 'text-gray-600')} />
             <span className={cn(
-              'font-mono font-bold text-base md:text-lg',
+              'font-mono font-bold text-lg',
               isCriticalTime ? 'text-red-600' : 'text-gray-900'
             )}>
               {formatElapsedTime(elapsedSeconds)}
@@ -159,7 +227,7 @@ export default function IncidentHeaderV2({ incident }: IncidentHeaderV2Props) {
           {/* Title - truncate */}
           <div className="flex items-center gap-1.5 flex-1 min-w-0">
             <Flame className="w-4 h-4 text-red-600 flex-shrink-0" />
-            <h1 className="text-sm md:text-base font-bold text-gray-900 truncate">{incident.title}</h1>
+            <h1 className="text-base font-bold text-gray-900 truncate">{incident.title}</h1>
           </div>
 
           {/* Progress - kompaktowy */}
@@ -167,7 +235,7 @@ export default function IncidentHeaderV2({ incident }: IncidentHeaderV2Props) {
             <Badge variant="outline" className="font-mono text-xs">
               {progress.percentage}%
             </Badge>
-            <div className="w-16 md:w-24 h-2 bg-gray-200 rounded-full overflow-hidden">
+            <div className="w-24 h-2 bg-gray-200 rounded-full overflow-hidden">
               <div
                 className="h-full bg-green-600 transition-all duration-300"
                 style={{ width: `${progress.percentage}%` }}

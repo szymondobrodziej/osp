@@ -138,34 +138,35 @@ export default function Home() {
           {/* Modern Tabs */}
           <Card className="backdrop-blur-sm bg-white/80 border-white/20 shadow-xl animate-slide-up-delayed">
             <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as any)} className="w-full">
-              <TabsList className="w-full justify-start h-auto p-0.5 md:p-1 bg-gray-100/50 rounded-t-lg overflow-x-auto flex-nowrap">
-                <TabsTrigger value="checklist" className="flex items-center gap-1 md:gap-2 data-[state=active]:bg-white data-[state=active]:shadow-sm text-xs md:text-sm px-2 md:px-3 py-1.5 md:py-2 whitespace-nowrap">
-                  <FileText className="w-3.5 h-3.5 md:w-4 md:h-4" />
-                  <span>Lista</span>
+              <TabsList className="w-full justify-start h-auto p-1 bg-gray-100/50 rounded-t-lg overflow-x-auto flex-nowrap">
+                <TabsTrigger value="checklist" className="flex items-center gap-1.5 md:gap-2 data-[state=active]:bg-white data-[state=active]:shadow-sm text-sm md:text-sm px-3 md:px-3 py-3 md:py-2 whitespace-nowrap min-h-[48px] md:min-h-0">
+                  <FileText className="w-5 h-5 md:w-4 md:h-4" />
+                  <span className="font-semibold">Lista</span>
                 </TabsTrigger>
-                <TabsTrigger value="rotation" className="flex items-center gap-1 md:gap-2 data-[state=active]:bg-white data-[state=active]:shadow-sm text-xs md:text-sm px-2 md:px-3 py-1.5 md:py-2 whitespace-nowrap">
-                  <Users className="w-3.5 h-3.5 md:w-4 md:h-4" />
-                  <span>Rota w aparatach</span>
+                <TabsTrigger value="rotation" className="flex items-center gap-1.5 md:gap-2 data-[state=active]:bg-white data-[state=active]:shadow-sm text-sm md:text-sm px-3 md:px-3 py-3 md:py-2 whitespace-nowrap min-h-[48px] md:min-h-0">
+                  <Users className="w-5 h-5 md:w-4 md:h-4" />
+                  <span className="font-semibold hidden sm:inline">Rota</span>
+                  <span className="font-semibold sm:hidden">🔥</span>
                 </TabsTrigger>
-                <TabsTrigger value="casualties" className="flex items-center gap-1 md:gap-2 data-[state=active]:bg-white data-[state=active]:shadow-sm text-xs md:text-sm px-2 md:px-3 py-1.5 md:py-2 whitespace-nowrap">
-                  <Users className="w-3.5 h-3.5 md:w-4 md:h-4" />
-                  <span className="hidden sm:inline">Poszkodowani</span>
-                  <Badge variant="secondary" className="ml-0.5 md:ml-1 text-xs">{currentIncident.casualties.length}</Badge>
+                <TabsTrigger value="casualties" className="flex items-center gap-1.5 md:gap-2 data-[state=active]:bg-white data-[state=active]:shadow-sm text-sm md:text-sm px-3 md:px-3 py-3 md:py-2 whitespace-nowrap min-h-[48px] md:min-h-0">
+                  <Users className="w-5 h-5 md:w-4 md:h-4" />
+                  <span className="font-semibold hidden sm:inline">Poszkodowani</span>
+                  <Badge variant="secondary" className="ml-1 text-xs font-bold min-w-[24px] h-6 flex items-center justify-center">{currentIncident.casualties.length}</Badge>
                 </TabsTrigger>
-                <TabsTrigger value="resources" className="flex items-center gap-1 md:gap-2 data-[state=active]:bg-white data-[state=active]:shadow-sm text-xs md:text-sm px-2 md:px-3 py-1.5 md:py-2 whitespace-nowrap">
-                  <Package className="w-3.5 h-3.5 md:w-4 md:h-4" />
-                  <span className="hidden sm:inline">Siły</span>
-                  <Badge variant="secondary" className="ml-0.5 md:ml-1 text-xs">{currentIncident.resources.length}</Badge>
+                <TabsTrigger value="resources" className="flex items-center gap-1.5 md:gap-2 data-[state=active]:bg-white data-[state=active]:shadow-sm text-sm md:text-sm px-3 md:px-3 py-3 md:py-2 whitespace-nowrap min-h-[48px] md:min-h-0">
+                  <Package className="w-5 h-5 md:w-4 md:h-4" />
+                  <span className="font-semibold hidden sm:inline">Siły</span>
+                  <Badge variant="secondary" className="ml-1 text-xs font-bold min-w-[24px] h-6 flex items-center justify-center">{currentIncident.resources.length}</Badge>
                 </TabsTrigger>
-                <TabsTrigger value="notes" className="flex items-center gap-1 md:gap-2 data-[state=active]:bg-white data-[state=active]:shadow-sm text-xs md:text-sm px-2 md:px-3 py-1.5 md:py-2 whitespace-nowrap">
-                  <StickyNote className="w-3.5 h-3.5 md:w-4 md:h-4" />
-                  <span className="hidden sm:inline">Notatki</span>
-                  <Badge variant="secondary" className="ml-0.5 md:ml-1 text-xs">{currentIncident.notes.length}</Badge>
+                <TabsTrigger value="notes" className="flex items-center gap-1.5 md:gap-2 data-[state=active]:bg-white data-[state=active]:shadow-sm text-sm md:text-sm px-3 md:px-3 py-3 md:py-2 whitespace-nowrap min-h-[48px] md:min-h-0">
+                  <StickyNote className="w-5 h-5 md:w-4 md:h-4" />
+                  <span className="font-semibold hidden sm:inline">Notatki</span>
+                  <Badge variant="secondary" className="ml-1 text-xs font-bold min-w-[24px] h-6 flex items-center justify-center">{currentIncident.notes.length}</Badge>
                 </TabsTrigger>
-                <TabsTrigger value="photos" className="flex items-center gap-1 md:gap-2 data-[state=active]:bg-white data-[state=active]:shadow-sm text-xs md:text-sm px-2 md:px-3 py-1.5 md:py-2 whitespace-nowrap">
-                  <Camera className="w-3.5 h-3.5 md:w-4 md:h-4" />
-                  <span className="hidden sm:inline">Zdjęcia</span>
-                  <Badge variant="secondary" className="ml-0.5 md:ml-1 text-xs">{currentIncident.photos.length}</Badge>
+                <TabsTrigger value="photos" className="flex items-center gap-1.5 md:gap-2 data-[state=active]:bg-white data-[state=active]:shadow-sm text-sm md:text-sm px-3 md:px-3 py-3 md:py-2 whitespace-nowrap min-h-[48px] md:min-h-0">
+                  <Camera className="w-5 h-5 md:w-4 md:h-4" />
+                  <span className="font-semibold hidden sm:inline">Zdjęcia</span>
+                  <Badge variant="secondary" className="ml-1 text-xs font-bold min-w-[24px] h-6 flex items-center justify-center">{currentIncident.photos.length}</Badge>
                 </TabsTrigger>
               </TabsList>
 
