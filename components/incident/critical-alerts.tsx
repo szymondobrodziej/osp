@@ -161,7 +161,8 @@ export function useIncidentAlerts(incident: any) {
     const newAlerts: CriticalAlert[] = [];
 
     // Alert: Długi czas trwania (>30 min)
-    const start = incident.arrivedAt || incident.dispatchedAt || incident.reportedAt;
+    const startRaw = incident.arrivedAt || incident.dispatchedAt || incident.reportedAt;
+    const start = new Date(startRaw);
     const elapsedMinutes = Math.floor((Date.now() - start.getTime()) / 60000);
     
     if (elapsedMinutes > 30) {
