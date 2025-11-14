@@ -107,84 +107,100 @@ export default function ChecklistItemV2({
   const isSkipped = item.status === 'SKIPPED';
   const isInProgress = item.status === 'IN_PROGRESS';
 
+  // Ultra kompaktowy widok - jedna linia
   if (compact) {
     return (
       <>
-        <Card
+        <div
           className={cn(
-            'border-l-4 transition-all duration-200 hover:shadow-md cursor-pointer',
+            'flex items-center gap-2 px-3 py-2 border-l-4 rounded-r transition-all duration-150',
+            'hover:bg-gray-50 cursor-pointer group',
             getPriorityColor(),
-            isCompleted && 'opacity-70',
-            isSkipped && 'opacity-50',
-            selected && 'ring-2 ring-blue-500'
+            isCompleted && 'opacity-60',
+            isSkipped && 'opacity-40',
+            selected && 'ring-2 ring-blue-500 bg-blue-50'
           )}
           onClick={() => onToggleSelect?.(item.id)}
         >
-          <CardContent className="p-3">
-            <div className="flex items-center gap-3">
-              {/* Checkbox */}
-              {onToggleSelect && (
-                <Checkbox
-                  checked={selected}
-                  onCheckedChange={() => onToggleSelect(item.id)}
-                  onClick={(e) => e.stopPropagation()}
-                />
+          {/* Checkbox - tylko gdy selection enabled */}
+          {onToggleSelect && (
+            <Checkbox
+              checked={selected}
+              onCheckedChange={() => onToggleSelect(item.id)}
+              onClick={(e) => e.stopPropagation()}
+              className="flex-shrink-0"
+            />
+          )}
+
+          {/* Status Icon - mniejszy */}
+          <div className="flex-shrink-0">{getStatusIcon()}</div>
+
+          {/* Title - truncate */}
+          <div className="flex-1 min-w-0">
+            <span
+              className={cn(
+                'text-sm font-medium',
+                isCompleted && 'line-through text-gray-500',
+                isSkipped && 'line-through text-gray-400'
               )}
+            >
+              {item.title}
+            </span>
+          </div>
 
-              {/* Status Icon */}
-              <div className="flex-shrink-0">{getStatusIcon()}</div>
+          {/* Priority emoji - tylko dla HIGH i CRITICAL */}
+          {item.priority === 'CRITICAL' && <span className="text-sm">🚨</span>}
+          {item.priority === 'HIGH' && <span className="text-sm">⚠️</span>}
 
-              {/* Title */}
-              <div className="flex-1 min-w-0">
-                <h4
-                  className={cn(
-                    'font-semibold text-sm truncate',
-                    isCompleted && 'line-through text-gray-500'
-                  )}
-                >
-                  {item.title}
-                </h4>
-              </div>
+          {/* Duration - kompaktowy */}
+          {item.estimatedDuration && (
+            <span className="text-xs text-gray-500 flex-shrink-0">
+              {item.estimatedDuration}m
+            </span>
+          )}
 
-              {/* Priority Badge */}
-              {getPriorityBadge()}
-
-              {/* Duration */}
-              {item.estimatedDuration && (
-                <div className="flex items-center gap-1 text-xs text-gray-500">
-                  <Clock className="w-3 h-3" />
-                  <span>{item.estimatedDuration}m</span>
-                </div>
-              )}
-
-              {/* Actions */}
-              <div className="flex gap-1 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
-                {!isCompleted && !isSkipped && (
-                  <>
-                    {!isInProgress && (
-                      <Button onClick={handleStart} size="sm" className="h-7 bg-blue-500 hover:bg-blue-600 px-2">
-                        <Play className="w-3 h-3" />
-                      </Button>
-                    )}
-                    {isInProgress && (
-                      <Button onClick={handleComplete} size="sm" className="h-7 bg-green-500 hover:bg-green-600 px-2">
-                        <CheckCircle2 className="w-3 h-3" />
-                      </Button>
-                    )}
-                    <Button
-                      onClick={() => setShowSkipDialog(true)}
-                      size="sm"
-                      variant="outline"
-                      className="h-7 px-2"
-                    >
-                      <XCircle className="w-3 h-3" />
-                    </Button>
-                  </>
+          {/* Actions - pokazują się na hover lub gdy in progress */}
+          <div
+            className={cn(
+              'flex gap-1 flex-shrink-0 transition-opacity',
+              !isInProgress && 'opacity-0 group-hover:opacity-100'
+            )}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {!isCompleted && !isSkipped && (
+              <>
+                {!isInProgress ? (
+                  <Button
+                    onClick={handleStart}
+                    size="sm"
+                    className="h-7 w-7 p-0 bg-blue-500 hover:bg-blue-600"
+                    title="Rozpocznij"
+                  >
+                    <Play className="w-3.5 h-3.5" />
+                  </Button>
+                ) : (
+                  <Button
+                    onClick={handleComplete}
+                    size="sm"
+                    className="h-7 w-7 p-0 bg-green-500 hover:bg-green-600"
+                    title="Zakończ"
+                  >
+                    <Check className="w-3.5 h-3.5" />
+                  </Button>
                 )}
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+                <Button
+                  onClick={() => setShowSkipDialog(true)}
+                  size="sm"
+                  variant="ghost"
+                  className="h-7 w-7 p-0 hover:bg-gray-200"
+                  title="Pomiń"
+                >
+                  <XCircle className="w-3.5 h-3.5" />
+                </Button>
+              </>
+            )}
+          </div>
+        </div>
 
         <SkipDialog
           open={showSkipDialog}

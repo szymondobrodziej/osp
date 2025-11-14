@@ -24,7 +24,7 @@ export default function ChecklistViewV2({ categories }: ChecklistViewV2Props) {
     priority: 'ALL',
     category: 'ALL',
   });
-  const [viewMode, setViewMode] = useState<'normal' | 'compact'>('normal');
+  const [viewMode, setViewMode] = useState<'normal' | 'compact'>('compact');
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
 
   // Computed values
@@ -206,56 +206,51 @@ export default function ChecklistViewV2({ categories }: ChecklistViewV2Props) {
               <Card
                 key={category.id}
                 className={cn(
-                  'overflow-hidden transition-all duration-300 hover:shadow-lg animate-fade-in',
-                  isComplete && 'border-green-500 bg-green-50/30'
+                  'overflow-hidden transition-all duration-200 hover:shadow-md',
+                  isComplete && 'border-green-500 bg-green-50/20'
                 )}
-                style={{ animationDelay: `${index * 100}ms` }}
               >
-                {/* Category Header */}
-                <div className="w-full p-3 md:p-5 flex items-center justify-between bg-gradient-to-r from-gray-50 to-transparent border-b">
-                  <div className="flex items-center gap-2 md:gap-3 flex-1 min-w-0">
-                    {isComplete && <CheckCircle2 className="w-4 h-4 md:w-5 md:h-5 text-green-500 flex-shrink-0" />}
-                    <h3 className="text-base md:text-lg font-bold truncate">{category.name}</h3>
+                {/* Category Header - kompaktowy */}
+                <div className="px-3 py-2 flex items-center justify-between bg-gray-50 border-b">
+                  <div className="flex items-center gap-2 flex-1 min-w-0">
+                    {isComplete && <CheckCircle2 className="w-4 h-4 text-green-500 flex-shrink-0" />}
+                    <h3 className="text-sm font-bold truncate">{category.name}</h3>
                   </div>
 
-                  <div className="flex items-center gap-2 md:gap-4 flex-shrink-0">
-                    <div className="flex items-center gap-1.5 md:gap-2">
-                      <span className="text-xs md:text-sm font-medium text-gray-600">
-                        {progress.completed}/{progress.total}
-                      </span>
-                      <div className="w-16 md:w-32 h-2 md:h-2.5 bg-gray-200 rounded-full overflow-hidden">
-                        <div
-                          className={cn(
-                            'h-full transition-all duration-500',
-                            isComplete ? 'bg-green-500' : 'bg-gradient-to-r from-blue-500 to-blue-600'
-                          )}
-                          style={{ width: `${progress.percentage}%` }}
-                        />
-                      </div>
-                      <span className={cn(
-                        'text-xs md:text-sm font-bold w-8 md:w-12 text-right',
-                        isComplete ? 'text-green-600' : 'text-gray-700'
-                      )}>
-                        {progress.percentage}%
-                      </span>
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    <span className="text-xs text-gray-600">
+                      {progress.completed}/{progress.total}
+                    </span>
+                    <div className="w-16 h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                      <div
+                        className={cn(
+                          'h-full transition-all duration-300',
+                          isComplete ? 'bg-green-500' : 'bg-blue-500'
+                        )}
+                        style={{ width: `${progress.percentage}%` }}
+                      />
                     </div>
+                    <span className={cn(
+                      'text-xs font-bold w-8 text-right',
+                      isComplete ? 'text-green-600' : 'text-gray-700'
+                    )}>
+                      {progress.percentage}%
+                    </span>
                   </div>
                 </div>
 
-                {/* Items */}
-                <div className="p-2 md:p-5 bg-gradient-to-b from-gray-50/50 to-transparent">
-                  <div className="space-y-1.5 md:space-y-2">
-                    {category.items.map((item) => (
-                      <ChecklistItemComponent
-                        key={item.id}
-                        item={item}
-                        categoryId={category.id}
-                        compact={viewMode === 'compact'}
-                        selected={selectedItems.has(item.id)}
-                        onToggleSelect={handleToggleSelect}
-                      />
-                    ))}
-                  </div>
+                {/* Items - kompaktowe */}
+                <div className="p-2 space-y-0.5">
+                  {category.items.map((item) => (
+                    <ChecklistItemComponent
+                      key={item.id}
+                      item={item}
+                      categoryId={category.id}
+                      compact={viewMode === 'compact'}
+                      selected={selectedItems.has(item.id)}
+                      onToggleSelect={handleToggleSelect}
+                    />
+                  ))}
                 </div>
               </Card>
             );
