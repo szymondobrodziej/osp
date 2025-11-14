@@ -4,8 +4,10 @@ import { useState } from 'react';
 import { useIncidentStore } from '@/store/incident-store';
 import { useChecklistStore } from '@/store/checklist-store';
 import IncidentTypeSelector from '@/components/incident-type-selector';
-import IncidentHeader from '@/components/incident-header';
+import IncidentHeaderV2 from '@/components/incident/incident-header-v2';
 import ChecklistViewV2 from '@/components/checklist/checklist-view-v2';
+import FloatingActionMenu from '@/components/incident/floating-action-menu';
+import CriticalAlerts, { useIncidentAlerts } from '@/components/incident/critical-alerts';
 import dynamic from 'next/dynamic';
 import { IncidentType } from '@/types/incident';
 import { Flame, FileText, Users, Package, StickyNote, Camera, X } from 'lucide-react';
@@ -105,40 +107,30 @@ export default function Home() {
 
   // Główny widok akcji
   if (currentIncident) {
+    const { alerts, dismissAlert } = useIncidentAlerts(currentIncident);
+
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-        {/* Modern Header with Glassmorphism */}
-        <div className="sticky top-0 z-50 backdrop-blur-xl bg-gradient-to-r from-red-600 to-orange-600 border-b border-white/20 shadow-lg">
-          <div className="max-w-7xl mx-auto px-3 md:px-4 py-2 md:py-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 md:gap-3">
-                <div className="relative">
-                  <Flame className="w-6 h-6 md:w-8 md:h-8 text-white animate-pulse" />
-                  <div className="absolute inset-0 bg-white/30 blur-lg rounded-full" />
-                </div>
-                <div>
-                  <h1 className="text-lg md:text-2xl font-bold text-white">OSP Commander</h1>
-                  <p className="text-xs text-white/80 hidden md:block">Akcja w toku</p>
-                </div>
-              </div>
-              <Button
-                onClick={handleEndIncident}
-                variant="outline"
-                className="bg-white/10 border-white/30 text-white hover:bg-white/20 backdrop-blur-sm h-8 md:h-10 text-xs md:text-sm px-2 md:px-4"
-              >
-                <X className="w-3.5 h-3.5 md:w-4 md:h-4 md:mr-2" />
-                <span className="hidden md:inline">Zakończ akcję</span>
-              </Button>
-            </div>
-          </div>
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 pb-24">
+        {/* Critical Alerts */}
+        <CriticalAlerts alerts={alerts} onDismiss={dismissAlert} />
+
+        {/* Incident Header V2 - Sticky */}
+        <IncidentHeaderV2 incident={currentIncident} />
+
+        {/* End Action Button - Top Right */}
+        <div className="fixed top-4 right-4 z-30">
+          <Button
+            onClick={handleEndIncident}
+            variant="outline"
+            className="bg-white/90 border-red-300 text-red-600 hover:bg-red-50 backdrop-blur-sm h-10 text-sm px-4 shadow-lg"
+          >
+            <X className="w-4 h-4 mr-2" />
+            Zakończ akcję
+          </Button>
         </div>
 
         {/* Content */}
         <div className="max-w-7xl mx-auto p-2 md:p-4 space-y-3 md:space-y-4">
-          {/* Incident Header Card */}
-          <div className="animate-slide-up">
-            <IncidentHeader incident={currentIncident} />
-          </div>
 
           {/* Modern Tabs */}
           <Card className="backdrop-blur-sm bg-white/80 border-white/20 shadow-xl animate-slide-up-delayed">
@@ -224,6 +216,45 @@ export default function Home() {
             </Tabs>
           </Card>
         </div>
+
+        {/* Floating Action Menu */}
+        <FloatingActionMenu
+          onAddCasualty={() => {
+            setActiveTab('casualties');
+            // TODO: Open add casualty dialog
+          }}
+          onAddResource={() => {
+            setActiveTab('resources');
+            // TODO: Open add resource dialog
+          }}
+          onAddNote={() => {
+            setActiveTab('notes');
+            // TODO: Open add note dialog
+          }}
+          onTakePhoto={() => {
+            setActiveTab('photos');
+            // TODO: Open camera
+          }}
+          onEmergencyCall={() => {
+            // TODO: Emergency call dialog
+            window.location.href = 'tel:112';
+          }}
+          onRequestBackup={() => {
+            // TODO: Request backup dialog
+            alert('Funkcja wezwania wsparcia w przygotowaniu');
+          }}
+          onShowMap={() => {
+            setActiveTab('checklist');
+            // Scroll to map
+            setTimeout(() => {
+              document.querySelector('.leaflet-container')?.scrollIntoView({ behavior: 'smooth' });
+            }, 100);
+          }}
+          onRadioCheck={() => {
+            // TODO: Radio check dialog
+            alert('Funkcja sprawdzenia łączności w przygotowaniu');
+          }}
+        />
       </div>
     );
   }
