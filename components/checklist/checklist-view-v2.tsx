@@ -4,10 +4,11 @@ import { useState, useMemo, useCallback, useEffect } from 'react';
 import { ChecklistCategory, ChecklistItem as ChecklistItemType, ChecklistItemStatus, Priority } from '@/types/incident';
 import { useIncidentStore } from '@/store/incident-store';
 import ChecklistFiltersComponent, { ChecklistFilters } from './checklist-filters';
-import ChecklistStats, { ChecklistStatistics } from './checklist-stats';
 import ChecklistToolbar from './checklist-toolbar';
 import ChecklistItemComponent from './checklist-item-v2';
 import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
 import { CheckCircle2 } from 'lucide-react';
 
@@ -76,30 +77,13 @@ export default function ChecklistViewV2({ categories }: ChecklistViewV2Props) {
       .filter(Boolean) as ChecklistCategory[];
   }, [categories, filters]);
 
-  // Calculate statistics
-  const stats: ChecklistStatistics = useMemo(() => {
+  // Calculate simple statistics - tylko to co potrzebne
+  const stats = useMemo(() => {
     const total = allItems.length;
     const completed = allItems.filter(item => item.status === 'COMPLETED').length;
-    const inProgress = allItems.filter(item => item.status === 'IN_PROGRESS').length;
-    const pending = allItems.filter(item => item.status === 'PENDING').length;
-    const skipped = allItems.filter(item => item.status === 'SKIPPED').length;
     const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
 
-    const estimatedTimeTotal = allItems.reduce((sum, item) => sum + (item.estimatedDuration || 0), 0);
-    const estimatedTimeRemaining = allItems
-      .filter(item => item.status === 'PENDING' || item.status === 'IN_PROGRESS')
-      .reduce((sum, item) => sum + (item.estimatedDuration || 0), 0);
-
-    return {
-      total,
-      completed,
-      inProgress,
-      pending,
-      skipped,
-      percentage,
-      estimatedTimeTotal,
-      estimatedTimeRemaining,
-    };
+    return { total, completed, percentage };
   }, [allItems]);
 
   // Active filters count
@@ -173,9 +157,20 @@ export default function ChecklistViewV2({ categories }: ChecklistViewV2Props) {
   };
 
   return (
-    <div className="space-y-4">
-      {/* Statistics */}
-      <ChecklistStats stats={stats} compact={viewMode === 'compact'} />
+    <div className="space-y-3">
+      {/* Progress - jedna linia */}
+      <div className="flex items-center gap-3 p-3 bg-white rounded-lg border">
+        <div className="flex items-center gap-2">
+          <CheckCircle2 className="w-5 h-5 text-green-600" />
+          <span className="font-semibold text-sm">Postęp</span>
+        </div>
+        <div className="flex-1">
+          <Progress value={stats.percentage} className="h-2" />
+        </div>
+        <Badge variant="outline" className="font-mono text-sm">
+          {stats.completed}/{stats.total} • {stats.percentage}%
+        </Badge>
+      </div>
 
       {/* Filters */}
       <ChecklistFiltersComponent
