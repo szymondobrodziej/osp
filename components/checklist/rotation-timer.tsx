@@ -9,9 +9,10 @@ import { cn } from '@/lib/utils';
 
 interface RotationTimerProps {
   onRotationChange?: (rotation: 1 | 2 | null) => void;
+  onCriticalStateChange?: (isCritical: boolean) => void;
 }
 
-export default function RotationTimer({ onRotationChange }: RotationTimerProps) {
+export default function RotationTimer({ onRotationChange, onCriticalStateChange }: RotationTimerProps) {
   const [activeRotation, setActiveRotation] = useState<1 | 2 | null>(null);
 
   // Osobne timery dla każdej roty
@@ -50,8 +51,8 @@ export default function RotationTimer({ onRotationChange }: RotationTimerProps) 
   };
 
   const getWarningState = (seconds: number) => {
-    if (seconds >= 1200) return 'critical'; // 20+ min
-    if (seconds >= 900) return 'warning';   // 15+ min
+    if (seconds >= 900) return 'critical'; // 15+ min (zmieniono z 20 na 15)
+    if (seconds >= 300) return 'warning';   // 5+ min (zmieniono z 15 na 5)
     return 'normal';
   };
 
@@ -96,6 +97,11 @@ export default function RotationTimer({ onRotationChange }: RotationTimerProps) 
 
   const hasAnyCritical = rotation1State === 'critical' || rotation2State === 'critical';
   const hasAnyWarning = rotation1State === 'warning' || rotation2State === 'warning';
+
+  // Notify parent about critical state
+  useEffect(() => {
+    onCriticalStateChange?.(hasAnyCritical);
+  }, [hasAnyCritical, onCriticalStateChange]);
 
   return (
     <Card className={cn(
@@ -216,13 +222,13 @@ export default function RotationTimer({ onRotationChange }: RotationTimerProps) 
         {hasAnyCritical && (
           <Badge className="bg-red-600 animate-pulse">
             <AlertTriangle className="w-3 h-3 mr-1" />
-            ZMIEŃ ROTĘ!
+            15+ min - ZMIEŃ ROTĘ!
           </Badge>
         )}
         {hasAnyWarning && !hasAnyCritical && (
           <Badge className="bg-orange-500 animate-pulse">
             <AlertTriangle className="w-3 h-3 mr-1" />
-            15+ min
+            5+ min
           </Badge>
         )}
       </div>

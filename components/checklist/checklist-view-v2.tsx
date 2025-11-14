@@ -14,9 +14,10 @@ import { CheckCircle2 } from 'lucide-react';
 
 interface ChecklistViewV2Props {
   categories: ChecklistCategory[];
+  onCriticalRotation?: (isCritical: boolean) => void;
 }
 
-export default function ChecklistViewV2({ categories }: ChecklistViewV2Props) {
+export default function ChecklistViewV2({ categories, onCriticalRotation }: ChecklistViewV2Props) {
   // State
   const [activeRotation, setActiveRotation] = useState<1 | 2 | null>(null);
   const [viewMode, setViewMode] = useState<'normal' | 'compact'>('compact');
@@ -115,7 +116,10 @@ export default function ChecklistViewV2({ categories }: ChecklistViewV2Props) {
       </div>
 
       {/* Rotation Timer */}
-      <RotationTimer onRotationChange={setActiveRotation} />
+      <RotationTimer
+        onRotationChange={setActiveRotation}
+        onCriticalStateChange={onCriticalRotation}
+      />
 
       {/* Toolbar */}
       <ChecklistToolbar

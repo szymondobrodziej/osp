@@ -17,6 +17,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
 
 // Landing page components
 import Navbar from '@/components/landing/navbar';
@@ -38,6 +39,7 @@ export default function Home() {
 
   const [activeTab, setActiveTab] = useState<'checklist' | 'casualties' | 'resources' | 'notes' | 'photos'>('checklist');
   const [showIncidentSelector, setShowIncidentSelector] = useState(false);
+  const [isCriticalRotation, setIsCriticalRotation] = useState(false);
 
   const handleCreateIncident = (type: IncidentType) => {
     // Natychmiastowe rozpoczęcie zdarzenia - bez formularza!
@@ -110,7 +112,10 @@ export default function Home() {
   // Główny widok akcji
   if (currentIncident) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 pb-24">
+      <div className={cn(
+        "min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 pb-24 transition-all duration-300",
+        isCriticalRotation && "ring-8 ring-red-600 ring-inset animate-pulse"
+      )}>
         {/* Incident Header V2 - Sticky */}
         <IncidentHeaderV2 incident={currentIncident} />
 
@@ -176,7 +181,10 @@ export default function Home() {
                 )}
 
                 {/* Checklista */}
-                <ChecklistViewV2 categories={currentIncident.checklists} />
+                <ChecklistViewV2
+                  categories={currentIncident.checklists}
+                  onCriticalRotation={setIsCriticalRotation}
+                />
               </TabsContent>
 
               <TabsContent value="casualties" className="mt-0 p-4">
