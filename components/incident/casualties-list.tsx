@@ -70,7 +70,19 @@ export default function CasualtiesList() {
     const stored = localStorage.getItem('incident-casualties');
     if (stored) {
       try {
-        setCasualties(JSON.parse(stored));
+        const loaded = JSON.parse(stored);
+        // Migrate old data to new structure
+        const migrated = loaded.map((c: any) => ({
+          ...c,
+          ageGroup: c.ageGroup || null,
+          consciousness: c.consciousness || null,
+          vitalSigns: c.vitalSigns || [],
+          injuries: c.injuries || '',
+          actionsTaken: c.actionsTaken || '',
+          sampleNotes: c.sampleNotes || '',
+          additionalNotes: c.additionalNotes || '',
+        }));
+        setCasualties(migrated);
       } catch (e) {
         console.error('Failed to load casualties:', e);
       }
@@ -386,6 +398,7 @@ export default function CasualtiesList() {
                     />
                   </div>
                 </div>
+              )}
             </Card>
           ))
         )}
