@@ -114,9 +114,9 @@ export default function RotationBoard() {
     const entries = rotationData[rotation];
 
     return (
-      <div className="grid grid-cols-[100px_repeat(4,1fr)] gap-0 border-b-2 border-black">
+      <div className="grid grid-cols-[56px_repeat(4,1fr)] md:grid-cols-[100px_repeat(4,1fr)] gap-0 border-b-2 border-black">
         {/* Number Label */}
-        <div className={cn("flex items-center justify-center font-black text-4xl border-r-2 border-black py-8", numberBgColor)}>
+        <div className={cn("flex items-center justify-center font-black text-xl md:text-4xl border-r-2 border-black py-2 md:py-8", numberBgColor)}>
           {label}
         </div>
 
@@ -131,34 +131,35 @@ export default function RotationBoard() {
               entry.hasExited && "opacity-50 bg-gray-200"
             )}>
               {/* KONIEC button */}
-              <div className="border-b border-black p-1">
+              <div className="border-b border-black p-0.5 md:p-1">
                 <Button
                   size="sm"
                   variant={entry.hasExited ? "default" : "outline"}
                   className={cn(
-                    "w-full h-7 text-xs font-bold",
+                    "w-full h-6 md:h-7 text-[10px] md:text-xs font-bold",
                     entry.hasExited ? "bg-green-600 hover:bg-green-700" : "bg-white hover:bg-gray-100"
                   )}
                   onClick={() => handleToggleExited(rotation, index)}
                 >
-                  {entry.hasExited ? "✓ KONIEC" : "KONIEC"}
+                  {entry.hasExited ? "✓" : "KONIEC"}
                 </Button>
               </div>
 
               {/* CZAS label */}
-              <div className="border-b border-black p-1 bg-gray-100 text-center">
-                <span className="text-xs font-bold">CZAS</span>
+              <div className="border-b border-black p-0.5 md:p-1 bg-gray-100 text-center">
+                <span className="text-[10px] md:text-xs font-bold">CZAS</span>
               </div>
 
               {/* KONTROLA CZASU label */}
-              <div className="border-b border-black p-1 bg-gray-100 text-center">
-                <span className="text-xs font-bold">KONTROLA CZASU</span>
+              <div className="border-b border-black p-0.5 md:p-1 bg-gray-100 text-center">
+                <span className="text-[10px] md:text-xs font-bold hidden md:inline">KONTROLA CZASU</span>
+                <span className="text-[10px] font-bold md:hidden">KONTR.</span>
               </div>
 
               {/* Name + Entry Time */}
               <div
                 className={cn(
-                  "border-b border-black p-3 flex flex-col items-center justify-center cursor-pointer hover:opacity-80 transition-all min-h-[80px]",
+                  "border-b border-black p-1.5 md:p-3 flex flex-col items-center justify-center cursor-pointer hover:opacity-80 transition-all min-h-[60px] md:min-h-[80px]",
                   entry.hasExited ? "bg-gray-300" : timeColor
                 )}
                 onClick={() => handleCellClick(rotation, index, 'name')}
@@ -169,14 +170,14 @@ export default function RotationBoard() {
                     onChange={(e) => handleNameChange(rotation, index, e.target.value)}
                     onBlur={() => setEditingCell(null)}
                     autoFocus
-                    className="h-8 text-center font-bold text-sm"
+                    className="h-7 md:h-8 text-center font-bold text-xs md:text-sm"
                     placeholder="Nazwisko"
                   />
                 ) : (
                   <>
-                    <span className="font-bold text-sm mb-2">{entry.name || '—'}</span>
+                    <span className="font-bold text-xs md:text-sm mb-1 md:mb-2">{entry.name || '—'}</span>
                     <div
-                      className="font-mono font-bold text-xl cursor-pointer"
+                      className="font-mono font-bold text-base md:text-xl cursor-pointer"
                       onClick={(e) => {
                         e.stopPropagation();
                         handleTimeSet(rotation, index, 'entryTime');
@@ -190,7 +191,7 @@ export default function RotationBoard() {
                       {formatTime(entry.entryTime) || '—:—'}
                     </div>
                     {entry.entryTime && !entry.exitTime && (
-                      <Badge variant="secondary" className="mt-1 text-xs font-bold">
+                      <Badge variant="secondary" className="mt-0.5 md:mt-1 text-[10px] md:text-xs font-bold">
                         {elapsed} min
                       </Badge>
                     )}
@@ -200,12 +201,12 @@ export default function RotationBoard() {
 
               {/* BAR label + Pressure */}
               <div className="grid grid-rows-[auto_1fr]">
-                <div className="border-b border-black p-1 bg-gray-100 text-center">
-                  <span className="text-xs font-bold">BAR</span>
+                <div className="border-b border-black p-0.5 md:p-1 bg-gray-100 text-center">
+                  <span className="text-[10px] md:text-xs font-bold">BAR</span>
                 </div>
                 <div
                   className={cn(
-                    "p-3 flex items-center justify-center cursor-pointer hover:bg-gray-100",
+                    "p-1.5 md:p-3 flex items-center justify-center cursor-pointer hover:bg-gray-100",
                     entry.hasExited ? "bg-gray-300" : "bg-white"
                   )}
                   onClick={() => handleCellClick(rotation, index, 'pressureBar')}
@@ -217,13 +218,13 @@ export default function RotationBoard() {
                       onChange={(e) => handlePressureChange(rotation, index, e.target.value)}
                       onBlur={() => setEditingCell(null)}
                       autoFocus
-                      className="h-10 text-center font-bold text-xl w-20"
+                      className="h-8 md:h-10 text-center font-bold text-lg md:text-xl w-16 md:w-20"
                       placeholder="0"
                       min="0"
                       max="300"
                     />
                   ) : (
-                    <span className="font-bold text-3xl">
+                    <span className="font-bold text-xl md:text-3xl">
                       {entry.pressureBar ?? '—'}
                     </span>
                   )}
@@ -253,9 +254,33 @@ export default function RotationBoard() {
   const showWarningAlert = maxActiveTime >= 5 && maxActiveTime < 15;
 
   return (
-    <div className="space-y-4">
-      {/* Big Clock */}
-      <Card className="p-6 bg-gradient-to-br from-blue-50 to-blue-100 border-4 border-blue-600">
+    <div className="space-y-2 md:space-y-4">
+      {/* Compact Clock - Mobile */}
+      <Card className="md:hidden p-3 bg-gradient-to-br from-blue-50 to-blue-100 border-2 border-blue-600">
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <Clock className="w-8 h-8 text-blue-600" />
+            <div className="font-mono text-3xl font-black text-blue-900">
+              {currentTime.toLocaleTimeString('pl-PL', { hour: '2-digit', minute: '2-digit' })}
+            </div>
+          </div>
+          {/* Alert badge */}
+          {showCriticalAlert && (
+            <Badge className="bg-red-600 animate-pulse text-xs px-2 py-1">
+              <AlertTriangle className="w-3 h-3 mr-1" />
+              {maxActiveTime} MIN!
+            </Badge>
+          )}
+          {showWarningAlert && (
+            <Badge className="bg-orange-500 text-xs px-2 py-1">
+              {maxActiveTime} min
+            </Badge>
+          )}
+        </div>
+      </Card>
+
+      {/* Big Clock - Desktop */}
+      <Card className="hidden md:block p-6 bg-gradient-to-br from-blue-50 to-blue-100 border-4 border-blue-600">
         <div className="flex items-center justify-center gap-6">
           <Clock className="w-16 h-16 text-blue-600" />
           <div className="text-center">
@@ -285,31 +310,31 @@ export default function RotationBoard() {
         </div>
       </Card>
 
-      {/* Instructions */}
-      <Card className="p-3 bg-yellow-50 border-2 border-yellow-400">
+      {/* Instructions - Desktop only */}
+      <Card className="hidden md:block p-3 bg-yellow-50 border-2 border-yellow-400">
         <p className="text-sm text-center font-semibold text-gray-700">
           💡 Kliknij KONIEC aby oznaczyć zakończenie | Kliknij nazwisko/BAR aby edytować | Kliknij kontrolę czasu aby ustawić | PPM aby wyczyścić
         </p>
       </Card>
 
       {/* Rotation Board */}
-      <Card className="overflow-hidden border-4 border-black">
-        <div className="overflow-x-auto">
-          <div className="min-w-[900px]">
+      <Card className="overflow-hidden border-2 md:border-4 border-black">
+        <div className="overflow-x-auto scrollbar-hide">
+          <div className="min-w-full md:min-w-[900px]">
             {/* Top header - unit name */}
-            <div className="bg-yellow-400 border-b-2 border-black p-3 text-center">
-              <h3 className="font-black text-lg uppercase">Tablica Rot w Aparatach - Jednostka OSP</h3>
+            <div className="bg-yellow-400 border-b-2 border-black p-1.5 md:p-3 text-center">
+              <h3 className="font-black text-xs md:text-lg uppercase">Tablica Rot w Aparatach</h3>
             </div>
 
             {/* Header row - yellow */}
-            <div className="grid grid-cols-[100px_repeat(4,1fr)] gap-0 bg-yellow-400 border-b-2 border-black">
-              <div className="border-r-2 border-black p-4 flex items-center justify-center">
-                <span className="font-black text-sm">ROTA</span>
+            <div className="grid grid-cols-[56px_repeat(4,1fr)] md:grid-cols-[100px_repeat(4,1fr)] gap-0 bg-yellow-400 border-b-2 border-black">
+              <div className="border-r-2 border-black p-1 md:p-4 flex items-center justify-center">
+                <span className="font-black text-[10px] md:text-sm">ROTA</span>
               </div>
-              <div className="border-r-2 border-black p-4 flex items-center justify-center font-black text-2xl">1</div>
-              <div className="border-r-2 border-black p-4 flex items-center justify-center font-black text-2xl">2</div>
-              <div className="border-r-2 border-black p-4 flex items-center justify-center font-black text-2xl">3</div>
-              <div className="p-4 flex items-center justify-center font-black text-2xl">4</div>
+              <div className="border-r-2 border-black p-1 md:p-4 flex items-center justify-center font-black text-sm md:text-2xl">1</div>
+              <div className="border-r-2 border-black p-1 md:p-4 flex items-center justify-center font-black text-sm md:text-2xl">2</div>
+              <div className="border-r-2 border-black p-1 md:p-4 flex items-center justify-center font-black text-sm md:text-2xl">3</div>
+              <div className="p-1 md:p-4 flex items-center justify-center font-black text-sm md:text-2xl">4</div>
             </div>
 
             {/* Rotation 1 - yellow number */}
@@ -324,25 +349,25 @@ export default function RotationBoard() {
         </div>
       </Card>
 
-      {/* Legend */}
-      <Card className="p-4">
-        <h3 className="font-semibold mb-3">Legenda kolorów:</h3>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-white border-2 border-gray-300 rounded"></div>
-            <span className="text-sm">&lt; 5 min</span>
+      {/* Legend - Compact on mobile */}
+      <Card className="p-2 md:p-4">
+        <h3 className="font-semibold text-xs md:text-base mb-2 md:mb-3">Legenda kolorów:</h3>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3">
+          <div className="flex items-center gap-1 md:gap-2">
+            <div className="w-6 h-6 md:w-8 md:h-8 bg-white border-2 border-gray-300 rounded"></div>
+            <span className="text-xs md:text-sm">&lt; 5 min</span>
           </div>
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-yellow-300 border-2 border-gray-300 rounded"></div>
-            <span className="text-sm">5-9 min</span>
+          <div className="flex items-center gap-1 md:gap-2">
+            <div className="w-6 h-6 md:w-8 md:h-8 bg-yellow-300 border-2 border-gray-300 rounded"></div>
+            <span className="text-xs md:text-sm">5-9 min</span>
           </div>
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-orange-400 border-2 border-gray-300 rounded"></div>
-            <span className="text-sm">10-14 min</span>
+          <div className="flex items-center gap-1 md:gap-2">
+            <div className="w-6 h-6 md:w-8 md:h-8 bg-orange-400 border-2 border-gray-300 rounded"></div>
+            <span className="text-xs md:text-sm">10-14 min</span>
           </div>
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-red-500 border-2 border-gray-300 rounded"></div>
-            <span className="text-sm">≥ 15 min</span>
+          <div className="flex items-center gap-1 md:gap-2">
+            <div className="w-6 h-6 md:w-8 md:h-8 bg-red-500 border-2 border-gray-300 rounded"></div>
+            <span className="text-xs md:text-sm">≥ 15 min</span>
           </div>
         </div>
       </Card>

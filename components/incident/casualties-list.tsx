@@ -6,8 +6,15 @@ import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { Plus, User, AlertCircle, Trash2, Edit2, Check, X } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Plus, User, AlertCircle, Trash2, Edit2, Check, X, Stethoscope, Info } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { VictimAssessmentComponent } from '@/components/actions/victim-assessment';
 
 interface Casualty {
   id: string;
@@ -43,7 +50,8 @@ export default function CasualtiesList() {
   }, [casualties, isLoaded]);
   const [isAdding, setIsAdding] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
-  
+  const [assessingId, setAssessingId] = useState<string | null>(null);
+
   const [formData, setFormData] = useState({
     name: '',
     age: '',
@@ -132,6 +140,185 @@ export default function CasualtiesList() {
           <span className="ml-2 sm:ml-0">Dodaj poszkodowanego</span>
         </Button>
       </div>
+
+      {/* Instrukcja medyczna dla strażaka */}
+      <Card className="p-4 bg-red-50 border-red-200">
+        <div className="flex items-start gap-3">
+          <AlertCircle className="w-6 h-6 text-red-600 flex-shrink-0 mt-0.5" />
+          <div className="space-y-2">
+            <h4 className="font-bold text-red-900 text-base">
+              🚑 INSTRUKCJA OCENY POSZKODOWANEGO - PIERWSZA POMOC
+            </h4>
+            <div className="text-sm text-red-900 space-y-2">
+              {/* ACVPU */}
+              <div>
+                <p className="font-semibold">1️⃣ OCENA ŚWIADOMOŚCI (ACVPU):</p>
+                <ul className="list-disc list-inside pl-2 space-y-0.5 text-xs">
+                  <li>
+                    <strong>A (Przytomny)</strong> - Przytomny, reaguje, zorientowany →
+                    Badanie urazowe
+                  </li>
+                  <li>
+                    <strong>C (Zdezorientowany)</strong> - Zdezorientowany, senny → Badanie
+                    urazowe
+                  </li>
+                  <li>
+                    <strong>V (Głos)</strong> - Reaguje tylko na głos → Badanie ABC
+                  </li>
+                  <li>
+                    <strong>P (Ból)</strong> - Reaguje tylko na ból → Badanie ABC
+                  </li>
+                  <li>
+                    <strong className="text-red-700">U (Nie reaguje)</strong> - Nie reaguje
+                    → <strong>ABC + PODEJRZEWAJ NZK!</strong>
+                  </li>
+                </ul>
+              </div>
+
+              {/* ABC */}
+              <div>
+                <p className="font-semibold">2️⃣ BADANIE ABC (jeśli V/P/U):</p>
+                <ul className="list-disc list-inside pl-2 space-y-0.5 text-xs">
+                  <li>
+                    <strong>A (Drogi oddechowe)</strong> - Usuń ciała obce, udrożnij drogi
+                    oddechowe (czoło-żuchwa lub uniesienie żuchwy przy urazie kręgosłupa)
+                  </li>
+                  <li>
+                    <strong>B (Oddychanie)</strong> - Policz oddechy/min:{' '}
+                    <span className="text-green-700">10-20 OK</span>,{' '}
+                    <span className="text-red-700">&lt;10 lub &gt;20 UWAGA</span>,{' '}
+                    <strong className="text-red-700">0 = RKO!</strong>
+                  </li>
+                  <li>
+                    <strong>C (Krążenie)</strong> - Sprawdź tętno, krwawienie:{' '}
+                    <strong className="text-red-700">
+                      Tętnicze = TAMUJ KRWOTOK!
+                    </strong>
+                    , Brak tętna = <strong className="text-red-700">RKO!</strong>
+                  </li>
+                </ul>
+              </div>
+
+              {/* Badanie urazowe */}
+              <div>
+                <p className="font-semibold">
+                  3️⃣ BADANIE URAZOWE (Od głowy do stóp):
+                </p>
+                <p className="text-xs pl-2">
+                  Sprawdź: Głowa/Szyja → Klatka → Brzuch → Miednica → Kończyny → Plecy
+                  (DEFORMACJE, OTARCIA, RANY, TKLIWOŚĆ, OBRZĘKI)
+                </p>
+              </div>
+
+              {/* SAMPLE */}
+              <div>
+                <p className="font-semibold">4️⃣ SAMPLE (Wywiad):</p>
+                <p className="text-xs pl-2">
+                  <strong>O</strong>bjawy, <strong>A</strong>lergie,{' '}
+                  <strong>L</strong>eki, <strong>P</strong>rzeszłość medyczna,{' '}
+                  <strong>O</strong>statni posiłek, <strong>Z</strong>darzenie
+                </p>
+              </div>
+
+              {/* Alerty */}
+              <div className="pt-2 border-t border-red-300">
+                <p className="font-bold text-red-700">
+                  ⚠️ NATYCHMIASTOWE DZIAŁANIE:
+                </p>
+                <ul className="list-disc list-inside pl-2 space-y-0.5 text-xs">
+                  <li>Brak oddechu (0/min) → <strong>RKO!</strong></li>
+                  <li>Brak tętna → <strong>RKO!</strong></li>
+                  <li>Krwawienie tętnicze → <strong>TAMUJ KRWOTOK!</strong></li>
+                  <li>Drogi niedrożne → <strong>UDROŻNIJ!</strong></li>
+                </ul>
+              </div>
+
+              {/* RKO */}
+              <div className="pt-2 border-t border-red-300">
+                <p className="font-bold text-red-700">
+                  💔 JAK PRZEPROWADZIĆ PRAWIDŁOWO RKO:
+                </p>
+                <div className="space-y-1 text-xs">
+                  <p className="font-semibold">
+                    1. WEZWIJ POMOC - Zadzwoń 112 / Wyślij kogoś po AED
+                  </p>
+                  <p className="font-semibold">2. UŁÓŻ POSZKODOWANEGO:</p>
+                  <ul className="list-disc list-inside pl-2 space-y-0.5">
+                    <li>Na twardym, płaskim podłożu</li>
+                    <li>Na plecach, ręce wzdłuż ciała</li>
+                    <li>Udrożnij drogi oddechowe (czoło-żuchwa)</li>
+                  </ul>
+                  <p className="font-semibold">3. UCISKANIE KLATKI PIERSIOWEJ:</p>
+                  <ul className="list-disc list-inside pl-2 space-y-0.5">
+                    <li>
+                      <strong>Miejsce:</strong> Środek klatki piersiowej (dolna połowa
+                      mostka)
+                    </li>
+                    <li>
+                      <strong>Pozycja rąk:</strong> Nadgarstek jednej ręki na mostku,
+                      druga ręka na wierzchu, palce splecionе
+                    </li>
+                    <li>
+                      <strong>Pozycja ciała:</strong> Ramiona proste, barki nad mostkiem,
+                      uciskaj ciężarem ciała
+                    </li>
+                    <li>
+                      <strong>Głębokość:</strong> 5-6 cm (dorośli), 1/3 głębokości klatki
+                      (dzieci/niemowlęta)
+                    </li>
+                    <li>
+                      <strong>Tempo:</strong> 100-120 uciśnięć/minutę (rytm: "Staying
+                      Alive")
+                    </li>
+                    <li>
+                      <strong>Ważne:</strong> Pozwól klatce całkowicie się wyprostować po
+                      każdym uciśnięciu
+                    </li>
+                  </ul>
+                  <p className="font-semibold">4. ODDECHY RATOWNICZE (jeśli umiesz):</p>
+                  <ul className="list-disc list-inside pl-2 space-y-0.5">
+                    <li>
+                      <strong>Stosunek:</strong> 30 uciśnięć : 2 oddechy
+                    </li>
+                    <li>
+                      <strong>Technika:</strong> Udrożnij drogi oddechowe, zaciśnij nos,
+                      wdmuchnij powietrze (1 sek)
+                    </li>
+                    <li>
+                      <strong>Obserwuj:</strong> Czy klatka się unosi
+                    </li>
+                    <li>
+                      <strong>Jeśli nie umiesz:</strong> Wykonuj TYLKO uciskanie klatki
+                      (ciągłe, bez przerw)
+                    </li>
+                  </ul>
+                  <p className="font-semibold">5. AED (jeśli dostępny):</p>
+                  <ul className="list-disc list-inside pl-2 space-y-0.5">
+                    <li>Włącz AED i postępuj zgodnie z instrukcjami głosowymi</li>
+                    <li>Przyklej elektrody na nagą klatkę (prawa górna, lewa dolna)</li>
+                    <li>
+                      Nie dotykaj poszkodowanego podczas analizy i defibrylacji
+                    </li>
+                    <li>Po wstrząsie natychmiast kontynuuj RKO (30:2)</li>
+                  </ul>
+                  <p className="font-semibold text-red-700">
+                    6. KONTYNUUJ RKO do czasu:
+                  </p>
+                  <ul className="list-disc list-inside pl-2 space-y-0.5">
+                    <li>Przyjazdu zespołu ratunkowego</li>
+                    <li>Poszkodowany zaczyna oddychać normalnie</li>
+                    <li>Jesteś całkowicie wyczerpany</li>
+                  </ul>
+                  <p className="font-semibold mt-1">
+                    ⏱️ CZAS = ŻYCIE! Każda minuta bez RKO zmniejsza szanse przeżycia o
+                    10%
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Card>
 
       {/* Add/Edit Form */}
       {(isAdding || editingId) && (
@@ -260,6 +447,15 @@ export default function CasualtiesList() {
 
                 <div className="flex gap-1 flex-shrink-0">
                   <Button
+                    onClick={() => setAssessingId(casualty.id)}
+                    size="sm"
+                    variant="ghost"
+                    className="h-10 w-10 sm:h-8 sm:w-8 p-0 hover:bg-blue-100 hover:text-blue-600"
+                    title="Ocena pierwszej pomocy"
+                  >
+                    <Stethoscope className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
+                  </Button>
+                  <Button
                     onClick={() => handleEdit(casualty)}
                     size="sm"
                     variant="ghost"
@@ -281,6 +477,27 @@ export default function CasualtiesList() {
           ))
         )}
       </div>
+
+      {/* Dialog oceny pierwszej pomocy */}
+      <Dialog open={!!assessingId} onOpenChange={(open) => !open && setAssessingId(null)}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>
+              Ocena Pierwszej Pomocy -{' '}
+              {casualties.find((c) => c.id === assessingId)?.name}
+            </DialogTitle>
+          </DialogHeader>
+          {assessingId && (
+            <VictimAssessmentComponent
+              actionId={assessingId}
+              onSave={(assessment) => {
+                console.log('Zapisano ocenę:', assessment);
+                setAssessingId(null);
+              }}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
