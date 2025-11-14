@@ -152,6 +152,12 @@ export function useIncidentAlerts(incident: any) {
   const [alerts, setAlerts] = useState<CriticalAlert[]>([]);
 
   useEffect(() => {
+    // Jeśli brak incydentu, wyczyść alerty
+    if (!incident) {
+      setAlerts([]);
+      return;
+    }
+
     const newAlerts: CriticalAlert[] = [];
 
     // Alert: Długi czas trwania (>30 min)

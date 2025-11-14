@@ -37,6 +37,9 @@ export default function Home() {
   const [activeTab, setActiveTab] = useState<'checklist' | 'casualties' | 'resources' | 'notes' | 'photos'>('checklist');
   const [showIncidentSelector, setShowIncidentSelector] = useState(false);
 
+  // Hook musi być zawsze wywołany (nie warunkowo)
+  const { alerts, dismissAlert } = useIncidentAlerts(currentIncident);
+
   const handleCreateIncident = (type: IncidentType) => {
     // Natychmiastowe rozpoczęcie zdarzenia - bez formularza!
     const templates = getTemplatesByType(type);
@@ -107,8 +110,6 @@ export default function Home() {
 
   // Główny widok akcji
   if (currentIncident) {
-    const { alerts, dismissAlert } = useIncidentAlerts(currentIncident);
-
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 pb-24">
         {/* Critical Alerts */}
