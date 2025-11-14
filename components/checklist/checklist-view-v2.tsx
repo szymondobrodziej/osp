@@ -3,7 +3,7 @@
 import { useState, useMemo, useCallback, useEffect } from 'react';
 import { ChecklistCategory, ChecklistItem as ChecklistItemType, ChecklistItemStatus, Priority } from '@/types/incident';
 import { useIncidentStore } from '@/store/incident-store';
-import ChecklistFiltersComponent, { ChecklistFilters } from './checklist-filters';
+import RotationTimer from './rotation-timer';
 import ChecklistToolbar from './checklist-toolbar';
 import ChecklistItemComponent from './checklist-item-v2';
 import { Card } from '@/components/ui/card';
@@ -18,12 +18,7 @@ interface ChecklistViewV2Props {
 
 export default function ChecklistViewV2({ categories }: ChecklistViewV2Props) {
   // State
-  const [filters, setFilters] = useState<ChecklistFilters>({
-    search: '',
-    status: 'ALL',
-    priority: 'ALL',
-    category: 'ALL',
-  });
+  const [activeRotation, setActiveRotation] = useState<1 | 2 | null>(null);
   const [viewMode, setViewMode] = useState<'normal' | 'compact'>('compact');
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
 
@@ -34,50 +29,7 @@ export default function ChecklistViewV2({ categories }: ChecklistViewV2Props) {
     );
   }, [categories]);
 
-  // Filter items
-  const filteredCategories = useMemo(() => {
-    return categories
-      .map(category => {
-        // Filter by category
-        if (filters.category !== 'ALL' && category.id !== filters.category) {
-          return null;
-        }
-
-        // Filter items
-        const filteredItems = category.items.filter(item => {
-          // Search filter
-          if (filters.search) {
-            const searchLower = filters.search.toLowerCase();
-            const matchesSearch =
-              item.title.toLowerCase().includes(searchLower) ||
-              item.description?.toLowerCase().includes(searchLower);
-            if (!matchesSearch) return false;
-          }
-
-          // Status filter
-          if (filters.status !== 'ALL' && item.status !== filters.status) {
-            return false;
-          }
-
-          // Priority filter
-          if (filters.priority !== 'ALL' && item.priority !== filters.priority) {
-            return false;
-          }
-
-          return true;
-        });
-
-        if (filteredItems.length === 0) return null;
-
-        return {
-          ...category,
-          items: filteredItems,
-        };
-      })
-      .filter(Boolean) as ChecklistCategory[];
-  }, [categories, filters]);
-
-  // Calculate simple statistics - tylko to co potrzebne
+  // Calculate simple statistics
   const stats = useMemo(() => {
     const total = allItems.length;
     const completed = allItems.filter(item => item.status === 'COMPLETED').length;
@@ -85,16 +37,6 @@ export default function ChecklistViewV2({ categories }: ChecklistViewV2Props) {
 
     return { total, completed, percentage };
   }, [allItems]);
-
-  // Active filters count
-  const activeFiltersCount = useMemo(() => {
-    let count = 0;
-    if (filters.search) count++;
-    if (filters.status !== 'ALL') count++;
-    if (filters.priority !== 'ALL') count++;
-    if (filters.category !== 'ALL') count++;
-    return count;
-  }, [filters]);
 
   // Bulk actions
   const handleSelectAll = useCallback(() => {
@@ -172,13 +114,8 @@ export default function ChecklistViewV2({ categories }: ChecklistViewV2Props) {
         </Badge>
       </div>
 
-      {/* Filters */}
-      <ChecklistFiltersComponent
-        filters={filters}
-        onFiltersChange={setFilters}
-        categories={categories.map(cat => ({ id: cat.id, name: cat.name }))}
-        activeFiltersCount={activeFiltersCount}
-      />
+      {/* Rotation Timer */}
+      <RotationTimer onRotationChange={setActiveRotation} />
 
       {/* Toolbar */}
       <ChecklistToolbar
@@ -192,70 +129,64 @@ export default function ChecklistViewV2({ categories }: ChecklistViewV2Props) {
       />
 
       {/* Categories */}
-      <div className="space-y-3 md:space-y-4">
-        {filteredCategories.length === 0 ? (
-          <Card className="p-8 text-center">
-            <p className="text-gray-500">Brak zadań spełniających kryteria filtrowania</p>
-          </Card>
-        ) : (
-          filteredCategories.sort((a, b) => a.order - b.order).map((category, index) => {
-            const progress = getCategoryProgress(category);
-            const isComplete = progress.percentage === 100;
+      <div className="space-y-2">
+        {categories.sort((a, b) => a.order - b.order).map((category) => {
+          const progress = getCategoryProgress(category);
+          const isComplete = progress.percentage === 100;
 
-            return (
-              <Card
-                key={category.id}
-                className={cn(
-                  'overflow-hidden transition-all duration-200 hover:shadow-md',
-                  isComplete && 'border-green-500 bg-green-50/20'
-                )}
-              >
-                {/* Category Header - kompaktowy */}
-                <div className="px-3 py-2 flex items-center justify-between bg-gray-50 border-b">
-                  <div className="flex items-center gap-2 flex-1 min-w-0">
-                    {isComplete && <CheckCircle2 className="w-4 h-4 text-green-500 flex-shrink-0" />}
-                    <h3 className="text-sm font-bold truncate">{category.name}</h3>
-                  </div>
-
-                  <div className="flex items-center gap-2 flex-shrink-0">
-                    <span className="text-xs text-gray-600">
-                      {progress.completed}/{progress.total}
-                    </span>
-                    <div className="w-16 h-1.5 bg-gray-200 rounded-full overflow-hidden">
-                      <div
-                        className={cn(
-                          'h-full transition-all duration-300',
-                          isComplete ? 'bg-green-500' : 'bg-blue-500'
-                        )}
-                        style={{ width: `${progress.percentage}%` }}
-                      />
-                    </div>
-                    <span className={cn(
-                      'text-xs font-bold w-8 text-right',
-                      isComplete ? 'text-green-600' : 'text-gray-700'
-                    )}>
-                      {progress.percentage}%
-                    </span>
-                  </div>
+          return (
+            <Card
+              key={category.id}
+              className={cn(
+                'overflow-hidden transition-all duration-200 hover:shadow-md',
+                isComplete && 'border-green-500 bg-green-50/20'
+              )}
+            >
+              {/* Category Header - kompaktowy */}
+              <div className="px-3 py-2 flex items-center justify-between bg-gray-50 border-b">
+                <div className="flex items-center gap-2 flex-1 min-w-0">
+                  {isComplete && <CheckCircle2 className="w-4 h-4 text-green-500 flex-shrink-0" />}
+                  <h3 className="text-sm font-bold truncate">{category.name}</h3>
                 </div>
 
-                {/* Items - kompaktowe */}
-                <div className="p-2 space-y-0.5">
-                  {category.items.map((item) => (
-                    <ChecklistItemComponent
-                      key={item.id}
-                      item={item}
-                      categoryId={category.id}
-                      compact={viewMode === 'compact'}
-                      selected={selectedItems.has(item.id)}
-                      onToggleSelect={handleToggleSelect}
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  <span className="text-xs text-gray-600">
+                    {progress.completed}/{progress.total}
+                  </span>
+                  <div className="w-16 h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                    <div
+                      className={cn(
+                        'h-full transition-all duration-300',
+                        isComplete ? 'bg-green-500' : 'bg-blue-500'
+                      )}
+                      style={{ width: `${progress.percentage}%` }}
                     />
-                  ))}
+                  </div>
+                  <span className={cn(
+                    'text-xs font-bold w-8 text-right',
+                    isComplete ? 'text-green-600' : 'text-gray-700'
+                  )}>
+                    {progress.percentage}%
+                  </span>
                 </div>
-              </Card>
-            );
-          })
-        )}
+              </div>
+
+              {/* Items - kompaktowe */}
+              <div className="p-2 space-y-0.5">
+                {category.items.map((item) => (
+                  <ChecklistItemComponent
+                    key={item.id}
+                    item={item}
+                    categoryId={category.id}
+                    compact={viewMode === 'compact'}
+                    selected={selectedItems.has(item.id)}
+                    onToggleSelect={handleToggleSelect}
+                  />
+                ))}
+              </div>
+            </Card>
+          );
+        })}
       </div>
     </div>
   );
