@@ -103,27 +103,28 @@ export default function PhotosList() {
       />
 
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div>
           <h3 className="text-lg font-bold">Zdjęcia</h3>
           <p className="text-sm text-gray-500">
             {photos.length} {photos.length === 1 ? 'zdjęcie' : 'zdjęć'}
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 w-full sm:w-auto">
           <Button
             onClick={handleCameraCapture}
-            className="bg-blue-600 hover:bg-blue-700"
+            className="bg-blue-600 hover:bg-blue-700 flex-1 sm:flex-none h-12 sm:h-10"
           >
-            <Camera className="w-4 h-4 mr-2" />
-            Zrób zdjęcie
+            <Camera className="w-5 h-5 sm:w-4 sm:h-4 sm:mr-2" />
+            <span className="hidden sm:inline">Zrób zdjęcie</span>
           </Button>
           <Button
             onClick={() => fileInputRef.current?.click()}
             variant="outline"
+            className="flex-1 sm:flex-none h-12 sm:h-10"
           >
-            <Upload className="w-4 h-4 mr-2" />
-            Wgraj
+            <Upload className="w-5 h-5 sm:w-4 sm:h-4 sm:mr-2" />
+            <span className="hidden sm:inline">Wgraj</span>
           </Button>
         </div>
       </div>
@@ -157,9 +158,9 @@ export default function PhotosList() {
                   }}
                   size="sm"
                   variant="destructive"
-                  className="absolute top-2 right-2 h-7 w-7 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                  className="absolute top-2 right-2 h-8 w-8 sm:h-7 sm:w-7 p-0 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
                 >
-                  <Trash2 className="w-3.5 h-3.5" />
+                  <Trash2 className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
                 </Button>
               </div>
               <div className="p-2">
@@ -179,40 +180,43 @@ export default function PhotosList() {
       {/* Lightbox */}
       {selectedPhoto && (
         <div
-          className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4"
+          className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-0 sm:p-4"
           onClick={() => setSelectedPhoto(null)}
         >
           <div
-            className="max-w-4xl w-full bg-white rounded-lg overflow-hidden"
+            className="max-w-4xl w-full h-full sm:h-auto bg-white sm:rounded-lg overflow-hidden flex flex-col"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
-            <div className="p-4 border-b flex items-center justify-between">
-              <div className="flex items-center gap-2 text-sm text-gray-600">
+            <div className="p-3 sm:p-4 border-b flex items-center justify-between flex-shrink-0">
+              <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-600">
                 <Clock className="w-4 h-4" />
-                {new Date(selectedPhoto.timestamp).toLocaleString('pl-PL')}
+                <span className="hidden sm:inline">{new Date(selectedPhoto.timestamp).toLocaleString('pl-PL')}</span>
+                <span className="sm:hidden">{new Date(selectedPhoto.timestamp).toLocaleTimeString('pl-PL')}</span>
               </div>
               <div className="flex gap-2">
                 <Button
                   onClick={() => handleDelete(selectedPhoto.id)}
                   size="sm"
                   variant="destructive"
+                  className="h-10 sm:h-9"
                 >
-                  <Trash2 className="w-4 h-4 mr-2" />
-                  Usuń
+                  <Trash2 className="w-4 h-4 sm:mr-2" />
+                  <span className="hidden sm:inline">Usuń</span>
                 </Button>
                 <Button
                   onClick={() => setSelectedPhoto(null)}
                   size="sm"
                   variant="ghost"
+                  className="h-10 sm:h-9"
                 >
-                  <X className="w-4 h-4" />
+                  <X className="w-5 h-5 sm:w-4 sm:h-4" />
                 </Button>
               </div>
             </div>
 
             {/* Image */}
-            <div className="max-h-[60vh] overflow-auto bg-gray-100">
+            <div className="flex-1 overflow-auto bg-gray-100">
               <img
                 src={selectedPhoto.url}
                 alt={selectedPhoto.description || 'Zdjęcie'}
@@ -221,8 +225,8 @@ export default function PhotosList() {
             </div>
 
             {/* Description */}
-            <div className="p-4 border-t">
-              <label className="text-xs font-semibold text-gray-700 mb-1 block">
+            <div className="p-3 sm:p-4 border-t flex-shrink-0">
+              <label className="text-xs font-semibold text-gray-700 mb-2 block">
                 Opis zdjęcia
               </label>
               <Input
@@ -232,7 +236,7 @@ export default function PhotosList() {
                   setSelectedPhoto({ ...selectedPhoto, description: e.target.value });
                 }}
                 placeholder="Dodaj opis..."
-                className="text-sm"
+                className="text-sm h-12 sm:h-10"
               />
             </div>
           </div>

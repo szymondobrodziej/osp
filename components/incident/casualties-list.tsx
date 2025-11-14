@@ -117,7 +117,7 @@ export default function CasualtiesList() {
   return (
     <div className="space-y-3">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div>
           <h3 className="text-lg font-bold">Poszkodowani</h3>
           <p className="text-sm text-gray-500">
@@ -126,10 +126,10 @@ export default function CasualtiesList() {
         </div>
         <Button
           onClick={() => setIsAdding(true)}
-          className="bg-red-600 hover:bg-red-700"
+          className="bg-red-600 hover:bg-red-700 w-full sm:w-auto h-12 sm:h-10"
         >
-          <Plus className="w-4 h-4 mr-2" />
-          Dodaj poszkodowanego
+          <Plus className="w-5 h-5 sm:w-4 sm:h-4 sm:mr-2" />
+          <span className="ml-2 sm:ml-0">Dodaj poszkodowanego</span>
         </Button>
       </div>
 
@@ -137,7 +137,7 @@ export default function CasualtiesList() {
       {(isAdding || editingId) && (
         <Card className="p-4 border-2 border-blue-500">
           <div className="space-y-3">
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label className="text-xs font-semibold text-gray-700 mb-1 block">
                   Imię i nazwisko *
@@ -146,7 +146,7 @@ export default function CasualtiesList() {
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   placeholder="Jan Kowalski"
-                  className="h-9"
+                  className="h-12 sm:h-9"
                 />
               </div>
               <div>
@@ -157,7 +157,7 @@ export default function CasualtiesList() {
                   value={formData.age}
                   onChange={(e) => setFormData({ ...formData, age: e.target.value })}
                   placeholder="np. 45"
-                  className="h-9"
+                  className="h-12 sm:h-9"
                 />
               </div>
             </div>
@@ -166,14 +166,14 @@ export default function CasualtiesList() {
               <label className="text-xs font-semibold text-gray-700 mb-1 block">
                 Stan
               </label>
-              <div className="flex gap-2">
+              <div className="grid grid-cols-2 sm:flex gap-2">
                 {(['critical', 'serious', 'moderate', 'minor'] as const).map((cond) => (
                   <Button
                     key={cond}
                     onClick={() => setFormData({ ...formData, condition: cond })}
                     variant={formData.condition === cond ? 'default' : 'outline'}
                     className={cn(
-                      'flex-1 h-9 text-xs',
+                      'flex-1 h-12 sm:h-9 text-xs sm:text-xs',
                       formData.condition === cond && getConditionColor(cond)
                     )}
                   >
@@ -199,7 +199,7 @@ export default function CasualtiesList() {
             <div className="flex gap-2">
               <Button
                 onClick={editingId ? handleUpdate : handleAdd}
-                className="flex-1 bg-green-600 hover:bg-green-700"
+                className="flex-1 bg-green-600 hover:bg-green-700 h-12 sm:h-10"
               >
                 <Check className="w-4 h-4 mr-2" />
                 {editingId ? 'Zapisz' : 'Dodaj'}
@@ -211,6 +211,7 @@ export default function CasualtiesList() {
                   setFormData({ name: '', age: '', condition: 'moderate', description: '' });
                 }}
                 variant="outline"
+                className="flex-1 sm:flex-none h-12 sm:h-10"
               >
                 <X className="w-4 h-4 mr-2" />
                 Anuluj
@@ -262,17 +263,17 @@ export default function CasualtiesList() {
                     onClick={() => handleEdit(casualty)}
                     size="sm"
                     variant="ghost"
-                    className="h-8 w-8 p-0"
+                    className="h-10 w-10 sm:h-8 sm:w-8 p-0"
                   >
-                    <Edit2 className="w-3.5 h-3.5" />
+                    <Edit2 className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
                   </Button>
                   <Button
                     onClick={() => handleDelete(casualty.id)}
                     size="sm"
                     variant="ghost"
-                    className="h-8 w-8 p-0 hover:bg-red-100 hover:text-red-600"
+                    className="h-10 w-10 sm:h-8 sm:w-8 p-0 hover:bg-red-100 hover:text-red-600"
                   >
-                    <Trash2 className="w-3.5 h-3.5" />
+                    <Trash2 className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
                   </Button>
                 </div>
               </div>

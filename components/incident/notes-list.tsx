@@ -93,7 +93,7 @@ export default function NotesList() {
   return (
     <div className="space-y-3">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div>
           <h3 className="text-lg font-bold">Notatki</h3>
           <p className="text-sm text-gray-500">
@@ -107,10 +107,10 @@ export default function NotesList() {
         </div>
         <Button
           onClick={() => setIsAdding(true)}
-          className="bg-blue-600 hover:bg-blue-700"
+          className="bg-blue-600 hover:bg-blue-700 w-full sm:w-auto h-12 sm:h-10"
         >
-          <Plus className="w-4 h-4 mr-2" />
-          Dodaj notatkę
+          <Plus className="w-5 h-5 sm:w-4 sm:h-4 sm:mr-2" />
+          <span className="ml-2 sm:ml-0">Dodaj notatkę</span>
         </Button>
       </div>
 
@@ -138,9 +138,9 @@ export default function NotesList() {
                 id="important"
                 checked={isImportant}
                 onChange={(e) => setIsImportant(e.target.checked)}
-                className="w-4 h-4"
+                className="w-5 h-5 sm:w-4 sm:h-4"
               />
-              <label htmlFor="important" className="text-sm font-medium cursor-pointer">
+              <label htmlFor="important" className="text-sm sm:text-sm font-medium cursor-pointer">
                 🚨 Oznacz jako ważne
               </label>
             </div>
@@ -148,7 +148,7 @@ export default function NotesList() {
             <div className="flex gap-2">
               <Button
                 onClick={editingId ? handleUpdate : handleAdd}
-                className="flex-1 bg-green-600 hover:bg-green-700"
+                className="flex-1 bg-green-600 hover:bg-green-700 h-12 sm:h-10"
                 disabled={!content.trim()}
               >
                 <Check className="w-4 h-4 mr-2" />
@@ -162,6 +162,7 @@ export default function NotesList() {
                   setIsImportant(false);
                 }}
                 variant="outline"
+                className="flex-1 sm:flex-none h-12 sm:h-10"
               >
                 <X className="w-4 h-4 mr-2" />
                 Anuluj
@@ -211,28 +212,28 @@ export default function NotesList() {
                     size="sm"
                     variant="ghost"
                     className={cn(
-                      'h-8 w-8 p-0',
+                      'h-10 w-10 sm:h-8 sm:w-8 p-0',
                       note.important && 'text-red-600 hover:text-red-700'
                     )}
                     title={note.important ? 'Usuń oznaczenie ważne' : 'Oznacz jako ważne'}
                   >
-                    <span className="text-base">{note.important ? '🚨' : '⭐'}</span>
+                    <span className="text-lg sm:text-base">{note.important ? '🚨' : '⭐'}</span>
                   </Button>
                   <Button
                     onClick={() => handleEdit(note)}
                     size="sm"
                     variant="ghost"
-                    className="h-8 w-8 p-0"
+                    className="h-10 w-10 sm:h-8 sm:w-8 p-0"
                   >
-                    <Edit2 className="w-3.5 h-3.5" />
+                    <Edit2 className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
                   </Button>
                   <Button
                     onClick={() => handleDelete(note.id)}
                     size="sm"
                     variant="ghost"
-                    className="h-8 w-8 p-0 hover:bg-red-100 hover:text-red-600"
+                    className="h-10 w-10 sm:h-8 sm:w-8 p-0 hover:bg-red-100 hover:text-red-600"
                   >
-                    <Trash2 className="w-3.5 h-3.5" />
+                    <Trash2 className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
                   </Button>
                 </div>
               </div>
