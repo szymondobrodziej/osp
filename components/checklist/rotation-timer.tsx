@@ -51,8 +51,15 @@ export default function RotationTimer({ onRotationChange, onCriticalStateChange 
   };
 
   const getWarningState = (seconds: number) => {
-    if (seconds >= 900) return 'critical'; // 15+ min (zmieniono z 20 na 15)
-    if (seconds >= 300) return 'warning';   // 5+ min (zmieniono z 15 na 5)
+    // Co 5 minut (300s) - pulsacja
+    const minutes = Math.floor(seconds / 60);
+    if (minutes >= 5 && minutes % 5 === 0 && seconds % 60 < 10) {
+      // Pulsacja przez pierwsze 10 sekund każdych 5 minut
+      return 'critical';
+    }
+    if (minutes >= 5) {
+      return 'warning';
+    }
     return 'normal';
   };
 
@@ -97,6 +104,12 @@ export default function RotationTimer({ onRotationChange, onCriticalStateChange 
 
   const hasAnyCritical = rotation1State === 'critical' || rotation2State === 'critical';
   const hasAnyWarning = rotation1State === 'warning' || rotation2State === 'warning';
+
+  // Get max minutes for badge
+  const maxMinutes = Math.max(
+    Math.floor(rotation1Seconds / 60),
+    Math.floor(rotation2Seconds / 60)
+  );
 
   // Notify parent about critical state
   useEffect(() => {
@@ -220,15 +233,15 @@ export default function RotationTimer({ onRotationChange, onCriticalStateChange 
 
         {/* Global warning badges */}
         {hasAnyCritical && (
-          <Badge className="bg-red-600 animate-pulse">
-            <AlertTriangle className="w-3 h-3 mr-1" />
-            15+ min - ZMIEŃ ROTĘ!
+          <Badge className="bg-red-600 animate-pulse text-base font-bold">
+            <AlertTriangle className="w-4 h-4 mr-1" />
+            {maxMinutes} MIN - ZMIEŃ ROTĘ!
           </Badge>
         )}
         {hasAnyWarning && !hasAnyCritical && (
-          <Badge className="bg-orange-500 animate-pulse">
+          <Badge className="bg-orange-500">
             <AlertTriangle className="w-3 h-3 mr-1" />
-            5+ min
+            {maxMinutes} min w aparatach
           </Badge>
         )}
       </div>
