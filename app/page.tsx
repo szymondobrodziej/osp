@@ -5,7 +5,7 @@ import { useIncidentStore } from '@/store/incident-store';
 import { useChecklistStore } from '@/store/checklist-store';
 import IncidentTypeSelector from '@/components/incident-type-selector';
 import IncidentHeader from '@/components/incident-header';
-import ChecklistView from '@/components/checklist-view';
+import ChecklistViewV2 from '@/components/checklist/checklist-view-v2';
 import dynamic from 'next/dynamic';
 import { IncidentType } from '@/types/incident';
 import { Flame, FileText, Users, Package, StickyNote, Camera, X } from 'lucide-react';
@@ -187,7 +187,7 @@ export default function Home() {
                 )}
 
                 {/* Checklista */}
-                <ChecklistView categories={currentIncident.checklists} />
+                <ChecklistViewV2 categories={currentIncident.checklists} />
               </TabsContent>
 
               <TabsContent value="casualties" className="mt-0 p-6">
