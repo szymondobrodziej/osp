@@ -9,6 +9,7 @@ export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const navLinks = [
+    { href: '/archive', label: 'Archiwum' },
     { href: '/checklists', label: 'Checklisty' },
     { href: '/vehicle-equipment', label: 'Wyposażenie' },
     { href: '#features', label: 'O aplikacji' },

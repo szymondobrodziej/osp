@@ -7,6 +7,7 @@ interface IncidentStore {
   // Stan
   currentIncident: Incident | null;
   incidents: Incident[];
+  archivedIncidents: Incident[];
 
   // Akcje - Zarządzanie zdarzeniem
   createIncident: (type: IncidentType, title: string, location: string, commander: string, templateId?: string) => void;
@@ -42,6 +43,11 @@ interface IncidentStore {
   // Pomocnicze
   getProgress: () => { completed: number; total: number; percentage: number };
   clearCurrentIncident: () => void;
+
+  // Archiwum
+  getArchivedIncidents: () => Incident[];
+  getArchivedIncidentById: (id: string) => Incident | undefined;
+  deleteArchivedIncident: (id: string) => void;
 }
 
 export const useIncidentStore = create<IncidentStore>()(
@@ -49,6 +55,7 @@ export const useIncidentStore = create<IncidentStore>()(
     (set, get) => ({
       currentIncident: null,
       incidents: [],
+      archivedIncidents: [],
       
       createIncident: (type, title, location, commander, templateId) => {
         // Pobierz szablon - albo custom z templateId, albo domyślny dla typu
@@ -419,7 +426,78 @@ export const useIncidentStore = create<IncidentStore>()(
       },
       
       clearCurrentIncident: () => {
-        set({ currentIncident: null });
+        set(state => {
+          if (!state.currentIncident) return { currentIncident: null };
+
+          // Pobierz dane z localStorage przed zapisaniem do archiwum
+          let casualtiesData: any[] = [];
+          let notesData: any[] = [];
+          let photosData: any[] = [];
+
+          try {
+            const storedCasualties = localStorage.getItem('incident-casualties');
+            if (storedCasualties) {
+              casualtiesData = JSON.parse(storedCasualties);
+            }
+          } catch (e) {
+            console.error('Failed to load casualties from localStorage:', e);
+          }
+
+          try {
+            const storedNotes = localStorage.getItem('incident-notes');
+            if (storedNotes) {
+              notesData = JSON.parse(storedNotes);
+            }
+          } catch (e) {
+            console.error('Failed to load notes from localStorage:', e);
+          }
+
+          try {
+            const storedPhotos = localStorage.getItem('incident-photos');
+            if (storedPhotos) {
+              photosData = JSON.parse(storedPhotos);
+            }
+          } catch (e) {
+            console.error('Failed to load photos from localStorage:', e);
+          }
+
+          // Zapisz zdarzenie do archiwum z wszystkimi danymi
+          const archivedIncident = {
+            ...state.currentIncident,
+            // Jeśli nie ma completedAt, ustaw teraz
+            completedAt: state.currentIncident.completedAt || new Date(),
+            // Jeśli status nie jest COMPLETED, ustaw
+            status: state.currentIncident.status === 'COMPLETED' ? state.currentIncident.status : 'COMPLETED' as const,
+            // Dodaj dane z localStorage
+            casualties: casualtiesData,
+            notes: notesData,
+            photos: photosData,
+          };
+
+          // Wyczyść localStorage dla nowego zdarzenia
+          localStorage.removeItem('incident-casualties');
+          localStorage.removeItem('incident-notes');
+          localStorage.removeItem('incident-photos');
+
+          return {
+            currentIncident: null,
+            archivedIncidents: [...state.archivedIncidents, archivedIncident],
+          };
+        });
+      },
+
+      getArchivedIncidents: () => {
+        return get().archivedIncidents;
+      },
+
+      getArchivedIncidentById: (id: string) => {
+        return get().archivedIncidents.find(inc => inc.id === id);
+      },
+
+      deleteArchivedIncident: (id: string) => {
+        set(state => ({
+          archivedIncidents: state.archivedIncidents.filter(inc => inc.id !== id),
+        }));
       },
     }),
     {
@@ -427,6 +505,7 @@ export const useIncidentStore = create<IncidentStore>()(
       partialize: (state) => ({
         incidents: state.incidents,
         currentIncident: state.currentIncident,
+        archivedIncidents: state.archivedIncidents,
       }),
     }
   )
