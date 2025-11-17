@@ -433,6 +433,7 @@ export const useIncidentStore = create<IncidentStore>()(
           let casualtiesData: any[] = [];
           let notesData: any[] = [];
           let photosData: any[] = [];
+          let rotationData: any = null;
 
           try {
             const storedCasualties = localStorage.getItem('incident-casualties');
@@ -461,6 +462,15 @@ export const useIncidentStore = create<IncidentStore>()(
             console.error('Failed to load photos from localStorage:', e);
           }
 
+          try {
+            const storedRotation = localStorage.getItem('incident-rotation');
+            if (storedRotation) {
+              rotationData = JSON.parse(storedRotation);
+            }
+          } catch (e) {
+            console.error('Failed to load rotation from localStorage:', e);
+          }
+
           // Zapisz zdarzenie do archiwum z wszystkimi danymi
           const archivedIncident = {
             ...state.currentIncident,
@@ -472,12 +482,14 @@ export const useIncidentStore = create<IncidentStore>()(
             casualties: casualtiesData,
             notes: notesData,
             photos: photosData,
+            rotation: rotationData,
           };
 
           // Wyczyść localStorage dla nowego zdarzenia
           localStorage.removeItem('incident-casualties');
           localStorage.removeItem('incident-notes');
           localStorage.removeItem('incident-photos');
+          localStorage.removeItem('incident-rotation');
 
           return {
             currentIncident: null,

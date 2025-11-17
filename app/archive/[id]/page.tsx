@@ -108,8 +108,9 @@ export default function ArchivedIncidentPage() {
 
         {/* Tabs */}
         <Tabs defaultValue="checklist" className="space-y-4">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="checklist">Checklist ({progress.completed}/{progress.total})</TabsTrigger>
+            <TabsTrigger value="rotation">Rotacja</TabsTrigger>
             <TabsTrigger value="casualties">Poszkodowani ({incident.casualties?.length || 0})</TabsTrigger>
             <TabsTrigger value="notes">Notatki ({incident.notes?.length || 0})</TabsTrigger>
             <TabsTrigger value="photos">Zdjęcia ({incident.photos?.length || 0})</TabsTrigger>
@@ -141,6 +142,133 @@ export default function ArchivedIncidentPage() {
                 </CardContent>
               </Card>
             ))}
+          </TabsContent>
+
+          {/* Rotation Tab */}
+          <TabsContent value="rotation" className="space-y-4">
+            {incident.rotation ? (
+              <>
+                {/* Rota 1 */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg">Rota 1</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-2">
+                      {incident.rotation.rotation1?.map((entry: any, idx: number) => (
+                        entry.name && (
+                          <div key={idx} className="bg-gray-50 p-3 rounded-lg">
+                            <div className="font-medium">{entry.name}</div>
+                            <div className="text-sm text-gray-600 grid grid-cols-2 md:grid-cols-4 gap-2 mt-1">
+                              {entry.entryTime && (
+                                <div>
+                                  <span className="text-gray-500">Wejście:</span> {format(new Date(entry.entryTime), 'HH:mm', { locale: pl })}
+                                </div>
+                              )}
+                              {entry.exitTime && (
+                                <div>
+                                  <span className="text-gray-500">Wyjście:</span> {format(new Date(entry.exitTime), 'HH:mm', { locale: pl })}
+                                </div>
+                              )}
+                              {entry.pressureBar !== null && (
+                                <div>
+                                  <span className="text-gray-500">Ciśnienie:</span> {entry.pressureBar} bar
+                                </div>
+                              )}
+                              {entry.hasExited && (
+                                <Badge variant="outline" className="w-fit">Wyszedł</Badge>
+                              )}
+                            </div>
+                          </div>
+                        )
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Rota 2 */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg">Rota 2</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-2">
+                      {incident.rotation.rotation2?.map((entry: any, idx: number) => (
+                        entry.name && (
+                          <div key={idx} className="bg-gray-50 p-3 rounded-lg">
+                            <div className="font-medium">{entry.name}</div>
+                            <div className="text-sm text-gray-600 grid grid-cols-2 md:grid-cols-4 gap-2 mt-1">
+                              {entry.entryTime && (
+                                <div>
+                                  <span className="text-gray-500">Wejście:</span> {format(new Date(entry.entryTime), 'HH:mm', { locale: pl })}
+                                </div>
+                              )}
+                              {entry.exitTime && (
+                                <div>
+                                  <span className="text-gray-500">Wyjście:</span> {format(new Date(entry.exitTime), 'HH:mm', { locale: pl })}
+                                </div>
+                              )}
+                              {entry.pressureBar !== null && (
+                                <div>
+                                  <span className="text-gray-500">Ciśnienie:</span> {entry.pressureBar} bar
+                                </div>
+                              )}
+                              {entry.hasExited && (
+                                <Badge variant="outline" className="w-fit">Wyszedł</Badge>
+                              )}
+                            </div>
+                          </div>
+                        )
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* RIT Rotation */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg">Rota RIT (Ratownictwo Interwencyjne)</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-2">
+                      {incident.rotation.ritRotation?.map((entry: any, idx: number) => (
+                        entry.name && (
+                          <div key={idx} className="bg-yellow-50 p-3 rounded-lg border border-yellow-200">
+                            <div className="font-medium">{entry.name}</div>
+                            <div className="text-sm text-gray-600 grid grid-cols-2 md:grid-cols-4 gap-2 mt-1">
+                              {entry.entryTime && (
+                                <div>
+                                  <span className="text-gray-500">Wejście:</span> {format(new Date(entry.entryTime), 'HH:mm', { locale: pl })}
+                                </div>
+                              )}
+                              {entry.exitTime && (
+                                <div>
+                                  <span className="text-gray-500">Wyjście:</span> {format(new Date(entry.exitTime), 'HH:mm', { locale: pl })}
+                                </div>
+                              )}
+                              {entry.pressureBar !== null && (
+                                <div>
+                                  <span className="text-gray-500">Ciśnienie:</span> {entry.pressureBar} bar
+                                </div>
+                              )}
+                              {entry.hasExited && (
+                                <Badge variant="outline" className="w-fit">Wyszedł</Badge>
+                              )}
+                            </div>
+                          </div>
+                        )
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              </>
+            ) : (
+              <Card>
+                <CardContent className="py-6 text-center text-gray-500">
+                  Brak danych rotacji
+                </CardContent>
+              </Card>
+            )}
           </TabsContent>
 
           {/* Casualties Tab */}

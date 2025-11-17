@@ -32,6 +32,43 @@ export default function RotationBoard() {
 
   const [currentTime, setCurrentTime] = useState(new Date());
   const [editingCell, setEditingCell] = useState<{ rotation: keyof RotationData; index: number; field: 'name' | 'entryTime' | 'exitTime' | 'pressureBar' } | null>(null);
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  // Load from localStorage
+  useEffect(() => {
+    const stored = localStorage.getItem('incident-rotation');
+    if (stored) {
+      try {
+        const loaded = JSON.parse(stored);
+        // Convert date strings back to Date objects
+        const convertDates = (data: RotationData): RotationData => {
+          const convert = (entries: FirefighterEntry[]): FirefighterEntry[] => {
+            return entries.map(entry => ({
+              ...entry,
+              entryTime: entry.entryTime ? new Date(entry.entryTime) : null,
+              exitTime: entry.exitTime ? new Date(entry.exitTime) : null,
+            }));
+          };
+          return {
+            rotation1: convert(data.rotation1),
+            rotation2: convert(data.rotation2),
+            ritRotation: convert(data.ritRotation),
+          };
+        };
+        setRotationData(convertDates(loaded));
+      } catch (e) {
+        console.error('Failed to load rotation data:', e);
+      }
+    }
+    setIsLoaded(true);
+  }, []);
+
+  // Save to localStorage
+  useEffect(() => {
+    if (isLoaded) {
+      localStorage.setItem('incident-rotation', JSON.stringify(rotationData));
+    }
+  }, [rotationData, isLoaded]);
 
   // Update current time every second
   useEffect(() => {
