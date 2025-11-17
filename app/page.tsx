@@ -198,12 +198,16 @@ export default function Home() {
                 />
               </TabsContent>
 
-              <TabsContent value="rotation" className="mt-0 p-4">
-                <RotationBoard />
+              <TabsContent value="rotation" className="mt-0 p-4" forceMount>
+                <div className={activeTab !== 'rotation' ? 'hidden' : ''}>
+                  <RotationBoard />
+                </div>
               </TabsContent>
 
-              <TabsContent value="casualties" className="mt-0 p-4">
-                <CasualtiesList />
+              <TabsContent value="casualties" className="mt-0 p-4" forceMount>
+                <div className={activeTab !== 'casualties' ? 'hidden' : ''}>
+                  <CasualtiesList />
+                </div>
               </TabsContent>
 
               <TabsContent value="resources" className="mt-0 p-6">
@@ -214,12 +218,16 @@ export default function Home() {
                 </div>
               </TabsContent>
 
-              <TabsContent value="notes" className="mt-0 p-4">
-                <NotesList />
+              <TabsContent value="notes" className="mt-0 p-4" forceMount>
+                <div className={activeTab !== 'notes' ? 'hidden' : ''}>
+                  <NotesList />
+                </div>
               </TabsContent>
 
-              <TabsContent value="photos" className="mt-0 p-4">
-                <PhotosList />
+              <TabsContent value="photos" className="mt-0 p-4" forceMount>
+                <div className={activeTab !== 'photos' ? 'hidden' : ''}>
+                  <PhotosList />
+                </div>
               </TabsContent>
             </Tabs>
           </Card>
