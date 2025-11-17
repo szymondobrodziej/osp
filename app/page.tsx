@@ -13,7 +13,7 @@ import PhotosList from '@/components/incident/photos-list';
 import RotationBoard from '@/components/incident/rotation-board';
 import dynamic from 'next/dynamic';
 import { IncidentType } from '@/types/incident';
-import { Flame, FileText, Users, Package, StickyNote, Camera, X, ArrowLeft } from 'lucide-react';
+import { Flame, FileText, Users, Package, StickyNote, Camera, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -118,31 +118,7 @@ export default function Home() {
         isCriticalRotation && "ring-8 ring-red-600 ring-inset animate-pulse"
       )}>
         {/* Incident Header V2 - Sticky */}
-        <IncidentHeaderV2 incident={currentIncident} />
-
-        {/* Back Button - Top Left */}
-        <div className="fixed top-4 left-4 z-30">
-          <Button
-            onClick={handleEndIncident}
-            variant="outline"
-            className="bg-white/90 border-gray-300 text-gray-700 hover:bg-gray-50 backdrop-blur-sm h-10 text-sm px-4 shadow-lg"
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Powrót
-          </Button>
-        </div>
-
-        {/* End Action Button - Top Right */}
-        <div className="fixed top-4 right-4 z-30">
-          <Button
-            onClick={handleEndIncident}
-            variant="outline"
-            className="bg-white/90 border-red-300 text-red-600 hover:bg-red-50 backdrop-blur-sm h-10 text-sm px-4 shadow-lg"
-          >
-            <X className="w-4 h-4 mr-2" />
-            Zakończ akcję
-          </Button>
-        </div>
+        <IncidentHeaderV2 incident={currentIncident} onBack={handleEndIncident} />
 
         {/* Content */}
         <div className="max-w-7xl mx-auto p-2 md:p-4 space-y-3 md:space-y-4">

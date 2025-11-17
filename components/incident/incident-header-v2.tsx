@@ -10,6 +10,7 @@ import {
   Flame,
   Check,
   X,
+  ArrowLeft,
 } from 'lucide-react';
 import { differenceInSeconds } from 'date-fns';
 import { Button } from '@/components/ui/button';
@@ -19,9 +20,10 @@ import { cn } from '@/lib/utils';
 
 interface IncidentHeaderV2Props {
   incident: Incident;
+  onBack?: () => void;
 }
 
-export default function IncidentHeaderV2({ incident }: IncidentHeaderV2Props) {
+export default function IncidentHeaderV2({ incident, onBack }: IncidentHeaderV2Props) {
   const { setIncidentStatus, markArrived, markControlled, completeIncident, getProgress, updateIncident } = useIncidentStore();
   
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
@@ -130,6 +132,18 @@ export default function IncidentHeaderV2({ incident }: IncidentHeaderV2Props) {
       <div className="md:hidden px-2 py-2 space-y-2">
         {/* Linia 1: Timer + Status + Priority + Title */}
         <div className="flex items-center gap-2">
+          {/* Back Button */}
+          {onBack && (
+            <Button
+              onClick={onBack}
+              variant="ghost"
+              size="sm"
+              className="h-10 w-10 p-0 flex-shrink-0"
+            >
+              <ArrowLeft className="w-5 h-5 text-gray-700" />
+            </Button>
+          )}
+
           {/* Timer */}
           <div className={cn(
             'flex items-center gap-1.5 px-2.5 py-1.5 rounded',
@@ -197,6 +211,19 @@ export default function IncidentHeaderV2({ incident }: IncidentHeaderV2Props) {
       {/* DESKTOP: 1 linia jak było */}
       <div className="hidden md:block px-4 py-2">
         <div className="flex items-center gap-3 flex-wrap">
+          {/* Back Button */}
+          {onBack && (
+            <Button
+              onClick={onBack}
+              variant="ghost"
+              size="sm"
+              className="h-8 px-2"
+            >
+              <ArrowLeft className="w-4 h-4 mr-1.5" />
+              <span className="text-sm">Powrót</span>
+            </Button>
+          )}
+
           {/* Timer - kompaktowy */}
           <div className={cn(
             'flex items-center gap-1.5 px-2 py-1 rounded',
