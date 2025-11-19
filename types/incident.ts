@@ -145,7 +145,10 @@ export interface Incident {
     timestamp: Date;
     description?: string;
   }[];
-  
+
+  // Karta rotacji
+  rotation?: any;
+
   // Warunki pogodowe
   weather?: {
     temperature?: number;
@@ -154,7 +157,7 @@ export interface Incident {
     visibility?: string;
     precipitation?: string;
   };
-  
+
   // Dodatkowe informacje
   metadata: {
     createdBy: string;
